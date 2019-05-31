@@ -1,4 +1,4 @@
-package com.jcspider.server;
+package com.jcspider.server.starter;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
