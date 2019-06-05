@@ -1,4 +1,4 @@
-package com.jcspider.server.component;
+package com.jcspider.server.model;
 
 /**
  * @author zhuang.hu

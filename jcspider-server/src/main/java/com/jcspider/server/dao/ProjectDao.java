@@ -23,4 +23,9 @@ public class ProjectDao {
         return this.jdbcTemplate.queryForObject(sql, Project.class);
     }
 
+    public void updateDispatcherById(long id, String dispatcher) {
+        final String sql = "update project set dispatcher = ? where id = ?";
+        this.jdbcTemplate.update(sql, dispatcher, id);
+    }
+
 }

@@ -11,9 +11,8 @@ public class Constant {
 
 
     public static final String  TOPIC_PROCESS_TASK_SUB = "process:task:consumer:";
-
     public static final String  TOPIC_PROCESS_PROJECT_START = "process:project:start:";
-
+    public static final String  TOPIC_DISPATCHER_PROJECT_START = "dispatcher:project:start";
 
     public static final String  TASK_STATUS_ERROR = "error";
     public static final String  TASK_STATUS_RUNNING = "running";
@@ -27,5 +26,8 @@ public class Constant {
     public static final String  SCHEDULE_TYPE_NONE = "none";
     public static final String  SCHEDULE_TYPE_ONCE = "once";
     public static final String  SCHEDULE_TYPE_LOOP = "loop";
+
+    public static final String  UNIT_TYPE_SECONDS = "seconds";
+    public static final String  UNIT_TYPE_MINUTES = "minutes";
 
 }

@@ -15,6 +15,7 @@ public class JCLocalRegistry implements JCRegistry {
     private static final Logger LOGGER = LoggerFactory.getLogger(JCLocalRegistry.class);
 
     private List<String> dispatcherNodes = new ArrayList<>();
+    private List<String> processNodes = new ArrayList<>();
 
     @Override
     public void start() {
@@ -43,10 +44,16 @@ public class JCLocalRegistry implements JCRegistry {
     @Override
     public synchronized void registerProcess(String host) {
         LOGGER.info("register process:{}", host);
+        this.processNodes.add(host);
     }
 
     @Override
     public List<String> listDispatchers() {
         return this.dispatcherNodes;
+    }
+
+    @Override
+    public List<String> listProcesses() {
+        return this.processNodes;
     }
 }

@@ -1,6 +1,6 @@
 package com.jcspider.server.starter;
 
-import com.jcspider.server.component.ComponentInitException;
+import com.jcspider.server.model.ComponentInitException;
 import com.jcspider.server.component.JCComponent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

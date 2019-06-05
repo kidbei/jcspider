@@ -1,5 +1,7 @@
 package com.jcspider.server.component;
 
+import com.jcspider.server.model.ComponentInitException;
+
 /**
  * @author zhuang.hu
  * @since 29 May 2019

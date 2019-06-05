@@ -1,9 +1,6 @@
 package com.jcspider.server.starter;
 
-import com.jcspider.server.component.JCDispatcher;
-import com.jcspider.server.component.JCLocalQueue;
-import com.jcspider.server.component.JCLocalRegistry;
-import com.jcspider.server.component.JCNashornProcess;
+import com.jcspider.server.component.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeansException;
@@ -45,6 +42,8 @@ public class DynamicServiceRegister {
                             BeanDefinitionBuilder.rootBeanDefinition(JCLocalQueue.class).getBeanDefinition());
                     registry.registerBeanDefinition("jcLocalRegistry",
                             BeanDefinitionBuilder.rootBeanDefinition(JCLocalRegistry.class).getBeanDefinition());
+                    registry.registerBeanDefinition("jcLockTool",
+                            BeanDefinitionBuilder.rootBeanDefinition(JCLocalLockTool.class).getBeanDefinition());
                 } else if ("cluster".equalsIgnoreCase(model)){
                     LOGGER.info("current model is cluster ");
                 } else {

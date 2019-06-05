@@ -14,4 +14,6 @@ public interface JCRegistry extends JCComponent {
 
     List<String> listDispatchers();
 
+    List<String> listProcesses();
+
 }
