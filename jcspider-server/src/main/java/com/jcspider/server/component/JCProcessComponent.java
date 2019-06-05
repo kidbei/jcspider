@@ -13,7 +13,4 @@ import java.util.List;
  */
 public interface JCProcessComponent extends JCComponent {
 
-    List<FindTask> runStart(long projectId, String url);
-
-    MethodResult  runMethod(long projectId, Response response);
 }

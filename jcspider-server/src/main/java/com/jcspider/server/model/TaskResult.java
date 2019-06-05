@@ -2,26 +2,33 @@ package com.jcspider.server.model;
 
 import java.io.Serializable;
 import java.sql.Timestamp;
-import java.util.Map;
 
 /**
  * @author zhuang.hu
  * @since 31 May 2019
  */
-public class Result implements Serializable {
+public class TaskResult implements Serializable {
 
-    private String  uuid;
-    private String  taskId;
-    private String  resultText;
-    private Map<String,Object> result;
+    private long        id;
+    private long        projectId;
+    private String      taskId;
+    private String      resultText;
     private Timestamp   createdAt;
 
-    public String getUuid() {
-        return uuid;
+    public long getId() {
+        return id;
     }
 
-    public void setUuid(String uuid) {
-        this.uuid = uuid;
+    public void setId(long id) {
+        this.id = id;
+    }
+
+    public long getProjectId() {
+        return projectId;
+    }
+
+    public void setProjectId(long projectId) {
+        this.projectId = projectId;
     }
 
     public String getTaskId() {
@@ -38,14 +45,6 @@ public class Result implements Serializable {
 
     public void setResultText(String resultText) {
         this.resultText = resultText;
-    }
-
-    public Map<String, Object> getResult() {
-        return result;
-    }
-
-    public void setResult(Map<String, Object> result) {
-        this.result = result;
     }
 
     public Timestamp getCreatedAt() {

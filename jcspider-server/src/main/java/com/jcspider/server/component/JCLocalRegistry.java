@@ -41,6 +41,11 @@ public class JCLocalRegistry implements JCRegistry {
     }
 
     @Override
+    public synchronized void registerProcess(String host) {
+        LOGGER.info("register process:{}", host);
+    }
+
+    @Override
     public List<String> listDispatchers() {
         return this.dispatcherNodes;
     }

@@ -7,7 +7,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
  * @author zhuang.hu
  * @since 28 五月 2019
  */
-@SpringBootApplication
+@SpringBootApplication(scanBasePackages = "com.jcspider")
 public class JCSpiderApplication {
 
 

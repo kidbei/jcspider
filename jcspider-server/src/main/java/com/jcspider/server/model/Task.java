@@ -18,10 +18,12 @@ public class Task implements Serializable {
     private long    projectId;
     private long    scheduleValue;
     private String  headers;
+    private String  extra;
     private String  fetchType;
     private String  proxy;
     private Timestamp   createdAt;
     private Timestamp   updatedAt;
+    private String      charset;
 
 
     public String getId() {
@@ -126,5 +128,26 @@ public class Task implements Serializable {
 
     public void setProxy(String proxy) {
         this.proxy = proxy;
+    }
+
+    public String getExtra() {
+        return extra;
+    }
+
+    public void setExtra(String extra) {
+        this.extra = extra;
+    }
+
+    public String getCharset() {
+        return charset;
+    }
+
+    public void setCharset(String charset) {
+        this.charset = charset;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        return this.id.equals(((Task)obj).getId());
     }
 }

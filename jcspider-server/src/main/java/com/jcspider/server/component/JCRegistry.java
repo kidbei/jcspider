@@ -10,6 +10,8 @@ public interface JCRegistry extends JCComponent {
 
     void registerDispatcher(String host);
 
+    void registerProcess(String host);
+
     List<String> listDispatchers();
 
 }

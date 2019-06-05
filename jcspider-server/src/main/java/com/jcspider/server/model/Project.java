@@ -19,6 +19,8 @@ public class Project implements Serializable {
     private String  dispatcher;
     private Timestamp   createdAt;
     private Timestamp   updatedAt;
+    private String  scheduleType;
+    private long  scheduleValue;
 
     public long getId() {
         return id;
@@ -98,5 +100,21 @@ public class Project implements Serializable {
 
     public void setUpdatedAt(Timestamp updatedAt) {
         this.updatedAt = updatedAt;
+    }
+
+    public String getScheduleType() {
+        return scheduleType;
+    }
+
+    public void setScheduleType(String scheduleType) {
+        this.scheduleType = scheduleType;
+    }
+
+    public long getScheduleValue() {
+        return scheduleValue;
+    }
+
+    public void setScheduleValue(long scheduleValue) {
+        this.scheduleValue = scheduleValue;
     }
 }
