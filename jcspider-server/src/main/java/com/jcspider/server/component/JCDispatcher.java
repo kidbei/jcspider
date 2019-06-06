@@ -15,9 +15,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.Timestamp;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
@@ -42,8 +40,6 @@ public class JCDispatcher implements JCComponent {
     private ProjectDao  projectDao;
 
     private String      localIp;
-
-    private final Map<Long,List<ProjectProcessNode>> projectProcessNodeMap = new HashMap<>();
 
     @Override
     public void start() throws ComponentInitException {
@@ -84,7 +80,7 @@ public class JCDispatcher implements JCComponent {
         }
         if (project.getDispatcher().equals(this.localIp)) {
 
-            this.startAtLocal(projectId, project);
+            this.startAtLocal(project);
 
         } else {
             if (dispatcherNodes.contains(project.getDispatcher())) {
@@ -92,13 +88,14 @@ public class JCDispatcher implements JCComponent {
             } else {
                 if (this.jcLockTool.getLock("start_lock:" + projectId)) {
                     LOGGER.info("project {} dispatcher node {} is offline, start at local", projectId, project.getDispatcher());
-                    this.startAtLocal(projectId, project);
+                    this.startAtLocal(project);
                 }
             }
         }
     }
 
-    private void startAtLocal(long projectId, Project project) {
+    private void startAtLocal(Project project) {
+        long projectId = project.getId();
         if (DispatcherScheduleFactory.isDispatcherStarted(projectId)) {
             LOGGER.info("project {} is already started at this node", projectId);
         } else {

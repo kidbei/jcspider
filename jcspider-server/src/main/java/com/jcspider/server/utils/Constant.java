@@ -36,4 +36,11 @@ public class Constant {
 
     public static final String  DB_RESULT_EXPORTER = "dbResultExporter";
 
+    public static final String  MODEL_LOCAL = "local";
+    public static final String  MODEL_CLUSTER = "cluster";
+
+    public static final String  METHOD_START = "start";
+
+    public static final String  SCRIPT_NASHORN = "nashorn";
+
 }

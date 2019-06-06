@@ -1,11 +1,8 @@
 package com.jcspider.server.component;
 
 import com.jcspider.server.dao.TaskResultDao;
-import com.jcspider.server.model.ComponentInitException;
 import com.jcspider.server.model.TaskResult;
 import com.jcspider.server.utils.Constant;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 /**
@@ -13,8 +10,6 @@ import org.springframework.beans.factory.annotation.Autowired;
  * @since 06 June 2019
  */
 public class DbResultExporter implements ResultExporter {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(DbResultExporter.class);
 
     @Autowired
     private TaskResultDao   taskResultDao;

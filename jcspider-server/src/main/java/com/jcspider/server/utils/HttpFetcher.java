@@ -3,7 +3,7 @@ package com.jcspider.server.utils;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.jcspider.server.model.FetchResult;
-import com.jcspider.server.model.Task;
+import com.jcspider.server.model.SimpleTask;
 import okhttp3.Headers;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -33,7 +33,7 @@ public class HttpFetcher implements Fetcher {
 
 
     @Override
-    public FetchResult fetch(Task task) throws IOException{
+    public FetchResult fetch(SimpleTask task) throws IOException{
         final String url = task.getSourceUrl();
         final FetchResult result = new FetchResult();
         if (LOGGER.isDebugEnabled()) {
@@ -95,7 +95,7 @@ public class HttpFetcher implements Fetcher {
 
 
 
-    private InetSocketAddress parseProxyAddress(Task task) {
+    private InetSocketAddress parseProxyAddress(SimpleTask task) {
         String proxy = task.getProxy();
         if (proxy.indexOf(":") == -1) {
             throw new IllegalArgumentException("invalid proxy address:" + task.getProxy());
@@ -105,7 +105,7 @@ public class HttpFetcher implements Fetcher {
     }
 
 
-    private Map<String, String> getHeaders(Task task) {
+    private Map<String, String> getHeaders(SimpleTask task) {
         Map<String, String> result = new HashMap<>();
         if (StringUtils.isNotBlank(task.getHeaders())) {
             JSONObject headers = JSON.parseObject(task.getHeaders());

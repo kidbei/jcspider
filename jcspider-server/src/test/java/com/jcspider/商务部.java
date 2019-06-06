@@ -1,7 +1,5 @@
 package com.jcspider;
 
-import static org.junit.Assert.assertTrue;
-
 import com.jcspider.server.component.JCQueue;
 import com.jcspider.server.dao.ProjectDao;
 import com.jcspider.server.model.Project;
@@ -25,7 +23,7 @@ import java.io.IOException;
  */
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = JCSpiderApplication.class, webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-public class AppTest {
+public class 商务部 {
 
     @Autowired
     private JdbcTemplate    jdbcTemplate;
@@ -41,10 +39,10 @@ public class AppTest {
         this.jdbcTemplate.update("truncate table result");
         this.jdbcTemplate.update("truncate table project_process_node");
 
-        String scriptText = IOUtils.toString(this.getClass().getClassLoader().getResourceAsStream("script.js"));
+        String scriptText = IOUtils.toString(this.getClass().getClassLoader().getResourceAsStream("shangwubu.js"));
         Project project = new Project();
-        project.setName("开源中国");
-        project.setStartUrl("https://www.oschina.net/news/project");
+        project.setName("商务部部令公告");
+        project.setStartUrl("http://www.mofcom.gov.cn/article/b/c/?");
         project.setRateNumber(1);
         project.setRateUnit(Constant.UNIT_TYPE_SECONDS);
         project.setScheduleType(Constant.SCHEDULE_TYPE_NONE);

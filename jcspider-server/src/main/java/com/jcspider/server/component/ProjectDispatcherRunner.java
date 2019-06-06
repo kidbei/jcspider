@@ -32,6 +32,7 @@ public class ProjectDispatcherRunner implements Runnable {
     private List<String>        processNodes;
     private volatile boolean    stop;
     private int                 idx;
+    private long                firstNoTaskTime = 0L;
 
     public ProjectDispatcherRunner() {
     }
@@ -77,19 +78,28 @@ public class ProjectDispatcherRunner implements Runnable {
 
 
     private void work() {
-
         List<Task> tasks = taskDao.findByProjectIdAndStatus(this.projectId, Constant.TASK_STATUS_NONE, this.rateNumber);
         if (CollectionUtils.isEmpty(tasks)) {
             LOGGER.info("project {} has no task to crawl", this.projectId);
+            if (this.firstNoTaskTime == 0L) {
+                this.firstNoTaskTime = System.currentTimeMillis();
+            }
             Project project = projectDao.getById(this.projectId);
             if (project.getStatus().equals(Constant.PROJECT_STATUS_START)) {
-                LOGGER.info("project {} has no new task, stop it", this.projectId);
-                projectDao.updateStatusById(this.projectId, Constant.PROJECT_STATUS_STOP);
-                DispatcherScheduleFactory.stopProjectRunner(this.projectId);
+                if (System.currentTimeMillis() - this.firstNoTaskTime > 1000 * 60L) {
+                    LOGGER.info("project {} has no new task, stop it", this.projectId);
+                    projectDao.updateStatusById(this.projectId, Constant.PROJECT_STATUS_STOP);
+                    DispatcherScheduleFactory.stopProjectRunner(this.projectId);
+                } else {
+                    LOGGER.info("project {} has no task now, wait for next schedule time", this.projectId);
+                }
             } else {
                 LOGGER.info("project {} has no task now, wait for next schedule time", this.projectId);
             }
         } else {
+            if (this.firstNoTaskTime != 0L) {
+                this.firstNoTaskTime = 0L;
+            }
             List<String> taskIds = tasks.stream().map(t -> t.getId()).collect(Collectors.toList());
             taskIds.forEach(taskId -> jcQueue.bPub(Constant.TOPIC_PROCESS_TASK_SUB + roundProcessNode(), taskId));
             taskDao.updateStatusByIds(taskIds, Constant.TASK_STATUS_RUNNING);

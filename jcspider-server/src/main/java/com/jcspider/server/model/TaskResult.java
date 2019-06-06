@@ -54,4 +54,16 @@ public class TaskResult implements Serializable {
     public void setCreatedAt(Timestamp createdAt) {
         this.createdAt = createdAt;
     }
+
+    @Override
+    public String toString() {
+        final StringBuilder sb = new StringBuilder("TaskResult{");
+        sb.append("id=").append(id);
+        sb.append(", projectId=").append(projectId);
+        sb.append(", taskId='").append(taskId).append('\'');
+        sb.append(", resultText='").append(resultText).append('\'');
+        sb.append(", createdAt=").append(createdAt);
+        sb.append('}');
+        return sb.toString();
+    }
 }

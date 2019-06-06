@@ -7,32 +7,16 @@ import java.sql.Timestamp;
  * @author zhuang.hu
  * @since 31 May 2019
  */
-public class Task implements Serializable {
+public class Task extends SimpleTask {
 
-    private String  id;
     private String  status;
-    private String  method;
-    private String  sourceUrl;
     private String  scheduleType;
     private String  stack;
     private long    projectId;
     private long    scheduleValue;
-    private String  headers;
-    private String  extra;
-    private String  fetchType;
-    private String  proxy;
     private Timestamp   createdAt;
     private Timestamp   updatedAt;
-    private String      charset;
 
-
-    public String getId() {
-        return id;
-    }
-
-    public void setId(String id) {
-        this.id = id;
-    }
 
     public String getStatus() {
         return status;
@@ -42,21 +26,6 @@ public class Task implements Serializable {
         this.status = status;
     }
 
-    public String getMethod() {
-        return method;
-    }
-
-    public void setMethod(String method) {
-        this.method = method;
-    }
-
-    public String getSourceUrl() {
-        return sourceUrl;
-    }
-
-    public void setSourceUrl(String sourceUrl) {
-        this.sourceUrl = sourceUrl;
-    }
 
     public String getScheduleType() {
         return scheduleType;
@@ -106,48 +75,8 @@ public class Task implements Serializable {
         this.scheduleValue = scheduleValue;
     }
 
-    public String getHeaders() {
-        return headers;
-    }
-
-    public void setHeaders(String headers) {
-        this.headers = headers;
-    }
-
-    public String getFetchType() {
-        return fetchType;
-    }
-
-    public void setFetchType(String fetchType) {
-        this.fetchType = fetchType;
-    }
-
-    public String getProxy() {
-        return proxy;
-    }
-
-    public void setProxy(String proxy) {
-        this.proxy = proxy;
-    }
-
-    public String getExtra() {
-        return extra;
-    }
-
-    public void setExtra(String extra) {
-        this.extra = extra;
-    }
-
-    public String getCharset() {
-        return charset;
-    }
-
-    public void setCharset(String charset) {
-        this.charset = charset;
-    }
-
     @Override
     public boolean equals(Object obj) {
-        return this.id.equals(((Task)obj).getId());
+        return this.getId().equals(((Task)obj).getId());
     }
 }

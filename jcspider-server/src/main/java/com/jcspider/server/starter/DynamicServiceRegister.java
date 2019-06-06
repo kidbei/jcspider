@@ -42,7 +42,7 @@ public class DynamicServiceRegister {
             @Override
             public void postProcessBeanDefinitionRegistry(BeanDefinitionRegistry registry) throws BeansException {
 
-                if ("local".equalsIgnoreCase(model)) {
+                if (Constant.MODEL_LOCAL.equalsIgnoreCase(model)) {
                     LOGGER.info("current model is local, register JCLocalQueue, JCLocalRegistry");
                     registry.registerBeanDefinition("jcQueue",
                             BeanDefinitionBuilder.rootBeanDefinition(JCLocalQueue.class).getBeanDefinition());
@@ -50,7 +50,7 @@ public class DynamicServiceRegister {
                             BeanDefinitionBuilder.rootBeanDefinition(JCLocalRegistry.class).getBeanDefinition());
                     registry.registerBeanDefinition("jcLockTool",
                             BeanDefinitionBuilder.rootBeanDefinition(JCLocalLockTool.class).getBeanDefinition());
-                } else if ("cluster".equalsIgnoreCase(model)){
+                } else if (Constant.MODEL_CLUSTER.equalsIgnoreCase(model)){
                     LOGGER.info("current model is cluster ");
                 } else {
                     throw new BeanCreationException("invalid model:" + model);

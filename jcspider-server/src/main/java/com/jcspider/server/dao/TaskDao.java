@@ -28,19 +28,19 @@ public class TaskDao {
 
     private static final String COLUMNS = "id,`status`,method,source_url,schedule_type," +
             "stack,project_id,schedule_value,headers,extra,fetch_type," +
-            "`proxy`,created_at,updated_at";
+            "`proxy`,created_at,updated_at, charset";
 
 
     public void insert(Task task) {
-        final String sql = "insert into task (" + COLUMNS + ") values (?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
+        final String sql = "insert into task (" + COLUMNS + ") values (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
         this.jdbcTemplate.update(sql, task.getId(), task.getStatus(), task.getMethod(), task.getSourceUrl(), task.getScheduleType(),
                 task.getStack(), task.getProjectId(), task.getScheduleValue(), task.getHeaders(), task.getExtra(), task.getFetchType(),
-                task.getProxy(), task.getCreatedAt(), task.getUpdatedAt());
+                task.getProxy(), task.getCreatedAt(), task.getUpdatedAt(), task.getCharset());
     }
 
 
     public void insertBatch(List<Task> tasks) {
-        final String sql = "insert into task (" + COLUMNS + ") values (?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
+        final String sql = "insert into task (" + COLUMNS + ") values (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
         this.jdbcTemplate.batchUpdate(sql, new BatchPreparedStatementSetter() {
             @Override
             public void setValues(PreparedStatement ps, int i) throws SQLException {
@@ -59,6 +59,7 @@ public class TaskDao {
                 ps.setString(12, task.getProxy());
                 ps.setTimestamp(13, task.getCreatedAt());
                 ps.setTimestamp(14, task.getUpdatedAt());
+                ps.setString(15, task.getCharset());
             }
 
             @Override

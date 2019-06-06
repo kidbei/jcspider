@@ -41,4 +41,7 @@ public class Response {
     public Elements doc(String selector) {
         return Jsoup.parse(this.content).select(selector);
     }
+    public Elements doc() {
+        return Jsoup.parse(this.content).children();
+    }
 }

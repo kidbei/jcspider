@@ -85,15 +85,19 @@ public class JCNashornProcess implements JCComponent {
         this.threadPoolExecutor = new ThreadPoolExecutor(processThreads, processThreads, Long.MAX_VALUE, TimeUnit.HOURS, new LinkedTransferQueue<>());
 
         this.threadPoolExecutor.execute(() -> {
+            final String topic = Constant.TOPIC_PROCESS_TASK_SUB + this.localIp;
+            LOGGER.info("subscript topic:{}", topic);
             while (!Thread.interrupted() && !isStop) {
-                String taskId = (String) this.jcQueue.bPop(Constant.TOPIC_PROCESS_TASK_SUB + this.localIp);
+                String taskId = (String) this.jcQueue.bPop(topic);
                 this.processTask(taskId);
             }
         });
 
         this.threadPoolExecutor.execute(() -> {
+            final String topic = Constant.TOPIC_PROCESS_PROJECT_START + this.localIp;
+            LOGGER.info("subscript topic:{}", topic);
             while (!Thread.interrupted() && !isStop) {
-                Long projectId =  Long.valueOf(this.jcQueue.bPop(Constant.TOPIC_PROCESS_PROJECT_START + this.localIp).toString());
+                Long projectId =  Long.valueOf(this.jcQueue.bPop(topic).toString());
                 this.startProject(projectId);
             }
         });
@@ -108,6 +112,10 @@ public class JCNashornProcess implements JCComponent {
             task = this.taskDao.getById(taskId);
             if (task == null) {
                 LOGGER.warn("task not found:{}", taskId);
+                return;
+            }
+            if (task.getStatus().equals(Constant.TASK_STATUS_DONE)) {
+                LOGGER.info("task {} is already done", taskId);
                 return;
             }
             ProjectCache projectCache = this.getProject(task.getProjectId());
@@ -128,7 +136,7 @@ public class JCNashornProcess implements JCComponent {
         if (task == null) {
             task = new Task();
             task.setId(taskId);
-            task.setMethod("start");
+            task.setMethod(Constant.METHOD_START);
             task.setCreatedAt(new Timestamp(System.currentTimeMillis()));
             task.setScheduleType(projectCache.project.getScheduleType());
             task.setScheduleValue(projectCache.project.getScheduleValue());
@@ -149,16 +157,76 @@ public class JCNashornProcess implements JCComponent {
     }
 
 
+    private DebugResult debug(String requestId, String scriptText, SimpleTask simpleTask) {
+        final DebugResult debugResult = new DebugResult();
+        debugResult.setRequestId(requestId);
 
-    private void runMethod(ProjectCache projectCache, Task task) throws RunMethodException {
+        ScriptEngine  scriptEngine = new ScriptEngineManager().getEngineByName(Constant.SCRIPT_NASHORN);
+        try {
+            scriptEngine.eval(scriptText);
+        } catch (ScriptException e) {
+            debugResult.setSuccess(false);
+            debugResult.setStack(e.toString());
+            return debugResult;
+        }
+
+        debugResult.setCurrentMethod(simpleTask.getMethod());
+
+        Self self = new Self(0);
+        Object result;
+        if (Constant.METHOD_START.equals(simpleTask.getMethod())) {
+            try {
+                result = ((Invocable)scriptEngine).invokeFunction(simpleTask.getMethod(), self, simpleTask.getSourceUrl());
+            } catch (Exception e) {
+                debugResult.setSuccess(false);
+                debugResult.setStack(e.toString());
+                return debugResult;
+            }
+        } else {
+            Fetcher fetcher = this.fetcherMap.get(simpleTask.getFetchType());
+            if (fetcher == null) {
+                debugResult.setSuccess(false);
+                debugResult.setStack("unknown fetchType:" + simpleTask.getFetchType());
+                return debugResult;
+            }
+            Response response;
+            try {
+                FetchResult fetchResult = fetcher.fetch(simpleTask);
+                response = new Response(fetchResult.getHeaders(), fetchResult.getContent());
+            } catch (IOException e) {
+                debugResult.setSuccess(false);
+                debugResult.setStack(e.toString());
+                return debugResult;
+            }
+            try {
+                result = ((Invocable)scriptEngine).invokeFunction(simpleTask.getMethod(), self, response);
+            } catch (Exception e) {
+                debugResult.setSuccess(false);
+                debugResult.setStack(e.toString());
+                return debugResult;
+            }
+            debugResult.setSuccess(true);
+            debugResult.setResult(result);
+            if (CollectionUtils.isNotEmpty(self.getNewTasks())) {
+                debugResult.setSimpleTasks(self.getNewTasks().stream().map(t -> (SimpleTask)t).collect(Collectors.toList()));
+            }
+        }
+
+        return debugResult;
+    }
+
+
+
+
+    private void runMethod(ProjectCache projectCache, SimpleTask task) throws RunMethodException {
         Fetcher fetcher = this.fetcherMap.get(task.getFetchType());
         if (fetcher == null) {
             throw new IllegalArgumentException("unknown fetch type:" + task.getFetchType());
         }
-        Self self = new Self(task.getProjectId());
+        Self self = new Self(projectCache.project.getId());
         Object result;
 
-        if ("start".equals(task.getMethod())) {
+        if (Constant.METHOD_START.equals(task.getMethod())) {
             try {
                 result = ((Invocable)projectCache.scriptEngine).invokeFunction(task.getMethod(), self, task.getSourceUrl());
             } catch (Exception e) {
@@ -185,6 +253,8 @@ public class JCNashornProcess implements JCComponent {
         if (CollectionUtils.isNotEmpty(self.getNewTasks())) {
             List<List<Task>> batchTaskList = Lists.partition(self.getNewTasks(), INSERT_BATCH_SIZE);
             batchTaskList.forEach(tasks -> this.taskDao.insertBatch(self.getNewTasks()));
+        } else {
+            LOGGER.info("tast {} has no new url found", task.getId());
         }
         if (result != null) {
             TaskResult taskResult = new TaskResult();
@@ -222,7 +292,7 @@ public class JCNashornProcess implements JCComponent {
             if (project == null) {
                 return null;
             }
-            ScriptEngine  scriptEngine = new ScriptEngineManager().getEngineByName("nashorn");
+            ScriptEngine  scriptEngine = new ScriptEngineManager().getEngineByName(Constant.SCRIPT_NASHORN);
             try {
                 scriptEngine.eval(project.getScriptText());
                 LOGGER.info("init script engine for project:{}", projectId);
