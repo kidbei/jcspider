@@ -4,20 +4,15 @@ import com.alibaba.fastjson.JSON;
 import com.google.common.collect.Lists;
 import com.jcspider.server.dao.ProjectDao;
 import com.jcspider.server.dao.TaskDao;
-import com.jcspider.server.dao.TaskResultDao;
 import com.jcspider.server.model.*;
-import com.jcspider.server.utils.Constant;
-import com.jcspider.server.utils.Fetcher;
-import com.jcspider.server.utils.HttpFetcher;
-import com.jcspider.server.utils.IPUtils;
-import org.apache.commons.codec.digest.DigestUtils;
+import com.jcspider.server.utils.*;
 import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.collections.MapUtils;
 import org.jboss.netty.util.internal.LinkedTransferQueue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.ApplicationContext;
 
 import javax.script.Invocable;
 import javax.script.ScriptEngine;
@@ -26,10 +21,7 @@ import javax.script.ScriptException;
 import java.io.IOException;
 import java.net.UnknownHostException;
 import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -48,14 +40,16 @@ public class JCNashornProcess implements JCComponent {
     private int maxCodeCache;
     @Value("${process.threads:10}")
     private int processThreads;
+    @Value("${process.result.exporter}")
+    private String exportComponents;
+
+    private List<ResultExporter> resultExporters = new ArrayList<>();
 
     private Map<Long, ProjectCache> projectCacheMap;
     @Autowired
     private ProjectDao              projectDao;
     @Autowired
     private TaskDao                 taskDao;
-    @Autowired
-    private TaskResultDao           taskResultDao;
     @Autowired
     private JCQueue                 jcQueue;
     @Autowired
@@ -69,7 +63,8 @@ public class JCNashornProcess implements JCComponent {
 
     private final Map<String, Fetcher> fetcherMap = new HashMap<>();
 
-
+    @Autowired
+    private ApplicationContext  applicationContext;
 
     @Override
     public void start() throws ComponentInitException {
@@ -80,8 +75,14 @@ public class JCNashornProcess implements JCComponent {
         } catch (UnknownHostException e) {
             throw new ComponentInitException(e, name());
         }
+
+        List<String> exportComponentList = Arrays.asList(this.exportComponents.split(","));
+        if (exportComponentList.contains(Constant.DB_RESULT_EXPORTER)) {
+            this.resultExporters.add(applicationContext.getBean(Constant.DB_RESULT_EXPORTER, DbResultExporter.class));
+        }
+
         this.jcRegistry.registerProcess(this.localIp);
-        this.threadPoolExecutor = new ThreadPoolExecutor(1, processThreads, 1L, TimeUnit.HOURS, new LinkedTransferQueue<>());
+        this.threadPoolExecutor = new ThreadPoolExecutor(processThreads, processThreads, Long.MAX_VALUE, TimeUnit.HOURS, new LinkedTransferQueue<>());
 
         this.threadPoolExecutor.execute(() -> {
             while (!Thread.interrupted() && !isStop) {
@@ -111,6 +112,7 @@ public class JCNashornProcess implements JCComponent {
             }
             ProjectCache projectCache = this.getProject(task.getProjectId());
             this.runMethod(projectCache, task);
+            this.taskDao.updateStatusAndStackById(taskId, "", Constant.TASK_STATUS_DONE);
         } catch (Exception e) {
             LOGGER.error("process task error:{}", taskId, e);
             this.taskDao.updateStatusAndStackById(taskId, e.toString(), Constant.TASK_STATUS_ERROR);
@@ -121,7 +123,7 @@ public class JCNashornProcess implements JCComponent {
     private void startProject(Long projectId) {
         LOGGER.info("start project:{}", projectId);
         ProjectCache projectCache = this.getProject(projectId);
-        String taskId = this.genTaskId(projectCache.project.getStartUrl(), "start");
+        String taskId = IDUtils.genTaskId(projectCache.project.getStartUrl(), "start");
         Task task = this.taskDao.getById(taskId);
         if (task == null) {
             task = new Task();
@@ -133,11 +135,13 @@ public class JCNashornProcess implements JCComponent {
             task.setSourceUrl(projectCache.project.getStartUrl());
             task.setStatus(Constant.TASK_STATUS_RUNNING);
             task.setProjectId(projectId);
+            task.setFetchType(Constant.FETCH_TYPE_HTML);
             this.taskDao.insert(task);
         }
         try {
             this.runMethod(projectCache, task);
             this.taskDao.updateStatusAndStackById(taskId, "", Constant.TASK_STATUS_DONE);
+            this.projectDao.updateStatusById(projectId, Constant.PROJECT_STATUS_START);
         } catch (RunMethodException e) {
             LOGGER.error("run task error,task:{}", task, e);
             this.taskDao.updateStatusAndStackById(taskId, e.toString(), Constant.TASK_STATUS_ERROR);
@@ -152,34 +156,35 @@ public class JCNashornProcess implements JCComponent {
             throw new IllegalArgumentException("unknown fetch type:" + task.getFetchType());
         }
         Self self = new Self(task.getProjectId());
-        FetchResult fetchResult;
         Object result;
-        try {
-            fetchResult = fetcher.fetch(task);
-        } catch (IOException e) {
-            throw new RunMethodException("fetch failed", e, task.getMethod());
-        }
-        if (!fetchResult.isSuccess()) {
-            throw new RunMethodException("fetch failed,http status:" + fetchResult.getStatus(), task.getMethod());
-        }
-        Response response = new Response(fetchResult.getHeaders(), fetchResult.getContent());
+
         if ("start".equals(task.getMethod())) {
             try {
-                result = ((Invocable)projectCache.scriptEngine).invokeFunction(task.getMethod(), self);
+                result = ((Invocable)projectCache.scriptEngine).invokeFunction(task.getMethod(), self, task.getSourceUrl());
             } catch (Exception e) {
                 throw new RunMethodException(e, task.getMethod());
             }
         } else {
+            FetchResult fetchResult;
+            try {
+                fetchResult = fetcher.fetch(task);
+            } catch (IOException e) {
+                throw new RunMethodException("fetch failed", e, task.getMethod());
+            }
+            if (!fetchResult.isSuccess()) {
+                throw new RunMethodException("fetch failed,http status:" + fetchResult.getStatus(), task.getMethod());
+            }
+            Response response = new Response(fetchResult.getHeaders(), fetchResult.getContent());
             try {
                 result = ((Invocable)projectCache.scriptEngine).invokeFunction(task.getMethod(), self, response);
             } catch (Exception e) {
                 throw new RunMethodException(e, task.getMethod());
             }
         }
-        this.removeRepeatTask(self.newTasks);
-        if (CollectionUtils.isNotEmpty(self.newTasks)) {
-            List<List<Task>> batchTaskList = Lists.partition(self.newTasks, INSERT_BATCH_SIZE);
-            batchTaskList.forEach(tasks -> this.taskDao.insertBatch(self.newTasks));
+        this.removeRepeatTask(self.getNewTasks());
+        if (CollectionUtils.isNotEmpty(self.getNewTasks())) {
+            List<List<Task>> batchTaskList = Lists.partition(self.getNewTasks(), INSERT_BATCH_SIZE);
+            batchTaskList.forEach(tasks -> this.taskDao.insertBatch(self.getNewTasks()));
         }
         if (result != null) {
             TaskResult taskResult = new TaskResult();
@@ -187,84 +192,26 @@ public class JCNashornProcess implements JCComponent {
             taskResult.setProjectId(projectCache.project.getId());
             taskResult.setCreatedAt(new Timestamp(System.currentTimeMillis()));
             taskResult.setResultText(JSON.toJSONString(result));
-            this.taskResultDao.insert(taskResult);
+            this.resultExporters.forEach(resultExporter -> {
+                try {
+                    resultExporter.export(taskResult);
+                } catch (Exception e) {
+                    LOGGER.error("export result error, exporter:{}", resultExporter, e);
+                }
+            });
         }
     }
 
 
     private void removeRepeatTask(List<Task> newTasks) {
+        if (CollectionUtils.isEmpty(newTasks)) {
+            return;
+        }
         List<Task> oldTask = this.taskDao.findByIds(newTasks.stream().map(t -> t.getId()).collect(Collectors.toList()));
         if (CollectionUtils.isNotEmpty(oldTask)) {
             newTasks.removeAll(oldTask);
         }
     }
-
-
-    public class Self {
-        private long        projectId;
-        private List<Task>  newTasks = new ArrayList<>();
-
-        public Self(long projectId) {
-            this.projectId = projectId;
-        }
-
-        public void crawl(String url, Map<String, Object> options) {
-            this.checkOptions(options);
-            String method = MapUtils.getString(options, "method");
-            Task task = new Task();
-            task.setId(genTaskId(url, method));
-            task.setCreatedAt(new Timestamp(System.currentTimeMillis()));
-            task.setProjectId(projectId);
-            task.setSourceUrl(url);
-            task.setMethod(method);
-            if (options.containsKey("headers")) {
-                task.setHeaders(JSON.toJSONString(options.get("headers")));
-            }
-            if (options.containsKey("charset")) {
-                task.setCharset(MapUtils.getString(options, "charset"));
-            }
-            if (options.containsKey("extra")) {
-                task.setExtra(JSON.toJSONString(options.get("extra")));
-            }
-            if (options.containsKey("fetchType")) {
-                task.setFetchType(MapUtils.getString(options, "fetchType"));
-            } else {
-                task.setFetchType(Constant.FETCH_TYPE_HTML);
-            }
-            if (options.containsKey("proxy")) {
-                task.setProxy(MapUtils.getString(options, "proxy"));
-            }
-            task.setStatus(Constant.TASK_STATUS_NONE);
-            if (options.containsKey("scheduleType")) {
-                task.setScheduleType(MapUtils.getString(options, "scheduleType"));
-            } else {
-                task.setScheduleType(Constant.SCHEDULE_TYPE_NONE);
-            }
-            if (options.containsKey("scheduleValue")) {
-                task.setScheduleValue(MapUtils.getLongValue(options, "scheduleValue"));
-            } else {
-                task.setScheduleValue(0L);
-            }
-            this.newTasks.add(task);
-        }
-
-        public long getProjectId() {
-            return projectId;
-        }
-
-        private void checkOptions(Map<String,Object> options) {
-            if (!options.containsKey("method")) {
-                throw new IllegalArgumentException("no method found for task");
-            }
-
-        }
-    }
-
-
-    private String genTaskId(String sourceUrl, String method) {
-        return DigestUtils.md5Hex(sourceUrl + "|" + method);
-    }
-
 
 
 

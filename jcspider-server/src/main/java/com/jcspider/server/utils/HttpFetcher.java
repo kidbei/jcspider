@@ -1,6 +1,7 @@
 package com.jcspider.server.utils;
 
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import com.jcspider.server.model.FetchResult;
 import com.jcspider.server.model.Task;
 import okhttp3.Headers;
@@ -105,10 +106,12 @@ public class HttpFetcher implements Fetcher {
 
 
     private Map<String, String> getHeaders(Task task) {
+        Map<String, String> result = new HashMap<>();
         if (StringUtils.isNotBlank(task.getHeaders())) {
-            return JSON.parseObject(task.getHeaders()).toJavaObject(HashMap.class);
+            JSONObject headers = JSON.parseObject(task.getHeaders());
+            headers.forEach((k,v) -> result.put(k, v.toString()));
         }
-        return new HashMap<>();
+        return result;
     }
 
 }

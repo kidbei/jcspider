@@ -1,5 +1,8 @@
 package com.jcspider.server.model;
 
+import org.jsoup.Jsoup;
+import org.jsoup.select.Elements;
+
 import java.util.Map;
 
 /**
@@ -33,5 +36,9 @@ public class Response {
 
     public void setContent(String content) {
         this.content = content;
+    }
+
+    public Elements doc(String selector) {
+        return Jsoup.parse(this.content).select(selector);
     }
 }

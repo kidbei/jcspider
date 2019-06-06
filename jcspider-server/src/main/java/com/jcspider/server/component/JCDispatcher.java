@@ -73,6 +73,10 @@ public class JCDispatcher implements JCComponent {
         if (project == null) {
             throw new NullPointerException("project not found:" + projectId);
         }
+        if (project.getStatus().equals(Constant.PROJECT_STATUS_START)) {
+            LOGGER.info("project is already started");
+            return;
+        }
         List<String> dispatcherNodes = this.jcRegistry.listDispatchers();
         if (StringUtils.isBlank(project.getDispatcher())) {
             project.setDispatcher(this.localIp);
@@ -80,7 +84,7 @@ public class JCDispatcher implements JCComponent {
         }
         if (project.getDispatcher().equals(this.localIp)) {
 
-            startAtLocal(projectId, project);
+            this.startAtLocal(projectId, project);
 
         } else {
             if (dispatcherNodes.contains(project.getDispatcher())) {
@@ -100,12 +104,14 @@ public class JCDispatcher implements JCComponent {
         } else {
             this.projectProcessNodeDao.deleteByProjectId(projectId);
             List<String> processNodes = this.jcRegistry.listProcesses();
-            ProjectDispatcherRunner runner = new ProjectDispatcherRunner(project.getRateNumber(), processNodes);
+            ProjectDispatcherRunner runner = new ProjectDispatcherRunner(projectId, project.getRateNumber(), processNodes);
+            DispatcherScheduleFactory.setProjectRunner(projectId, runner, project.getRateUnit());
             Timestamp now = new Timestamp(System.currentTimeMillis());
             List<ProjectProcessNode> projectProcessNodes = processNodes.stream()
                     .map(p -> new ProjectProcessNode(projectId, p, now))
                     .collect(Collectors.toList());
             this.projectProcessNodeDao.insertBatch(projectProcessNodes);
+            this.jcQueue.bPub(Constant.TOPIC_PROCESS_PROJECT_START + processNodes.get(0), projectId+"");
         }
     }
 

@@ -19,6 +19,9 @@ public class Constant {
     public static final String  TASK_STATUS_NONE = "none";
     public static final String  TASK_STATUS_DONE = "done";
 
+    public static final String  PROJECT_STATUS_START = "start";
+    public static final String  PROJECT_STATUS_STOP = "stop";
+
 
     public static final String  FETCH_TYPE_HTML = "html";
     public static final String  FETCH_TYPE_JS = "js";
@@ -29,5 +32,8 @@ public class Constant {
 
     public static final String  UNIT_TYPE_SECONDS = "seconds";
     public static final String  UNIT_TYPE_MINUTES = "minutes";
+
+
+    public static final String  DB_RESULT_EXPORTER = "dbResultExporter";
 
 }

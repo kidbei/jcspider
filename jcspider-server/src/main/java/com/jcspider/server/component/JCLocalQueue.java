@@ -79,11 +79,7 @@ public class JCLocalQueue implements JCQueue {
 
     @Override
     public void bPub(String topic, Object message) {
-        LinkedBlockingQueue<Object> queue = this.bDataQueue.get(topic);
-        if (queue == null) {
-            queue = new LinkedBlockingQueue<>();
-            this.bDataQueue.put(topic, queue);
-        }
+        LinkedBlockingQueue<Object> queue = this.checkOrCreateQueue(topic);
         try {
             queue.put(message);
         } catch (InterruptedException e) {
@@ -93,16 +89,27 @@ public class JCLocalQueue implements JCQueue {
 
     @Override
     public Object bPop(String topic) {
-        LinkedBlockingQueue<Object> queue = this.bDataQueue.get(topic);
-        if (queue == null) {
-            queue = new LinkedBlockingQueue<>();
-            this.bDataQueue.put(topic, queue);
-        }
+        LinkedBlockingQueue<Object> queue = this.checkOrCreateQueue(topic);
         try {
             return queue.take();
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
+    }
+
+
+    private LinkedBlockingQueue<Object> checkOrCreateQueue(String topic) {
+        LinkedBlockingQueue<Object> queue =this.bDataQueue.get(topic);
+        if (queue == null) {
+            synchronized (this.bDataQueue) {
+                queue = this.bDataQueue.get(topic);
+                if (queue == null) {
+                    queue = new LinkedBlockingQueue<>();
+                    this.bDataQueue.put(topic, queue);
+                }
+            }
+        }
+        return queue;
     }
 
 

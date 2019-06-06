@@ -2,10 +2,10 @@ package com.jcspider.server.dao;
 
 import com.jcspider.server.model.Task;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.SingleColumnRowMapper;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Repository;
@@ -33,7 +33,7 @@ public class TaskDao {
 
     public void insert(Task task) {
         final String sql = "insert into task (" + COLUMNS + ") values (?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
-        this.jdbcTemplate.update(sql, task.getId(), task.getStack(), task.getMethod(), task.getSourceUrl(), task.getScheduleType(),
+        this.jdbcTemplate.update(sql, task.getId(), task.getStatus(), task.getMethod(), task.getSourceUrl(), task.getScheduleType(),
                 task.getStack(), task.getProjectId(), task.getScheduleValue(), task.getHeaders(), task.getExtra(), task.getFetchType(),
                 task.getProxy(), task.getCreatedAt(), task.getUpdatedAt());
     }
@@ -41,7 +41,7 @@ public class TaskDao {
 
     public void insertBatch(List<Task> tasks) {
         final String sql = "insert into task (" + COLUMNS + ") values (?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
-        this.jdbcTemplate.update(sql, new BatchPreparedStatementSetter() {
+        this.jdbcTemplate.batchUpdate(sql, new BatchPreparedStatementSetter() {
             @Override
             public void setValues(PreparedStatement ps, int i) throws SQLException {
                 Task task = tasks.get(i);
@@ -68,24 +68,39 @@ public class TaskDao {
         });
     }
 
-
     public Task getById(String taskId) {
         final String sql = "select " + COLUMNS + " from task where id = ?";
-        return this.jdbcTemplate.queryForObject(sql, Task.class);
+        try {
+            return this.jdbcTemplate.queryForObject(sql, new Object[]{taskId}, new BeanPropertyRowMapper<>(Task.class));
+        } catch (EmptyResultDataAccessException e) {
+            return null;
+        }
     }
 
 
     public void updateStatusAndStackById(String taskId, String stack, String status) {
         final String sql = "update task set stack = ?, status = ? where id = ?";
-        this.jdbcTemplate.update(sql, stack, stack, taskId);
+        this.jdbcTemplate.update(sql, stack, status, taskId);
     }
-
 
     public List<Task> findByIds(Collection<String> taskIds) {
         final String sql = "select " + COLUMNS + " from task where id in (:ids)";
         MapSqlParameterSource parameters = new MapSqlParameterSource();
         parameters.addValue("ids", taskIds);
         return this.namedParameterJdbcTemplate.query(sql, parameters, new BeanPropertyRowMapper<>(Task.class));
+    }
+
+    public void updateStatusByIds(Collection<String> taskIds, String status) {
+        final String sql = "update task set status = :status where id in (:ids)";
+        MapSqlParameterSource parameters = new MapSqlParameterSource();
+        parameters.addValue("status", status);
+        parameters.addValue("ids", taskIds);
+        this.namedParameterJdbcTemplate.update(sql, parameters);
+    }
+
+    public List<Task> findByProjectIdAndStatus(long projectId, String status, int limit) {
+        final String sql = "select " + COLUMNS + " from task where project_id = ? and status = ? limit ?";
+        return this.jdbcTemplate.query(sql, new Object[]{projectId, status, limit}, new BeanPropertyRowMapper<>(Task.class));
     }
 
 }
