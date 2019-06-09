@@ -15,6 +15,7 @@ public class Project implements Serializable {
     private String  scriptText;
     private String  status;
     private String  rateUnit;
+    private int     rateUnitMultiple;
     private int     rateNumber;
     private String  dispatcher;
     private Timestamp   createdAt;
@@ -116,5 +117,13 @@ public class Project implements Serializable {
 
     public void setScheduleValue(long scheduleValue) {
         this.scheduleValue = scheduleValue;
+    }
+
+    public int getRateUnitMultiple() {
+        return rateUnitMultiple;
+    }
+
+    public void setRateUnitMultiple(int rateUnitMultiple) {
+        this.rateUnitMultiple = rateUnitMultiple;
     }
 }

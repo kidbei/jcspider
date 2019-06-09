@@ -12,6 +12,7 @@ import org.springframework.stereotype.Repository;
 
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.util.Collection;
 import java.util.List;
 
@@ -26,12 +27,15 @@ public class TaskDao {
     @Autowired
     private NamedParameterJdbcTemplate  namedParameterJdbcTemplate;
 
-    private static final String COLUMNS = "id,`status`,method,source_url,schedule_type," +
+    private static final String COLUMNS = "id,status,method,source_url,schedule_type," +
             "stack,project_id,schedule_value,headers,extra,fetch_type," +
-            "`proxy`,created_at,updated_at, charset";
+            "proxy,created_at,updated_at, charset";
 
 
     public void insert(Task task) {
+        if (task.getUpdatedAt() == null) {
+            task.setUpdatedAt(new Timestamp(System.currentTimeMillis()));
+        }
         final String sql = "insert into task (" + COLUMNS + ") values (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
         this.jdbcTemplate.update(sql, task.getId(), task.getStatus(), task.getMethod(), task.getSourceUrl(), task.getScheduleType(),
                 task.getStack(), task.getProjectId(), task.getScheduleValue(), task.getHeaders(), task.getExtra(), task.getFetchType(),
@@ -40,6 +44,11 @@ public class TaskDao {
 
 
     public void insertBatch(List<Task> tasks) {
+        tasks.forEach(t -> {
+            if (t.getUpdatedAt() == null) {
+                t.setUpdatedAt(new Timestamp(System.currentTimeMillis()));
+            }
+        });
         final String sql = "insert into task (" + COLUMNS + ") values (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
         this.jdbcTemplate.batchUpdate(sql, new BatchPreparedStatementSetter() {
             @Override
@@ -80,8 +89,8 @@ public class TaskDao {
 
 
     public void updateStatusAndStackById(String taskId, String stack, String status) {
-        final String sql = "update task set stack = ?, status = ? where id = ?";
-        this.jdbcTemplate.update(sql, stack, status, taskId);
+        final String sql = "update task set stack = ?, status = ?, updated_at = ? where id = ?";
+        this.jdbcTemplate.update(sql, stack, status, new Timestamp(System.currentTimeMillis()), taskId);
     }
 
     public List<Task> findByIds(Collection<String> taskIds) {
@@ -92,10 +101,11 @@ public class TaskDao {
     }
 
     public void updateStatusByIds(Collection<String> taskIds, String status) {
-        final String sql = "update task set status = :status where id in (:ids)";
+        final String sql = "update task set status = :status, updated_at = :updatedAt where id in (:ids)";
         MapSqlParameterSource parameters = new MapSqlParameterSource();
         parameters.addValue("status", status);
         parameters.addValue("ids", taskIds);
+        parameters.addValue("updatedAt", new Timestamp(System.currentTimeMillis()));
         this.namedParameterJdbcTemplate.update(sql, parameters);
     }
 

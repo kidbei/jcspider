@@ -32,6 +32,8 @@ public class 商务部 {
     @Autowired
     private JCQueue jcQueue;
 
+    public static long projectId = 0L;
+
     @Before
     public void init() throws IOException {
         this.jdbcTemplate.update("truncate table project");
@@ -49,12 +51,12 @@ public class 商务部 {
         project.setScriptText(scriptText);
         project.setStatus(Constant.PROJECT_STATUS_STOP);
         project.setDispatcher(IPUtils.getLocalIP());
-        projectDao.insert(project);
+        projectId = projectDao.insert(project);
     }
 
     @Test
     public void test_start() {
-        jcQueue.pub(Constant.TOPIC_DISPATCHER_PROJECT_START, 1l);
+        jcQueue.pub(Constant.TOPIC_DISPATCHER_PROJECT_START, projectId);
         try {
             Thread.sleep(Integer.MAX_VALUE);
         } catch (InterruptedException e) {

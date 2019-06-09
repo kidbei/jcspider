@@ -5,6 +5,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
+import java.sql.Timestamp;
+
 /**
  * @author zhuang.hu
  * @since 05 June 2019
@@ -14,11 +16,14 @@ public class TaskResultDao {
     @Autowired
     private JdbcTemplate    jdbcTemplate;
 
-    private static final String COLUMNS = "id, project_id, task_id, result_text, created_at";
+    private static final String COLUMNS = "project_id, task_id, result_text, created_at";
 
     public void insert(TaskResult taskResult) {
-        final String sql = "insert into result(" + COLUMNS + ") values (?,?,?,?,?)";
-        this.jdbcTemplate.update(sql, taskResult.getId(), taskResult.getProjectId(),
+        if (taskResult.getCreatedAt() == null) {
+            taskResult.setCreatedAt(new Timestamp(System.currentTimeMillis()));
+        }
+        final String sql = "insert into result(" + COLUMNS + ") values (?,?,?,?)";
+        this.jdbcTemplate.update(sql, taskResult.getProjectId(),
                 taskResult.getTaskId(), taskResult.getResultText(), taskResult.getCreatedAt());
     }
 }

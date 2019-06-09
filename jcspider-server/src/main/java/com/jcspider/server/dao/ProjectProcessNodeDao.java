@@ -9,6 +9,7 @@ import org.springframework.stereotype.Repository;
 
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.util.List;
 
 /**
@@ -18,30 +19,32 @@ import java.util.List;
 @Repository
 public class ProjectProcessNodeDao {
 
-    private static final String COLUMNS = "id,project_id,process_node,created_at";
+    private static final String COLUMNS = "project_id,process_node,created_at";
 
     @Autowired
     private JdbcTemplate    jdbcTemplate;
 
 
     public void insert(ProjectProcessNode projectProcessNode) {
-        final String sql = "insert into project_process_node (" + COLUMNS + ") values (?,?,?,?)";
-        this.jdbcTemplate.update(sql, projectProcessNode.getId(),
+        if (projectProcessNode.getCreatedAt() == null) {
+            projectProcessNode.setCreatedAt(new Timestamp(System.currentTimeMillis()));
+        }
+        final String sql = "insert into project_process_node (" + COLUMNS + ") values (?,?,?)";
+        this.jdbcTemplate.update(sql,
                 projectProcessNode.getProjectId(), projectProcessNode.getProcessNode(),
                 projectProcessNode.getCreatedAt());
     }
 
 
     public void insertBatch(List<ProjectProcessNode> projectProcessNodes) {
-        final String sql = "insert into project_process_node (" + COLUMNS + ") values (?,?,?,?)";
+        final String sql = "insert into project_process_node (" + COLUMNS + ") values (?,?,?)";
         this.jdbcTemplate.batchUpdate(sql, new BatchPreparedStatementSetter() {
             @Override
             public void setValues(PreparedStatement preparedStatement, int i) throws SQLException {
                 ProjectProcessNode projectProcessNode = projectProcessNodes.get(i);
-                preparedStatement.setLong(1, projectProcessNode.getId());
-                preparedStatement.setLong(2, projectProcessNode.getProjectId());
-                preparedStatement.setString(3, projectProcessNode.getProcessNode());
-                preparedStatement.setTimestamp(4, projectProcessNode.getCreatedAt());
+                preparedStatement.setLong(1, projectProcessNode.getProjectId());
+                preparedStatement.setString(2, projectProcessNode.getProcessNode());
+                preparedStatement.setTimestamp(3, projectProcessNode.getCreatedAt());
             }
 
             @Override
@@ -52,7 +55,7 @@ public class ProjectProcessNodeDao {
     }
 
     public List<ProjectProcessNode> findByProjectId(long projectId) {
-        final String sql = "select " + COLUMNS + " from project_process_node where project_id = ?";
+        final String sql = "select id, " + COLUMNS + " from project_process_node where project_id = ?";
         return this.jdbcTemplate.query(sql, new Object[]{projectId}, new BeanPropertyRowMapper<>(ProjectProcessNode.class));
     }
 

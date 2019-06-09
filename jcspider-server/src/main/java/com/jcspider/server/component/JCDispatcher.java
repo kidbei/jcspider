@@ -108,7 +108,7 @@ public class JCDispatcher implements JCComponent {
                     .map(p -> new ProjectProcessNode(projectId, p, now))
                     .collect(Collectors.toList());
             this.projectProcessNodeDao.insertBatch(projectProcessNodes);
-            this.jcQueue.bPub(Constant.TOPIC_PROCESS_PROJECT_START + processNodes.get(0), projectId+"");
+            this.jcQueue.blockingPushProcessProjectStart(processNodes.get(0), projectId);
         }
     }
 

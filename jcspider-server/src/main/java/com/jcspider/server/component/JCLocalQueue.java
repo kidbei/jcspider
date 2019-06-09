@@ -1,5 +1,6 @@
 package com.jcspider.server.component;
 
+import com.jcspider.server.utils.Constant;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -95,6 +96,26 @@ public class JCLocalQueue implements JCQueue {
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    @Override
+    public String blockingPopProcessTask(String localIp) {
+        return this.bPop(Constant.TOPIC_PROCESS_TASK + localIp).toString();
+    }
+
+    @Override
+    public long blockingPopProcessProjectStart(String localIp) {
+        return (long) this.bPop(Constant.TOPIC_PROCESS_PROJECT_START + localIp);
+    }
+
+    @Override
+    public void blockingPushProcessTask(String processIp, String taskId) {
+        this.bPub(Constant.TOPIC_PROCESS_TASK + processIp, taskId);
+    }
+
+    @Override
+    public void blockingPushProcessProjectStart(String processIp, long projectId) {
+        this.bPub(Constant.TOPIC_PROCESS_PROJECT_START + processIp, projectId);
     }
 
 

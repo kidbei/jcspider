@@ -85,10 +85,10 @@ public class JCNashornProcess implements JCComponent {
         this.threadPoolExecutor = new ThreadPoolExecutor(processThreads, processThreads, Long.MAX_VALUE, TimeUnit.HOURS, new LinkedTransferQueue<>());
 
         this.threadPoolExecutor.execute(() -> {
-            final String topic = Constant.TOPIC_PROCESS_TASK_SUB + this.localIp;
+            final String topic = Constant.TOPIC_PROCESS_TASK + this.localIp;
             LOGGER.info("subscript topic:{}", topic);
             while (!Thread.interrupted() && !isStop) {
-                String taskId = (String) this.jcQueue.bPop(topic);
+                String taskId = this.jcQueue.blockingPopProcessTask(this.localIp);
                 this.processTask(taskId);
             }
         });
@@ -97,7 +97,7 @@ public class JCNashornProcess implements JCComponent {
             final String topic = Constant.TOPIC_PROCESS_PROJECT_START + this.localIp;
             LOGGER.info("subscript topic:{}", topic);
             while (!Thread.interrupted() && !isStop) {
-                Long projectId =  Long.valueOf(this.jcQueue.bPop(topic).toString());
+                Long projectId =  this.jcQueue.blockingPopProcessProjectStart(this.localIp);
                 this.startProject(projectId);
             }
         });

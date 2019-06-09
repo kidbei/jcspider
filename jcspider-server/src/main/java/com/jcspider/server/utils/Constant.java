@@ -10,7 +10,7 @@ public class Constant {
     public static final String COMPONENT_NAME_DISPATCHER = "dispatcher";
 
 
-    public static final String  TOPIC_PROCESS_TASK_SUB = "process:task:consumer:";
+    public static final String  TOPIC_PROCESS_TASK = "process:task:consumer:";
     public static final String  TOPIC_PROCESS_PROJECT_START = "process:project:start:";
     public static final String  TOPIC_DISPATCHER_PROJECT_START = "dispatcher:project:start";
 

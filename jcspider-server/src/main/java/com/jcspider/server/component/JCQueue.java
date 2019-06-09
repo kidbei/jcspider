@@ -14,4 +14,12 @@ public interface JCQueue extends JCComponent {
 
     Object bPop(String topic);
 
+    String blockingPopProcessTask(String localIp);
+
+    long blockingPopProcessProjectStart(String localIp);
+
+    void blockingPushProcessTask(String processIp, String taskId);
+
+    void blockingPushProcessProjectStart(String processIp, long projectId);
+
 }

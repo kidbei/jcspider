@@ -33,7 +33,7 @@ public class DispatcherScheduleFactory {
 
 
 
-    public static void setProjectRunner(long projectId, ProjectDispatcherRunner runner, String rateUnit) {
+    public static void setProjectRunner(long projectId, ProjectDispatcherRunner runner, String rateUnit, int rateUnitMultiple) {
         PROJECT_DISPATCHER_RUNNER_MAP.put(projectId, runner);
         TimeUnit timeUnit;
         if (Constant.UNIT_TYPE_SECONDS.equals(rateUnit)) {
@@ -43,7 +43,8 @@ public class DispatcherScheduleFactory {
         } else {
             throw new IllegalArgumentException("not support rate unit:" + rateUnit);
         }
-        schedulePool.scheduleWithFixedDelay(runner, 0L, 1L, timeUnit);
+        long delay = rateUnitMultiple == 0 ? 1L : rateUnitMultiple;
+        schedulePool.scheduleWithFixedDelay(runner, 0L, rateUnitMultiple, timeUnit);
     }
 
 
