@@ -13,6 +13,8 @@ public class Constant {
     public static final String  TOPIC_PROCESS_TASK = "process:task:consumer:";
     public static final String  TOPIC_PROCESS_PROJECT_START = "process:project:start:";
     public static final String  TOPIC_DISPATCHER_PROJECT_START = "dispatcher:project:start";
+    public static final String  TOPIC_PROCESS_DEBUG = "process:task:debug:consumer:";
+    public static final String  TOPIC_PROCESS_DEBUG_TASK_RETURN = "process:task:debug:return:";
 
     public static final String  TASK_STATUS_ERROR = "error";
     public static final String  TASK_STATUS_RUNNING = "running";

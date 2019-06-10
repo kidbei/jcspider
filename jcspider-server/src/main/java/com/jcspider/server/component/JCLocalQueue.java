@@ -1,5 +1,7 @@
 package com.jcspider.server.component;
 
+import com.jcspider.server.model.DebugResult;
+import com.jcspider.server.model.DebugTask;
 import com.jcspider.server.utils.Constant;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -104,6 +106,16 @@ public class JCLocalQueue implements JCQueue {
     }
 
     @Override
+    public DebugTask blockingPopProcessDebugTask(String localIp) {
+        return (DebugTask) this.bPop(Constant.TOPIC_PROCESS_DEBUG + localIp);
+    }
+
+    @Override
+    public DebugResult blockingPopProcessDebugTaskReturn(String requestId) {
+        return (DebugResult) this.bPop(Constant.TOPIC_PROCESS_DEBUG_TASK_RETURN + requestId);
+    }
+
+    @Override
     public long blockingPopProcessProjectStart(String localIp) {
         return (long) this.bPop(Constant.TOPIC_PROCESS_PROJECT_START + localIp);
     }
@@ -116,6 +128,16 @@ public class JCLocalQueue implements JCQueue {
     @Override
     public void blockingPushProcessProjectStart(String processIp, long projectId) {
         this.bPub(Constant.TOPIC_PROCESS_PROJECT_START + processIp, projectId);
+    }
+
+    @Override
+    public void blockingPushProcessDebugTask(DebugTask debugTask) {
+        this.bPub(Constant.TOPIC_PROCESS_DEBUG + debugTask.getRequestId(), debugTask);
+    }
+
+    @Override
+    public void blockingPushProcessDebugTaskReturn(DebugResult debugResult) {
+        this.bPub(Constant.TOPIC_PROCESS_DEBUG_TASK_RETURN + debugResult.getRequestId(), debugResult);
     }
 
 

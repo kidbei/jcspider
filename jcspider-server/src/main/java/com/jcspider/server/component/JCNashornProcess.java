@@ -66,6 +66,7 @@ public class JCNashornProcess implements JCComponent {
     @Autowired
     private ApplicationContext  applicationContext;
 
+
     @Override
     public void start() throws ComponentInitException {
         this.fetcherMap.put(Constant.FETCH_TYPE_HTML, new HttpFetcher());
@@ -99,6 +100,21 @@ public class JCNashornProcess implements JCComponent {
             while (!Thread.interrupted() && !isStop) {
                 Long projectId =  this.jcQueue.blockingPopProcessProjectStart(this.localIp);
                 this.startProject(projectId);
+            }
+        });
+
+        this.threadPoolExecutor.execute(() -> {
+            final String topic = Constant.TOPIC_PROCESS_DEBUG + this.localIp;
+            LOGGER.info("subscript topic:{}", topic);
+            while (!Thread.interrupted() && !isStop) {
+                DebugTask debugTask = this.jcQueue.blockingPopProcessDebugTask(this.localIp);
+                try {
+                    DebugResult debugResult = this.debug(debugTask.getRequestId(),
+                            debugTask.getScriptText(), debugTask.getSimpleTask());
+                    this.jcQueue.blockingPushProcessDebugTaskReturn(debugResult);
+                } catch (Exception e) {
+                    LOGGER.error("debug error", e);
+                }
             }
         });
     }

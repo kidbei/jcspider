@@ -80,6 +80,9 @@ public class ProjectDispatcherRunner implements Runnable {
     private void work() {
         List<Task> tasks = taskDao.findByProjectIdAndStatus(this.projectId, Constant.TASK_STATUS_NONE, this.rateNumber);
         if (CollectionUtils.isEmpty(tasks)) {
+            tasks = taskDao.findByOutOfNextRunTime(this.projectId, System.currentTimeMillis(), this.rateNumber);
+        }
+        if (CollectionUtils.isEmpty(tasks)) {
             LOGGER.info("project {} has no task to crawl", this.projectId);
             if (this.firstNoTaskTime == 0L) {
                 this.firstNoTaskTime = System.currentTimeMillis();

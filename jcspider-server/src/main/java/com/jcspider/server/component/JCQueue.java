@@ -1,5 +1,8 @@
 package com.jcspider.server.component;
 
+import com.jcspider.server.model.DebugResult;
+import com.jcspider.server.model.DebugTask;
+
 /**
  * @author zhuang.hu
  * @since 29 May 2019
@@ -16,10 +19,18 @@ public interface JCQueue extends JCComponent {
 
     String blockingPopProcessTask(String localIp);
 
+    DebugTask blockingPopProcessDebugTask(String localIp);
+
+    DebugResult blockingPopProcessDebugTaskReturn(String requestId);
+
     long blockingPopProcessProjectStart(String localIp);
 
     void blockingPushProcessTask(String processIp, String taskId);
 
     void blockingPushProcessProjectStart(String processIp, long projectId);
+
+    void blockingPushProcessDebugTask(DebugTask debugTask);
+
+    void blockingPushProcessDebugTaskReturn(DebugResult debugResult);
 
 }

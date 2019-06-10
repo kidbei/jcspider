@@ -1,6 +1,7 @@
 package com.jcspider.server.dao;
 
 import com.jcspider.server.model.Task;
+import com.jcspider.server.utils.Constant;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
@@ -29,17 +30,17 @@ public class TaskDao {
 
     private static final String COLUMNS = "id,status,method,source_url,schedule_type," +
             "stack,project_id,schedule_value,headers,extra,fetch_type," +
-            "proxy,created_at,updated_at, charset";
+            "proxy,created_at,updated_at, charset,next_run_time";
 
 
     public void insert(Task task) {
         if (task.getUpdatedAt() == null) {
             task.setUpdatedAt(new Timestamp(System.currentTimeMillis()));
         }
-        final String sql = "insert into task (" + COLUMNS + ") values (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
+        final String sql = "insert into task (" + COLUMNS + ") values (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
         this.jdbcTemplate.update(sql, task.getId(), task.getStatus(), task.getMethod(), task.getSourceUrl(), task.getScheduleType(),
                 task.getStack(), task.getProjectId(), task.getScheduleValue(), task.getHeaders(), task.getExtra(), task.getFetchType(),
-                task.getProxy(), task.getCreatedAt(), task.getUpdatedAt(), task.getCharset());
+                task.getProxy(), task.getCreatedAt(), task.getUpdatedAt(), task.getCharset(), task.getNextRunTime());
     }
 
 
@@ -49,7 +50,7 @@ public class TaskDao {
                 t.setUpdatedAt(new Timestamp(System.currentTimeMillis()));
             }
         });
-        final String sql = "insert into task (" + COLUMNS + ") values (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
+        final String sql = "insert into task (" + COLUMNS + ") values (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
         this.jdbcTemplate.batchUpdate(sql, new BatchPreparedStatementSetter() {
             @Override
             public void setValues(PreparedStatement ps, int i) throws SQLException {
@@ -69,6 +70,7 @@ public class TaskDao {
                 ps.setTimestamp(13, task.getCreatedAt());
                 ps.setTimestamp(14, task.getUpdatedAt());
                 ps.setString(15, task.getCharset());
+                ps.setLong(16, task.getNextRunTime());
             }
 
             @Override
@@ -112,6 +114,13 @@ public class TaskDao {
     public List<Task> findByProjectIdAndStatus(long projectId, String status, int limit) {
         final String sql = "select " + COLUMNS + " from task where project_id = ? and status = ? limit ?";
         return this.jdbcTemplate.query(sql, new Object[]{projectId, status, limit}, new BeanPropertyRowMapper<>(Task.class));
+    }
+
+    public List<Task> findByOutOfNextRunTime(long projectId,long now, int limit) {
+        final String sql = "select " + COLUMNS + " from task where project_id = ? and status not in(?,?) and next_run_time <= ? and next_run_time != 0 limit ?";
+        return this.jdbcTemplate.query(sql,
+                new Object[]{projectId, Constant.TASK_STATUS_DONE, Constant.TASK_STATUS_ERROR, now, limit},
+                new BeanPropertyRowMapper<>(Task.class));
     }
 
 }

@@ -14,6 +14,7 @@ public class Task extends SimpleTask {
     private String  stack;
     private long    projectId;
     private long    scheduleValue;
+    private long    nextRunTime;
     private Timestamp   createdAt;
     private Timestamp   updatedAt;
 
@@ -78,5 +79,13 @@ public class Task extends SimpleTask {
     @Override
     public boolean equals(Object obj) {
         return this.getId().equals(((Task)obj).getId());
+    }
+
+    public long getNextRunTime() {
+        return nextRunTime;
+    }
+
+    public void setNextRunTime(long nextRunTime) {
+        this.nextRunTime = nextRunTime;
     }
 }
