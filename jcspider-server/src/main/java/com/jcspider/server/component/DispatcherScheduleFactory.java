@@ -1,11 +1,13 @@
 package com.jcspider.server.component;
 
+import com.jcspider.server.model.Project;
 import com.jcspider.server.utils.Constant;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
-import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -13,6 +15,7 @@ import java.util.concurrent.TimeUnit;
  * @since 29 May 2019
  */
 public class DispatcherScheduleFactory {
+    private static final Logger LOGGER = LoggerFactory.getLogger(DispatcherScheduleFactory.class);
 
     private static ScheduledThreadPoolExecutor schedulePool;
 
@@ -34,6 +37,10 @@ public class DispatcherScheduleFactory {
 
 
     public static void setProjectRunner(long projectId, ProjectDispatcherRunner runner, String rateUnit, int rateUnitMultiple) {
+        if (PROJECT_DISPATCHER_RUNNER_MAP.containsKey(projectId)) {
+            LOGGER.warn("project {} is already in runner", projectId);
+            return;
+        }
         PROJECT_DISPATCHER_RUNNER_MAP.put(projectId, runner);
         TimeUnit timeUnit;
         if (Constant.UNIT_TYPE_SECONDS.equals(rateUnit)) {
@@ -44,7 +51,7 @@ public class DispatcherScheduleFactory {
             throw new IllegalArgumentException("not support rate unit:" + rateUnit);
         }
         long delay = rateUnitMultiple == 0 ? 1L : rateUnitMultiple;
-        schedulePool.scheduleWithFixedDelay(runner, 0L, rateUnitMultiple, timeUnit);
+        schedulePool.scheduleWithFixedDelay(runner, 0L, delay, timeUnit);
     }
 
 
@@ -52,6 +59,16 @@ public class DispatcherScheduleFactory {
         ProjectDispatcherRunner runner = PROJECT_DISPATCHER_RUNNER_MAP.remove(projectId);
         if (runner != null) {
             runner.setStop(true);
+        }
+    }
+
+    public synchronized static final void setProjectDispatcherLoopRunner(long projectId, String scheduleType, long scheduleValue) {
+        if (scheduleType.equals(Constant.SCHEDULE_TYPE_ONCE)) {
+            schedulePool.schedule(new ProjectDispatcherLoopRunner(projectId), scheduleValue, TimeUnit.MILLISECONDS);
+        } else if (scheduleType.equals(Constant.SCHEDULE_TYPE_LOOP)){
+            schedulePool.scheduleWithFixedDelay(new ProjectDispatcherLoopRunner(projectId), 0L, scheduleValue, TimeUnit.MILLISECONDS);
+        } else {
+
         }
     }
 

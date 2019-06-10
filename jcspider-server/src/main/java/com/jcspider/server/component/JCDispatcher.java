@@ -102,13 +102,14 @@ public class JCDispatcher implements JCComponent {
             this.projectProcessNodeDao.deleteByProjectId(projectId);
             List<String> processNodes = this.jcRegistry.listProcesses();
             ProjectDispatcherRunner runner = new ProjectDispatcherRunner(projectId, project.getRateNumber(), processNodes);
-            DispatcherScheduleFactory.setProjectRunner(projectId, runner, project.getRateUnit());
+            DispatcherScheduleFactory.setProjectRunner(projectId, runner, project.getRateUnit(), project.getRateUnitMultiple());
             Timestamp now = new Timestamp(System.currentTimeMillis());
             List<ProjectProcessNode> projectProcessNodes = processNodes.stream()
                     .map(p -> new ProjectProcessNode(projectId, p, now))
                     .collect(Collectors.toList());
             this.projectProcessNodeDao.insertBatch(projectProcessNodes);
             this.jcQueue.blockingPushProcessProjectStart(processNodes.get(0), projectId);
+            DispatcherScheduleFactory.setProjectDispatcherLoopRunner(projectId, project.getScheduleType(), project.getScheduleValue());
         }
     }
 
