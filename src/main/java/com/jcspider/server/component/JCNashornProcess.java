@@ -109,6 +109,7 @@ public class JCNashornProcess implements JCComponent {
             while (!Thread.interrupted() && !isStop) {
                 DebugTask debugTask = this.jcQueue.blockingPopProcessDebugTask(this.localIp);
                 try {
+                    LOGGER.info("debug task:{}", debugTask);
                     DebugResult debugResult = this.debug(debugTask.getRequestId(),
                             debugTask.getScriptText(), debugTask.getSimpleTask());
                     this.jcQueue.blockingPushProcessDebugTaskReturn(debugResult);
@@ -226,6 +227,9 @@ public class JCNashornProcess implements JCComponent {
         if (Constant.METHOD_START.equals(simpleTask.getMethod())) {
             try {
                 result = ((Invocable)scriptEngine).invokeFunction(simpleTask.getMethod(), self, simpleTask.getSourceUrl());
+                debugResult.setResult(result);
+                debugResult.setSuccess(true);
+                debugResult.setSimpleTasks(self.getNewTasks());
             } catch (Exception e) {
                 debugResult.setSuccess(false);
                 debugResult.setStack(e.toString());
@@ -256,6 +260,7 @@ public class JCNashornProcess implements JCComponent {
             }
             debugResult.setSuccess(true);
             debugResult.setResult(result);
+            debugResult.setSimpleTasks(self.getNewTasks());
             if (CollectionUtils.isNotEmpty(self.getNewTasks())) {
                 debugResult.setSimpleTasks(self.getNewTasks().stream().map(t -> (SimpleTask)t).collect(Collectors.toList()));
             }

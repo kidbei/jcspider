@@ -2,9 +2,10 @@ package com.jcspider.server.model;
 
 public class DebugTask {
 
-    private String  requestId;
-    private String  scriptText;
+    private String      requestId;
+    private String      scriptText;
     private SimpleTask  simpleTask;
+    private String      processNode;
 
     public String getRequestId() {
         return requestId;
@@ -30,4 +31,21 @@ public class DebugTask {
         this.simpleTask = simpleTask;
     }
 
+    public String getProcessNode() {
+        return processNode;
+    }
+
+    public void setProcessNode(String processNode) {
+        this.processNode = processNode;
+    }
+
+    @Override
+    public String toString() {
+        return "DebugTask{" +
+                "requestId='" + requestId + '\'' +
+                ", scriptText='" + scriptText + '\'' +
+                ", simpleTask=" + simpleTask +
+                ", processNode='" + processNode + '\'' +
+                '}';
+    }
 }

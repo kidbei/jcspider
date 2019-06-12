@@ -132,7 +132,7 @@ public class JCLocalQueue implements JCQueue {
 
     @Override
     public void blockingPushProcessDebugTask(DebugTask debugTask) {
-        this.bPub(Constant.TOPIC_PROCESS_DEBUG + debugTask.getRequestId(), debugTask);
+        this.bPub(Constant.TOPIC_PROCESS_DEBUG + debugTask.getProcessNode(), debugTask);
     }
 
     @Override

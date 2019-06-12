@@ -22,9 +22,13 @@ public class DebugController {
         if (StringUtils.isBlank(debugTask.getScriptText())) {
             return JSONResult.error("scriptText must not be null");
         }
-        if (debugTask.getSimpleTask() == null || StringUtils.isBlank(debugTask.getSimpleTask().getMethod())) {
+        if (debugTask.getSimpleTask() == null) {
+            return JSONResult.error("simpleTask must not be null");
+        }
+        if (StringUtils.isBlank(debugTask.getSimpleTask().getMethod())) {
             return JSONResult.error("simpleTask.method must not be null");
         }
+
         return JSONResult.success(debugService.debug(debugTask));
     }
 

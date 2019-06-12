@@ -12,7 +12,7 @@ public class DebugResult {
     private boolean success;
     private String  stack;
     private String  currentMethod;
-    private List<SimpleTask> simpleTasks;
+    private List<? extends SimpleTask> simpleTasks;
     private Object  result;
 
     public String getRequestId() {
@@ -47,11 +47,11 @@ public class DebugResult {
         this.currentMethod = currentMethod;
     }
 
-    public List<SimpleTask> getSimpleTasks() {
+    public List<? extends SimpleTask> getSimpleTasks() {
         return simpleTasks;
     }
 
-    public void setSimpleTasks(List<SimpleTask> simpleTasks) {
+    public void setSimpleTasks(List<? extends SimpleTask> simpleTasks) {
         this.simpleTasks = simpleTasks;
     }
 
