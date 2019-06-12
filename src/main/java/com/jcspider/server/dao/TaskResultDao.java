@@ -26,4 +26,10 @@ public class TaskResultDao {
         this.jdbcTemplate.update(sql, taskResult.getProjectId(),
                 taskResult.getTaskId(), taskResult.getResultText(), taskResult.getCreatedAt());
     }
+
+
+    public void deleteByProjectIdAndTaskId(long projectId, String taskId) {
+        final String sql = "delete from result where project_id = ? and task_id = ?";
+        this.jdbcTemplate.update(sql, projectId, taskId);
+    }
 }

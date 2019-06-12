@@ -130,17 +130,50 @@ public class JCNashornProcess implements JCComponent {
                 LOGGER.warn("task not found:{}", taskId);
                 return;
             }
-            if (task.getStatus().equals(Constant.TASK_STATUS_DONE)) {
-                LOGGER.info("task {} is already done", taskId);
-                return;
-            }
             ProjectCache projectCache = this.getProject(task.getProjectId());
-            this.runMethod(projectCache, task);
-            this.taskDao.updateStatusAndStackById(taskId, "", Constant.TASK_STATUS_DONE);
+            if (task.getScheduleType().equals(Constant.SCHEDULE_TYPE_ONCE)) {
+                Long nextRunTime = task.getNextRunTime();
+                //第一次运行
+                if (nextRunTime == 0L) {
+                    this.runMethod(projectCache, task);
+                    Task update = new Task(taskId, Constant.TASK_STATUS_DONE, System.currentTimeMillis() + task.getScheduleValue());
+                    this.taskDao.upgrade(update);
+                } else if (nextRunTime.equals(Long.MAX_VALUE)){
+                    //不运行
+                } else {
+                    //第2次运行
+                    this.clearResult(task.getProjectId(), taskId);
+                    this.runMethod(projectCache, task);
+                    Task update = new Task(taskId, Constant.TASK_STATUS_DONE, Long.MAX_VALUE);
+                    this.taskDao.upgrade(update);
+                }
+            } else if (task.getScheduleType().equals(Constant.SCHEDULE_TYPE_LOOP)) {
+                if (task.getNextRunTime() == 0L) {
+                    this.clearResult(task.getProjectId(), taskId);
+                }
+                this.runMethod(projectCache, task);
+                Task update = new Task(taskId, Constant.TASK_STATUS_DONE, System.currentTimeMillis() + task.getScheduleValue());
+                this.taskDao.upgrade(update);
+            } else {
+                this.runMethod(projectCache, task);
+                Task update = new Task(taskId, Constant.TASK_STATUS_DONE, 0L);
+                this.taskDao.upgrade(update);
+            }
         } catch (Exception e) {
             LOGGER.error("process task error:{}", taskId, e);
             this.taskDao.updateStatusAndStackById(taskId, e.toString(), Constant.TASK_STATUS_ERROR);
         }
+    }
+
+
+    private void clearResult(long projectId, String taskId) {
+        this.resultExporters.forEach(resultExporter -> {
+            try {
+                resultExporter.delete(projectId, taskId);
+            } catch (Exception e) {
+                LOGGER.error("delete result error, projectId:{}. taskId:{}", projectId, taskId);
+            }
+        });
     }
 
 

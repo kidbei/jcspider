@@ -14,6 +14,7 @@ import org.springframework.stereotype.Repository;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
@@ -121,6 +122,71 @@ public class TaskDao {
         return this.jdbcTemplate.query(sql,
                 new Object[]{projectId, Constant.TASK_STATUS_DONE, Constant.TASK_STATUS_ERROR, now, limit},
                 new BeanPropertyRowMapper<>(Task.class));
+    }
+
+
+    public void upgrade(Task task) {
+        List<Object> params = new ArrayList<>();
+        StringBuilder sb = new StringBuilder("update task set ");
+        if (task.getStatus() != null) {
+            sb.append("status = ?,");
+            params.add(task.getStatus());
+        }
+        if (task.getStack() != null) {
+            sb.append("stack = ?,");
+            params.add(task.getStack());
+        }
+        if (task.getFetchType() != null) {
+            sb.append("fetch_type = ?,");
+            params.add(task.getFetchType());
+        }
+        if (task.getMethod() != null) {
+            sb.append("method = ?,");
+            params.add(task.getMethod());
+        }
+        if (task.getProxy() != null) {
+            sb.append("proxy = ?,");
+            params.add(task.getProxy());
+        }
+        if (task.getCreatedAt() != null) {
+            sb.append("created_at = ?,");
+            params.add(task.getCreatedAt());
+        }
+        if (task.getNextRunTime() != null) {
+            sb.append("next_run_time = ?,");
+            params.add(task.getNextRunTime());
+        }
+        if (task.getProjectId() != null) {
+            sb.append("project_id = ?,");
+            params.add(task.getProjectId());
+        }
+        if (task.getScheduleType() != null) {
+            sb.append("schedule_type = ?,");
+            params.add(task.getScheduleType());
+        }
+        if (task.getScheduleValue() != null) {
+            sb.append("schedule_value = ?,");
+            params.add(task.getScheduleValue());
+        }
+        if (task.getCharset() != null) {
+            sb.append("charset = ?,");
+            params.add(task.getCharset());
+        }
+        if (task.getExtra() != null) {
+            sb.append("extra = ?,");
+            params.add(task.getExtra());
+        }
+        if (task.getHeaders() != null) {
+            sb.append("headers = ?,");
+            params.add(task.getHeaders());
+        }
+        if (task.getSourceUrl() != null) {
+            sb.append("source_url = ?,");
+            params.add(task.getSourceUrl());
+        }
+        params.add(task.getId());
+        String sql = sb.substring(0, sb.length() - 1) + " where id = ?";
+        this.jdbcTemplate.update(sql, params.toArray());
     }
 
 }

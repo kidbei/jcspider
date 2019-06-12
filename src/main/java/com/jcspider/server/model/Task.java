@@ -12,12 +12,20 @@ public class Task extends SimpleTask {
     private String  status;
     private String  scheduleType;
     private String  stack;
-    private long    projectId;
-    private long    scheduleValue;
-    private long    nextRunTime;
+    private Long    projectId = 0L;
+    private Long    scheduleValue = 0L;
+    private Long    nextRunTime = 0L;
     private Timestamp   createdAt;
     private Timestamp   updatedAt;
 
+    public Task() {
+    }
+
+    public Task(String id, String status, Long nextRunTime) {
+        this.setId(id);
+        this.status = status;
+        this.nextRunTime = nextRunTime;
+    }
 
     public String getStatus() {
         return status;
@@ -44,11 +52,11 @@ public class Task extends SimpleTask {
         this.stack = stack;
     }
 
-    public long getProjectId() {
+    public Long getProjectId() {
         return projectId;
     }
 
-    public void setProjectId(long projectId) {
+    public void setProjectId(Long projectId) {
         this.projectId = projectId;
     }
 
@@ -68,11 +76,11 @@ public class Task extends SimpleTask {
         this.updatedAt = updatedAt;
     }
 
-    public long getScheduleValue() {
+    public Long getScheduleValue() {
         return scheduleValue;
     }
 
-    public void setScheduleValue(long scheduleValue) {
+    public void setScheduleValue(Long scheduleValue) {
         this.scheduleValue = scheduleValue;
     }
 
@@ -81,11 +89,11 @@ public class Task extends SimpleTask {
         return this.getId().equals(((Task)obj).getId());
     }
 
-    public long getNextRunTime() {
+    public Long getNextRunTime() {
         return nextRunTime;
     }
 
-    public void setNextRunTime(long nextRunTime) {
+    public void setNextRunTime(Long nextRunTime) {
         this.nextRunTime = nextRunTime;
     }
 }

@@ -41,7 +41,7 @@ public class AppTest {
         this.jdbcTemplate.update("truncate table result");
         this.jdbcTemplate.update("truncate table project_process_node");
 
-        String scriptText = IOUtils.toString(this.getClass().getClassLoader().getResourceAsStream("script.js"));
+        String scriptText = IOUtils.toString(this.getClass().getClassLoader().getResourceAsStream("src/main/resources/script.js"));
         Project project = new Project();
         project.setName("开源中国");
         project.setStartUrl("https://www.oschina.net/news/project");

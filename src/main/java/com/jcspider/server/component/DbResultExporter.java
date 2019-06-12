@@ -21,6 +21,11 @@ public class DbResultExporter implements ResultExporter {
     }
 
     @Override
+    public void delete(long projectId, String taskId) {
+        this.taskResultDao.deleteByProjectIdAndTaskId(projectId, taskId);
+    }
+
+    @Override
     public void start() {
 
     }
