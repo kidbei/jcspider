@@ -5,9 +5,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Repository;
 
 import java.sql.Timestamp;
+import java.util.List;
 
 /**
  * @author zhuang.hu
@@ -21,6 +24,8 @@ public class ProjectDao {
 
     @Autowired
     private JdbcTemplate    jdbcTemplate;
+    @Autowired
+    private NamedParameterJdbcTemplate  namedParameterJdbcTemplate;
 
     public long insert(Project project) {
         if (project.getUpdatedAt() == null) {
@@ -54,6 +59,13 @@ public class ProjectDao {
     public void updateStatusById(long id, String status) {
         final String sql = "update project set status = ? where id = ?";
         this.jdbcTemplate.update(sql, status, id);
+    }
+
+    public List<Project> findByIds(List<Long> ids) {
+        final String sql = "select id, " + COLUMNS + " from project where id in (:ids)";
+        MapSqlParameterSource params = new MapSqlParameterSource();
+        params.addValue("ids", ids);
+        return this.namedParameterJdbcTemplate.query(sql, params, new BeanPropertyRowMapper<>(Project.class));
     }
 
 }

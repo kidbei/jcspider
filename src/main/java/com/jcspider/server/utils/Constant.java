@@ -45,4 +45,16 @@ public class Constant {
 
     public static final String  SCRIPT_NASHORN = "nashorn";
 
+
+    public static final String  PROJECT_ROLE_OWNER = "owner";
+    public static final String  PROJECT_ROLE_ADMIN = "admin";
+    public static final String  PROJECT_ROLE_GUEST = "guest";
+
+    public static final String  USER_ROLE_SUPER = "super";
+    public static final String  USER_ROLE_ADMIN = "admin";
+    public static final String  USER_ROLE_NORMAL = "normal";
+
+
+    public static final String  TOKEN_SALT = "UXsXsdaaXDsE";
+
 }

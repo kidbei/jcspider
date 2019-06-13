@@ -47,8 +47,8 @@ public class HttpFetcher implements Fetcher {
         if (MapUtils.isNotEmpty(headers)) {
             headers.forEach((k, v) -> reqBuilder.header(k, v));
         }
-        if (!headers.containsKey("User-Agent")) {
-            reqBuilder.header("User-Agent", DEFAULT_UA);
+        if (!headers.containsKey("WebUser-Agent")) {
+            reqBuilder.header("WebUser-Agent", DEFAULT_UA);
         }
 
         reqBuilder.url(url);

@@ -1,6 +1,6 @@
-package com.jcspider.server.api;
+package com.jcspider.server.web.api;
 
-import com.jcspider.server.api.service.DebugService;
+import com.jcspider.server.web.api.service.DebugService;
 import com.jcspider.server.model.DebugResult;
 import com.jcspider.server.model.DebugTask;
 import com.jcspider.server.model.JSONResult;

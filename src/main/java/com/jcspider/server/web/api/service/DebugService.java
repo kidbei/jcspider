@@ -1,4 +1,4 @@
-package com.jcspider.server.api.service;
+package com.jcspider.server.web.api.service;
 
 import com.jcspider.server.component.JCQueue;
 import com.jcspider.server.component.JCRegistry;
