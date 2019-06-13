@@ -1,9 +1,13 @@
 package com.jcspider.server.dao;
 
 import com.jcspider.server.model.Task;
+import com.jcspider.server.model.TaskQueryExp;
 import com.jcspider.server.utils.Constant;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -189,4 +193,35 @@ public class TaskDao {
         this.jdbcTemplate.update(sql, params.toArray());
     }
 
+
+    public Page<Task> findByExp(TaskQueryExp exp, Pageable pageable) {
+        List<Object> params = new ArrayList<>();
+        List<Object> countP = new ArrayList<>();
+
+        StringBuilder countB = new StringBuilder("select count(1) from task where 1=1 ");
+        StringBuilder sb = new StringBuilder("select id,").append(COLUMNS)
+                .append(" from task where 1=1 ");
+        if (exp.getProjectId() != null) {
+            sb.append("and project_id = ?");
+            countB.append("and project_id = ?");
+            params.add(exp.getProjectId());
+            countP.add(exp.getProjectId());
+        }
+        if (exp.getStatus() != null) {
+            sb.append("and status = ?");
+            countB.append("and status = ?");
+            params.add(exp.getStatus());
+            countP.add(exp.getStatus());
+        }
+        sb.append(" limit ? offset ?");
+        params.add(pageable.getPageSize());
+        params.add(pageable.getOffset());
+
+        int count = this.jdbcTemplate.queryForObject(countB.toString(), countP.toArray(), int.class);
+
+        List<Task> result =  this.jdbcTemplate.query(sb.toString(),
+                params.toArray(), new BeanPropertyRowMapper<>(Task.class));
+        Page<Task> page = new PageImpl<>(result, pageable, count);
+        return page;
+    }
 }

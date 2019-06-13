@@ -2,6 +2,7 @@ package com.jcspider.server.dao;
 
 import com.jcspider.server.model.UserProject;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -43,6 +44,16 @@ public class UserProjectDao {
     public List<UserProject> findByUid(String uid) {
         final String sql = "select id, " + COLUMNS + " from user_project where uid = ?";
         return this.jdbcTemplate.query(sql, new Object[]{uid}, new BeanPropertyRowMapper<>(UserProject.class));
+    }
+
+    public UserProject getByUidAndProjectId(String uid, long projectId) {
+        final String sql = "select id, " + COLUMNS + " from user_project where uid = ? and project_id = ?";
+        try {
+            return this.jdbcTemplate.queryForObject(sql, new Object[]{uid, projectId},
+                    new BeanPropertyRowMapper<>(UserProject.class));
+        } catch (EmptyResultDataAccessException e) {
+            return null;
+        }
     }
 
 

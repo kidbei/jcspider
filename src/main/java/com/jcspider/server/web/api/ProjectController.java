@@ -1,7 +1,10 @@
 package com.jcspider.server.web.api;
 
+import com.jcspider.server.model.JSONResult;
+import com.jcspider.server.model.WebUser;
 import com.jcspider.server.web.api.service.ProjectService;
 import com.jcspider.server.model.Project;
+import com.jcspider.server.web.filter.LoginInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -19,10 +22,12 @@ public class ProjectController {
     @Autowired
     private ProjectService  projectService;
 
-    @RequestMapping(value = "", method = RequestMethod.GET)
-    public Page<Project> listUserProjects(Integer curPage, Integer pageSize) {
 
-        return null;
+    @RequestMapping(value = "", method = RequestMethod.GET)
+    public JSONResult<Page<Project>> listUserProjects(Integer curPage, Integer pageSize) {
+        WebUser webUser = LoginInfo.getLoginInfo();
+        Page<Project> projectPage = this.projectService.findUserProjects(webUser.getUid(), curPage, pageSize);
+        return JSONResult.success(projectPage);
     }
 
 }

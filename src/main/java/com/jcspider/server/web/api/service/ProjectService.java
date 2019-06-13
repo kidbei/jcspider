@@ -42,7 +42,7 @@ public class ProjectService {
     }
 
 
-    Page<Project> findUserProjects(String uid, Integer curPage, Integer pageSize) {
+    public Page<Project> findUserProjects(String uid, Integer curPage, Integer pageSize) {
         PageRequest request = PageRequest.of(curPage == null ? 1 : curPage, pageSize == null ? 10 : pageSize);
         Page<UserProject> userProjectPage = this.userProjectDao.findByUid(uid, request);
         List<Long> projectIds = userProjectPage.getContent().stream()
@@ -50,6 +50,11 @@ public class ProjectService {
         List<Project> projects = this.projectDao.findByIds(projectIds);
         Page<Project> projectPage = new PageImpl<>(projects, userProjectPage.getPageable(), userProjectPage.getTotalElements());
         return projectPage;
+    }
+
+
+    public UserProject get(String uid, long projectId) {
+        return this.userProjectDao.getByUidAndProjectId(uid, projectId);
     }
 
 }
