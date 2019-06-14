@@ -40,10 +40,21 @@ public class UserService {
                 webUser.setCnName(name);
                 webUser.setUid(name);
                 webUser.setPassword(safePass);
+                webUser.setInviteUid(name);
                 webUser.setRole(Constant.USER_ROLE_SUPER);
                 this.webUserDao.insert(webUser);
             }
         }
+    }
+
+
+    public WebUser get(String uid) {
+        return this.webUserDao.getByUid(uid);
+    }
+
+
+    public void deleteById(long id) {
+        this.webUserDao.deleteById(id);
     }
 
 }

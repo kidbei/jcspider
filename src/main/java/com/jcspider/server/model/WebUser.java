@@ -14,6 +14,7 @@ public class WebUser {
     private String  role;
     private String  password;
     private String  token;
+    private String  inviteUid;
     private Timestamp   createdAt;
     private Timestamp   updatedAt;
 
@@ -80,5 +81,13 @@ public class WebUser {
 
     public void setUpdatedAt(Timestamp updatedAt) {
         this.updatedAt = updatedAt;
+    }
+
+    public String getInviteUid() {
+        return inviteUid;
+    }
+
+    public void setInviteUid(String inviteUid) {
+        this.inviteUid = inviteUid;
     }
 }

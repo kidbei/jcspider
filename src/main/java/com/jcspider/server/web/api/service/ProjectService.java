@@ -4,6 +4,7 @@ import com.jcspider.server.dao.ProjectDao;
 import com.jcspider.server.dao.UserProjectDao;
 import com.jcspider.server.model.CreateProjectReq;
 import com.jcspider.server.model.Project;
+import com.jcspider.server.model.ProjectQueryExp;
 import com.jcspider.server.model.UserProject;
 import com.jcspider.server.utils.Constant;
 import org.slf4j.Logger;
@@ -50,6 +51,13 @@ public class ProjectService {
         List<Project> projects = this.projectDao.findByIds(projectIds);
         Page<Project> projectPage = new PageImpl<>(projects, userProjectPage.getPageable(), userProjectPage.getTotalElements());
         return projectPage;
+    }
+
+
+    public Page<Project> query(ProjectQueryExp exp, Integer curPage, Integer pageSize) {
+
+
+        return null;
     }
 
 

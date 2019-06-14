@@ -22,6 +22,7 @@ public class Project implements Serializable {
     private Timestamp   updatedAt;
     private String  scheduleType;
     private long  scheduleValue;
+    private String  description;
 
     public long getId() {
         return id;
@@ -125,5 +126,13 @@ public class Project implements Serializable {
 
     public void setRateUnitMultiple(int rateUnitMultiple) {
         this.rateUnitMultiple = rateUnitMultiple;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
     }
 }
