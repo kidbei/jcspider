@@ -1,8 +1,9 @@
 package com.jcspider.server.model;
 
 /**
- * @Author: Gosin
  * @Date: 2019-06-13 23:20
+ * @author zhuang.hu
+ * @since 14 June 2019
  */
 public class ProjectQueryExp {
 
@@ -10,6 +11,7 @@ public class ProjectQueryExp {
     private String  status;
     private String  name;
     private Long    projectId;
+    private String  description;
 
     public String getUid() {
         return uid;
@@ -25,6 +27,14 @@ public class ProjectQueryExp {
 
     public void setStatus(String status) {
         this.status = status;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
     }
 
     public String getName() {

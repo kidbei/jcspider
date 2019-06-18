@@ -18,7 +18,7 @@ public class WebUserDao {
     @Autowired
     private JdbcTemplate    jdbcTemplate;
 
-    private static final String COLUMNS = "uid,cn_name,role,token,password,created_at,updated_at";
+    private static final String COLUMNS = "uid,cn_name,role,token,password,created_at,updated_at,invite_uid";
 
 
     public void insert(WebUser webUser) {
@@ -28,9 +28,10 @@ public class WebUserDao {
         if (webUser.getUpdatedAt() == null) {
             webUser.setUpdatedAt(webUser.getCreatedAt());
         }
-        final String sql = "insert into web_user (" + COLUMNS + ") values (?,?,?,?,?,?,?)";
+        final String sql = "insert into web_user (" + COLUMNS + ") values (?,?,?,?,?,?,?,?)";
         this.jdbcTemplate.update(sql, webUser.getUid(), webUser.getCnName(), webUser.getRole(),
-                webUser.getToken(), webUser.getPassword(), webUser.getCreatedAt(), webUser.getUpdatedAt());
+                webUser.getToken(), webUser.getPassword(), webUser.getCreatedAt(), webUser.getUpdatedAt(),
+                webUser.getInviteUid());
     }
 
 
@@ -53,6 +54,22 @@ public class WebUserDao {
         } catch (EmptyResultDataAccessException e) {
             return null;
         }
+    }
+
+
+    public WebUser getByUid(String uid) {
+        final String sql = "select id, " + COLUMNS + " from web_user where uid = ? limit 1";
+        try {
+            return this.jdbcTemplate.queryForObject(sql, new Object[]{uid},
+                    new BeanPropertyRowMapper<>(WebUser.class));
+        } catch (EmptyResultDataAccessException e) {
+            return null;
+        }
+    }
+
+    public void deleteById(long id) {
+        final String sql = "delete from web_user where id = ?";
+        this.jdbcTemplate.update(sql, id);
     }
 
 }
