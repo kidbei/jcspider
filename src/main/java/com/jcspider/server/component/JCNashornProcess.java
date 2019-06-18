@@ -70,6 +70,7 @@ public class JCNashornProcess implements JCComponent {
     @Override
     public void start() throws ComponentInitException {
         this.fetcherMap.put(Constant.FETCH_TYPE_HTML, new HttpFetcher());
+        this.fetcherMap.put(Constant.FETCH_TYPE_JS, new AjaxFetcher());
         projectCacheMap = new ConcurrentHashMap<>(maxCodeCache);
         try {
             this.localIp = IPUtils.getLocalIP();

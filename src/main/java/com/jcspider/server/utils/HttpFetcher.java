@@ -30,6 +30,7 @@ public class HttpFetcher implements Fetcher {
 
     private static final String DEFAULT_UA = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.14; rv:66.0) Gecko/20100101 Firefox/66.0";
     private static final String DEFAULT_CHARSET = "utf-8";
+    private static final String UA_NAME = "User-Agent";
 
 
     @Override
@@ -47,8 +48,8 @@ public class HttpFetcher implements Fetcher {
         if (MapUtils.isNotEmpty(headers)) {
             headers.forEach((k, v) -> reqBuilder.header(k, v));
         }
-        if (!headers.containsKey("WebUser-Agent")) {
-            reqBuilder.header("WebUser-Agent", DEFAULT_UA);
+        if (!headers.containsKey(UA_NAME)) {
+            reqBuilder.header(UA_NAME, DEFAULT_UA);
         }
 
         reqBuilder.url(url);

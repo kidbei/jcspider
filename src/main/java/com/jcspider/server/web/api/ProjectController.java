@@ -1,11 +1,13 @@
 package com.jcspider.server.web.api;
 
 import com.jcspider.server.model.JSONResult;
+import com.jcspider.server.model.Project;
 import com.jcspider.server.model.ProjectQueryExp;
 import com.jcspider.server.model.WebUser;
+import com.jcspider.server.utils.Constant;
 import com.jcspider.server.web.api.service.ProjectService;
-import com.jcspider.server.model.Project;
 import com.jcspider.server.web.filter.LoginInfo;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -29,8 +31,13 @@ public class ProjectController {
     public JSONResult<Page<Project>> listUserProjects(@RequestBody(required = false) ProjectQueryExp exp,
                                                       Integer curPage, Integer pageSize) {
         WebUser webUser = LoginInfo.getLoginInfo();
-        Page<Project> projectPage = this.projectService.findUserProjects(webUser.getUid(), curPage, pageSize);
-        return JSONResult.success(projectPage);
+        if (webUser.getRole().equals(Constant.USER_ROLE_NORMAL)) {
+            if (StringUtils.isBlank(exp.getUid())) {
+                exp.setUid(webUser.getUid());
+            }
+        }
+        Page<Project> page = this.projectService.query(exp, curPage, pageSize);
+        return JSONResult.success(page);
     }
 
 }

@@ -11,13 +11,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * @author zhuang.hu
@@ -43,21 +39,10 @@ public class ProjectService {
     }
 
 
-    public Page<Project> findUserProjects(String uid, Integer curPage, Integer pageSize) {
-        PageRequest request = PageRequest.of(curPage == null ? 1 : curPage, pageSize == null ? 10 : pageSize);
-        Page<UserProject> userProjectPage = this.userProjectDao.findByUid(uid, request);
-        List<Long> projectIds = userProjectPage.getContent().stream()
-                .map(userProject -> userProject.getProjectId()).collect(Collectors.toList());
-        List<Project> projects = this.projectDao.findByIds(projectIds);
-        Page<Project> projectPage = new PageImpl<>(projects, userProjectPage.getPageable(), userProjectPage.getTotalElements());
-        return projectPage;
-    }
-
 
     public Page<Project> query(ProjectQueryExp exp, Integer curPage, Integer pageSize) {
-
-
-        return null;
+        PageRequest request = PageRequest.of(curPage == null ? 0 : curPage, pageSize == null ? 10 : pageSize);
+        return this.projectDao.queryByExp(exp, request);
     }
 
 
