@@ -9,26 +9,33 @@ import java.sql.Timestamp;
  */
 public class Project implements Serializable {
 
-    private long    id;
+    private Long    id;
     private String  name;
     private String  startUrl;
     private String  scriptText;
     private String  status;
     private String  rateUnit;
-    private int     rateUnitMultiple;
-    private int     rateNumber;
+    private Integer     rateUnitMultiple;
+    private Integer     rateNumber;
     private String  dispatcher;
     private Timestamp   createdAt;
     private Timestamp   updatedAt;
     private String  scheduleType;
-    private long  scheduleValue;
+    private Long  scheduleValue;
     private String  description;
 
-    public long getId() {
+    public Project() {
+    }
+
+    public Project(Long id) {
+        this.id = id;
+    }
+
+    public Long getId() {
         return id;
     }
 
-    public void setId(long id) {
+    public void setId(Long id) {
         this.id = id;
     }
 
@@ -72,11 +79,19 @@ public class Project implements Serializable {
         this.rateUnit = rateUnit;
     }
 
-    public int getRateNumber() {
+    public Integer getRateUnitMultiple() {
+        return rateUnitMultiple;
+    }
+
+    public void setRateUnitMultiple(Integer rateUnitMultiple) {
+        this.rateUnitMultiple = rateUnitMultiple;
+    }
+
+    public Integer getRateNumber() {
         return rateNumber;
     }
 
-    public void setRateNumber(int rateNumber) {
+    public void setRateNumber(Integer rateNumber) {
         this.rateNumber = rateNumber;
     }
 
@@ -112,20 +127,12 @@ public class Project implements Serializable {
         this.scheduleType = scheduleType;
     }
 
-    public long getScheduleValue() {
+    public Long getScheduleValue() {
         return scheduleValue;
     }
 
-    public void setScheduleValue(long scheduleValue) {
+    public void setScheduleValue(Long scheduleValue) {
         this.scheduleValue = scheduleValue;
-    }
-
-    public int getRateUnitMultiple() {
-        return rateUnitMultiple;
-    }
-
-    public void setRateUnitMultiple(int rateUnitMultiple) {
-        this.rateUnitMultiple = rateUnitMultiple;
     }
 
     public String getDescription() {

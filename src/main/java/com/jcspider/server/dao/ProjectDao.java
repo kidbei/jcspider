@@ -74,6 +74,60 @@ public class ProjectDao {
     }
 
 
+    public void updateByExp(Project project) {
+        final StringBuilder sb = new StringBuilder("update project set ");
+        final List<Object> params = new ArrayList<>();
+        if (project.getStatus() != null) {
+            sb.append("status = ?,");
+            params.add(project.getStatus());
+        }
+        project.setUpdatedAt(new Timestamp(System.currentTimeMillis()));
+        if (project.getDescription() != null) {
+            sb.append("description = ?,");
+            params.add(project.getDescription());
+        }
+        if (project.getRateUnitMultiple() != null) {
+            sb.append("rate_unit_multiple = ?,");
+            params.add(project.getRateUnitMultiple());
+        }
+        if (project.getRateUnit() != null) {
+            sb.append("rate_unit = ?,");
+            params.add(project.getRateUnit());
+        }
+        if (project.getDispatcher() != null) {
+            sb.append("dispatcher = ?,");
+            params.add(project.getDispatcher());
+        }
+        if (project.getRateNumber() != null) {
+            sb.append("rate_number = ?,");
+            params.add(project.getRateNumber());
+        }
+        if (project.getScheduleType() != null) {
+            sb.append("schedule_type = ?,");
+            params.add(project.getScheduleType());
+        }
+        if (project.getScheduleValue() != null) {
+            sb.append("schedule_value = ?,");
+            params.add(project.getScheduleValue());
+        }
+        if (project.getScriptText() != null) {
+            sb.append("script_text = ?,");
+            params.add(project.getScriptText());
+        }
+        if (project.getStartUrl() != null) {
+            sb.append("start_url = ?,");
+            params.add(project.getStartUrl());
+        }
+        if (project.getName() != null) {
+            sb.append("name = ?,");
+            params.add(project.getName());
+        }
+        final String sql = sb.substring(0, sb.length() - 1) + " where id = ?";
+        params.add(project.getId());
+        this.jdbcTemplate.update(sql, params.toArray());
+    }
+
+
     public int countByExp(ProjectQueryExp exp) {
         List<Object> params = new ArrayList<>();
         StringBuilder sb = new StringBuilder("select count(id) from project where 1=1 ");

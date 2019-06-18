@@ -1,19 +1,13 @@
 package com.jcspider.server.web.api;
 
-import com.jcspider.server.model.JSONResult;
-import com.jcspider.server.model.Project;
-import com.jcspider.server.model.ProjectQueryExp;
-import com.jcspider.server.model.WebUser;
+import com.jcspider.server.model.*;
 import com.jcspider.server.utils.Constant;
 import com.jcspider.server.web.api.service.ProjectService;
 import com.jcspider.server.web.filter.LoginInfo;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 /**
  * @author zhuang.hu
@@ -27,6 +21,22 @@ public class ProjectController {
     private ProjectService  projectService;
 
 
+    @RequestMapping(value = "/", method = RequestMethod.POST)
+    public JSONResult<Project> create(@RequestBody CreateProjectReq createProjectReq) {
+        if (StringUtils.isBlank(createProjectReq.getName())) {
+            return JSONResult.error("name is empty");
+        }
+        if (StringUtils.isBlank(createProjectReq.getStartUrl())) {
+            return JSONResult.error("startUrl is empty");
+        }
+        WebUser webUser = LoginInfo.getLoginInfo();
+        createProjectReq.setUid(webUser.getUid());
+        long projectId = this.projectService.createProject(createProjectReq);
+        createProjectReq.setId(projectId);
+        return JSONResult.success(createProjectReq);
+    }
+
+
     @RequestMapping(value = "query", method = RequestMethod.POST)
     public JSONResult<Page<Project>> listUserProjects(@RequestBody(required = false) ProjectQueryExp exp,
                                                       Integer curPage, Integer pageSize) {
@@ -38,6 +48,27 @@ public class ProjectController {
         }
         Page<Project> page = this.projectService.query(exp, curPage, pageSize);
         return JSONResult.success(page);
+    }
+
+
+
+    @RequestMapping(value = "/start/{projectId}", method = RequestMethod.GET)
+    public JSONResult<String> start(@PathVariable long projectId) {
+        Project project = this.projectService.get(projectId);
+        if (project == null) {
+            return JSONResult.error("project is not found:" + projectId);
+        }
+        WebUser webUser = LoginInfo.getLoginInfo();
+
+        if (webUser.getRole().equals(Constant.USER_ROLE_NORMAL)) {
+            UserProject userProject = this.projectService.get(webUser.getUid(), projectId);
+            if (userProject == null) {
+                return JSONResult.error("permission required");
+            }
+        }
+
+        this.projectService.startProject(project);
+        return JSONResult.success("ok");
     }
 
 }

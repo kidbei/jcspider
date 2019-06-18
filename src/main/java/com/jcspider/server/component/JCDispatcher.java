@@ -56,10 +56,10 @@ public class JCDispatcher implements JCComponent {
 
 
     private void subProjectStart() {
-        this.jcQueue.sub(Constant.TOPIC_DISPATCHER_PROJECT_START, (topic, message) -> {
-            long projectId = (message.getClass() == long.class || message instanceof Long) ? (long) message : Long.valueOf(message.toString());
-            this.toStartProject(projectId);
+        this.jcQueue.subDispatcherStart((topic, projectId) -> {
+            this.toStartProject((Long) projectId);
         });
+
     }
 
 
@@ -110,6 +110,7 @@ public class JCDispatcher implements JCComponent {
             this.projectProcessNodeDao.insertBatch(projectProcessNodes);
             this.jcQueue.blockingPushProcessProjectStart(processNodes.get(0), projectId);
             DispatcherScheduleFactory.setProjectDispatcherLoopRunner(projectId, project.getScheduleType(), project.getScheduleValue());
+            this.projectDao.updateStatusById(projectId, Constant.PROJECT_STATUS_START);
         }
     }
 

@@ -33,4 +33,8 @@ public interface JCQueue extends JCComponent {
 
     void blockingPushProcessDebugTaskReturn(DebugResult debugResult);
 
+    void pubDispatcherStart(long projectId);
+
+    void subDispatcherStart(QueueOnMessage queueOnMessage);
+
 }

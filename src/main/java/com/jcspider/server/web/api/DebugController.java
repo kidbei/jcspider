@@ -17,6 +17,7 @@ public class DebugController {
     @Autowired
     private DebugService    debugService;
 
+
     @RequestMapping(value = "/task", method = RequestMethod.POST)
     public JSONResult<DebugResult> debug(@RequestBody DebugTask debugTask) {
         if (StringUtils.isBlank(debugTask.getScriptText())) {

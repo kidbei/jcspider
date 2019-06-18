@@ -140,6 +140,16 @@ public class JCLocalQueue implements JCQueue {
         this.bPub(Constant.TOPIC_PROCESS_DEBUG_TASK_RETURN + debugResult.getRequestId(), debugResult);
     }
 
+    @Override
+    public void pubDispatcherStart(long projectId) {
+        this.pub(Constant.TOPIC_DISPATCHER_PROJECT_START, projectId);
+    }
+
+    @Override
+    public void subDispatcherStart(QueueOnMessage queueOnMessage) {
+        this.sub(Constant.TOPIC_DISPATCHER_PROJECT_START, queueOnMessage);
+    }
+
 
     private LinkedBlockingQueue<Object> checkOrCreateQueue(String topic) {
         LinkedBlockingQueue<Object> queue =this.bDataQueue.get(topic);

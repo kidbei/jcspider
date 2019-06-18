@@ -37,13 +37,17 @@ public class AjaxFetcher implements Fetcher{
         if (StringUtils.isNotBlank(task.getHeaders())) {
            //TODO set cookie
         }
-        webDriver.get(task.getSourceUrl());
-        String content = webDriver.getPageSource();
-        FetchResult result = new FetchResult();
-        result.setSuccess(true);
-        result.setContent(content);
-        result.setStatus(200);
-        return result;
+       try {
+           webDriver.get(task.getSourceUrl());
+           String content = webDriver.getPageSource();
+           FetchResult result = new FetchResult();
+           result.setSuccess(true);
+           result.setContent(content);
+           result.setStatus(200);
+           return result;
+       } finally {
+           webDriver.manage().deleteAllCookies();
+       }
     }
 
 
