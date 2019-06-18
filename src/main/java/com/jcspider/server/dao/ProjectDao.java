@@ -1,6 +1,7 @@
 package com.jcspider.server.dao;
 
 import com.jcspider.server.model.Project;
+import com.jcspider.server.model.ProjectQueryExp;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
@@ -10,6 +11,7 @@ import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Repository;
 
 import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -66,6 +68,29 @@ public class ProjectDao {
         MapSqlParameterSource params = new MapSqlParameterSource();
         params.addValue("ids", ids);
         return this.namedParameterJdbcTemplate.query(sql, params, new BeanPropertyRowMapper<>(Project.class));
+    }
+
+
+    public int countByExp(ProjectQueryExp exp) {
+        List<Object> params = new ArrayList<>();
+        StringBuilder sb = new StringBuilder("select count(id) from project where 1=1 ");
+        if (exp.getName() != null) {
+            sb.append("and name like ? ");
+            params.add("%" + exp.getName() + "%");
+        }
+        if (exp.getProjectId() != null) {
+            sb.append("and project = ? ");
+            params.add(exp.getProjectId());
+        }
+        if (exp.getStatus() != null) {
+            sb.append("and status = ? ");
+            params.add(exp.getStatus());
+        }
+        if (exp.getUid() != null) {
+            sb.append("and uid = ? ");
+            params.add(exp.getUid());
+        }
+        return this.jdbcTemplate.queryForObject(sb.toString(), params.toArray(), int.class);
     }
 
 }

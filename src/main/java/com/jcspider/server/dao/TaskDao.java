@@ -224,4 +224,20 @@ public class TaskDao {
         Page<Task> page = new PageImpl<>(result, pageable, count);
         return page;
     }
+
+
+
+    public int countByExp(TaskQueryExp exp) {
+        List<Object> params = new ArrayList<>();
+        StringBuilder sb = new StringBuilder("select count(id) from task where 1=1 ");
+        if (exp.getProjectId() != null) {
+            sb.append("and project_id = ? ");
+            params.add(exp.getProjectId());
+        }
+        if (exp.getStatus() != null) {
+            sb.append("and status = ? ");
+            params.add(exp.getStatus());
+        }
+        return this.jdbcTemplate.queryForObject(sb.toString(), params.toArray(), int.class);
+    }
 }
