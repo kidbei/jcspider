@@ -1,12 +1,15 @@
 package com.jcspider.server.component;
 
+import com.google.common.collect.ArrayListMultimap;
 import com.jcspider.server.model.DebugResult;
 import com.jcspider.server.model.DebugTask;
 import com.jcspider.server.utils.Constant;
+import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.LinkedBlockingQueue;
 
@@ -17,7 +20,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 public class JCLocalQueue implements JCQueue {
     private static final Logger LOGGER = LoggerFactory.getLogger(JCLocalQueue.class);
 
-    private final Map<String, QueueOnMessage> onMessageMap = new HashMap<>();
+    private final ArrayListMultimap<String, QueueOnMessage> onMessageMap = ArrayListMultimap.create();
     private final LinkedBlockingQueue<SubData> queue = new LinkedBlockingQueue<>();
     private final Map<String, LinkedBlockingQueue<Object>> bDataQueue = new HashMap<>();
     private Thread subThread;
@@ -29,12 +32,18 @@ public class JCLocalQueue implements JCQueue {
             while (!isStop && !Thread.interrupted()) {
                 try {
                     SubData subData = queue.take();
-                    QueueOnMessage queueOnMessage = onMessageMap.get(subData.topic);
-                    if (queueOnMessage == null) {
+                    List<QueueOnMessage> queueOnMessages = onMessageMap.get(subData.topic);
+                    if (CollectionUtils.isEmpty(queueOnMessages)) {
                         LOGGER.warn("no consumer for sub data:{}", subData);
                         return;
                     }
-                    subData.queueOnMessage.onMessage(subData.topic, subData.data);
+                    queueOnMessages.forEach(queueOnMessage -> {
+                        try {
+                            queueOnMessage.onMessage(subData.topic, subData.data);
+                        } catch (Exception e) {
+                            LOGGER.error("sub message error, topic:{}, message:{}", subData.topic, subData.data, e);
+                        }
+                    });
                 } catch (Exception e) {
                     LOGGER.error("sub error", e);
                 }
@@ -56,9 +65,6 @@ public class JCLocalQueue implements JCQueue {
 
     @Override
     public synchronized void sub(String topic, QueueOnMessage onMessage) {
-        if (onMessageMap.containsKey(topic)) {
-            throw new IllegalStateException("topic is already had subscription:" + topic);
-        }
         this.onMessageMap.put(topic, onMessage);
         LOGGER.info("new subscription for topic:{}", topic);
     }
@@ -68,13 +74,8 @@ public class JCLocalQueue implements JCQueue {
         if (LOGGER.isDebugEnabled()) {
             LOGGER.debug("pub message, topic:{}, message:{}", topic, message);
         }
-        QueueOnMessage queueOnMessage = this.onMessageMap.get(topic);
-        if (queueOnMessage == null) {
-            LOGGER.warn("no consumer for topic:{}", topic);
-            return;
-        }
         try {
-            this.queue.put(new SubData(queueOnMessage, topic, message));
+            this.queue.put(new SubData(topic, message));
         } catch (InterruptedException e) {
             LOGGER.error("in queue error,topic:{}, message:{}", topic, message);
         }
@@ -150,6 +151,16 @@ public class JCLocalQueue implements JCQueue {
         this.sub(Constant.TOPIC_DISPATCHER_PROJECT_START, queueOnMessage);
     }
 
+    @Override
+    public void pubDispatcherStop(long projectId) {
+        this.pub(Constant.TOPIC_DISPATCHER_PROJECT_STOP, projectId);
+    }
+
+    @Override
+    public void subDispatcherStop(QueueOnMessage queueOnMessage) {
+        this.sub(Constant.TOPIC_DISPATCHER_PROJECT_STOP, queueOnMessage);
+    }
+
 
     private LinkedBlockingQueue<Object> checkOrCreateQueue(String topic) {
         LinkedBlockingQueue<Object> queue =this.bDataQueue.get(topic);
@@ -167,12 +178,10 @@ public class JCLocalQueue implements JCQueue {
 
 
     class SubData {
-        QueueOnMessage queueOnMessage;
         String topic;
         Object data;
 
-        public SubData(QueueOnMessage queueOnMessage, String topic, Object data) {
-            this.queueOnMessage = queueOnMessage;
+        public SubData(String topic, Object data) {
             this.topic = topic;
             this.data = data;
         }
@@ -180,7 +189,6 @@ public class JCLocalQueue implements JCQueue {
         @Override
         public String toString() {
             final StringBuilder sb = new StringBuilder("SubData{");
-            sb.append("queueOnMessage=").append(queueOnMessage);
             sb.append(", topic='").append(topic).append('\'');
             sb.append(", data=").append(data);
             sb.append('}');

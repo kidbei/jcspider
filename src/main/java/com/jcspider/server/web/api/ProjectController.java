@@ -71,4 +71,24 @@ public class ProjectController {
         return JSONResult.success("ok");
     }
 
+
+    @RequestMapping(value = "/stop/{projectId}", method = RequestMethod.GET)
+    public JSONResult<String> stop(@PathVariable long projectId) {
+        Project project = this.projectService.get(projectId);
+        if (project == null) {
+            return JSONResult.error("project is not found:" + projectId);
+        }
+        WebUser webUser = LoginInfo.getLoginInfo();
+
+        if (webUser.getRole().equals(Constant.USER_ROLE_NORMAL)) {
+            UserProject userProject = this.projectService.get(webUser.getUid(), projectId);
+            if (userProject == null) {
+                return JSONResult.error("permission required");
+            }
+        }
+
+        this.projectService.stopProject(project);
+        return JSONResult.success("ok");
+    }
+
 }

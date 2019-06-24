@@ -9,20 +9,20 @@ import java.sql.Timestamp;
  */
 public class Project implements Serializable {
 
-    private Long    id;
-    private String  name;
-    private String  startUrl;
-    private String  scriptText;
-    private String  status;
-    private String  rateUnit;
-    private Integer     rateUnitMultiple;
-    private Integer     rateNumber;
-    private String  dispatcher;
+    private Long        id;
+    private String      name;
+    private String      startUrl;
+    private String      scriptText;
+    private String      status;
+    private String      rateUnit;
+    private Integer     rateUnitMultiple = 0;
+    private Integer     rateNumber = 0;
+    private String      dispatcher;
     private Timestamp   createdAt;
     private Timestamp   updatedAt;
-    private String  scheduleType;
-    private Long  scheduleValue;
-    private String  description;
+    private String      scheduleType;
+    private Long        scheduleValue = 0L;
+    private String      description;
 
     public Project() {
     }

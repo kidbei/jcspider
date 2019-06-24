@@ -115,4 +115,19 @@ public class ProjectService {
 
 
 
+    public void stopProject(long projectId) {
+        Project project = this.projectDao.getById(projectId);
+        if (project == null) {
+            LOGGER.error("project not found:{}", projectId);
+            return;
+        }
+        this.stopProject(project);
+    }
+
+
+    public void stopProject(Project project) {
+        LOGGER.info("stop project {}", project.getId());
+        this.jcQueue.pubDispatcherStop(project.getId());
+    }
+
 }

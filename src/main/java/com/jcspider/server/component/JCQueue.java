@@ -37,4 +37,8 @@ public interface JCQueue extends JCComponent {
 
     void subDispatcherStart(QueueOnMessage queueOnMessage);
 
+    void pubDispatcherStop(long projectId);
+
+    void subDispatcherStop(QueueOnMessage queueOnMessage);
+
 }
