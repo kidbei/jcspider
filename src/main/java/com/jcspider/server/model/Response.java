@@ -3,7 +3,10 @@ package com.jcspider.server.model;
 import org.jsoup.Jsoup;
 import org.jsoup.select.Elements;
 
+import java.util.Collections;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * @author zhuang.hu
@@ -41,7 +44,19 @@ public class Response {
     public Elements doc(String selector) {
         return Jsoup.parse(this.content).select(selector);
     }
+
     public Elements doc() {
         return Jsoup.parse(this.content).children();
+    }
+
+    public List<String> doc(String[] selectors, String attr) {
+        Elements elements = doc();
+        for (String selector : selectors) {
+            elements = elements.select(selector);
+        }
+        if (!elements.isEmpty()) {
+            return elements.stream().map(element -> element.attr(attr)).collect(Collectors.toList());
+        }
+        return Collections.emptyList();
     }
 }
