@@ -66,7 +66,7 @@ public class JCNashornProcess extends JCProcess {
             try {
                 fetchResult = fetcher.fetch(task);
             } catch (IOException e) {
-                throw new RunMethodException("fetch failed", e, task.getMethod());
+                throw new RunMethodException("fetch failed, method:" + task.getMethod() + ".reason" + e.getMessage());
             }
             if (!fetchResult.isSuccess()) {
                 throw new RunMethodException("fetch failed,http status:" + fetchResult.getStatus(), task.getMethod());
