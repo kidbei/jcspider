@@ -1,6 +1,5 @@
 package com.jcspider.server.component;
 
-import com.jcspider.server.model.Project;
 import com.jcspider.server.utils.Constant;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

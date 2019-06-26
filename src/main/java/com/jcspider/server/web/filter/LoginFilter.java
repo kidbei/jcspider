@@ -1,20 +1,28 @@
 package com.jcspider.server.web.filter;
 
+import java.io.IOException;
+import java.util.HashSet;
+
+import javax.servlet.Filter;
+import javax.servlet.FilterChain;
+import javax.servlet.FilterConfig;
+import javax.servlet.ServletException;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
+import javax.servlet.annotation.WebFilter;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
 import com.alibaba.fastjson.JSON;
 import com.jcspider.server.dao.WebUserDao;
 import com.jcspider.server.model.JSONResult;
 import com.jcspider.server.model.WebUser;
+
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-
-import javax.servlet.*;
-import javax.servlet.annotation.WebFilter;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
 
 /**
  * @author zhuang.hu
@@ -24,6 +32,14 @@ import java.io.IOException;
 @Component
 public class LoginFilter implements Filter {
     private static final Logger LOGGER = LoggerFactory.getLogger(LoginFilter.class);
+
+    private static final HashSet<String> EXCLUDES = new HashSet<String>(){
+        private static final long serialVersionUID = -8048317463493087332L;
+
+        {
+            this.add("/api/login");
+        }
+    };
 
     @Autowired
     private static WebUserDao   webUserDao;
@@ -43,7 +59,7 @@ public class LoginFilter implements Filter {
         HttpServletRequest request = (HttpServletRequest) servletRequest;
         HttpServletResponse response = (HttpServletResponse) servletResponse;
 
-        if (setLoginInfo(request)) {
+        if (EXCLUDES.contains(request.getRequestURI()) || setLoginInfo(request)) {
             filterChain.doFilter(request, response);
         } else {
             this.writeErrorResponse(response);
@@ -79,7 +95,7 @@ public class LoginFilter implements Filter {
     private void writeErrorResponse(HttpServletResponse response) {
         try {
 
-            JSONResult result = JSONResult.error("login required");
+            JSONResult<String> result = JSONResult.error("login required");
             response.setStatus(401);
             response.getWriter().write(JSON.toJSONString(result));
             response.getWriter().flush();

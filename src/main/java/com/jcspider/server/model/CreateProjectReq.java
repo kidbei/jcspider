@@ -6,7 +6,8 @@ package com.jcspider.server.model;
  */
 public class CreateProjectReq extends Project {
 
-    private String  uid;
+    private static final long serialVersionUID = -588472126108791566L;
+    private String uid;
 
     public String getUid() {
         return uid;

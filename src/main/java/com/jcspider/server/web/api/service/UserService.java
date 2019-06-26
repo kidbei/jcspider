@@ -32,10 +32,10 @@ public class UserService {
         for (String nameAndPass : nameAndPasses) {
             String name = nameAndPass.split(":")[0];
             String password = nameAndPass.split(":")[1];
-            String safePass = DigestUtils.md5Hex(Constant.TOKEN_SALT + password);
+            String safePass = this.getSecretPassword(password);
             WebUser webUser = this.webUserDao.getByUidAndPassword(name, safePass);
             if (webUser == null) {
-                LOGGER.info("create webUser, {}", nameAndPasses);
+                LOGGER.info("create webUser, {}", nameAndPass);
                 webUser = new WebUser();
                 webUser.setCnName(name);
                 webUser.setUid(name);
@@ -55,6 +55,24 @@ public class UserService {
 
     public void deleteById(long id) {
         this.webUserDao.deleteById(id);
+    }
+
+
+    private String getSecretPassword(String password) {
+        return DigestUtils.md5Hex(Constant.TOKEN_SALT + password);
+    }
+
+    public WebUser login(String userName, String password) {
+        String secretPassword = this.getSecretPassword(password);
+        WebUser webUser = this.webUserDao.getByUidAndPassword(userName, secretPassword);
+        if (webUser == null) {
+            LOGGER.info("invalid user name or password, {}:{}", userName, secretPassword);
+            return null;
+        }
+        String token = DigestUtils.md5Hex(userName + System.currentTimeMillis() + secretPassword);
+        webUser.setToken(token);
+        this.webUserDao.updateTokenById(webUser.getId(), token);
+        return webUser;
     }
 
 }

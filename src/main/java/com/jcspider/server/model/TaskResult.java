@@ -9,7 +9,8 @@ import java.sql.Timestamp;
  */
 public class TaskResult implements Serializable {
 
-    private long        id;
+    private static final long serialVersionUID = -1575371272023064284L;
+    private long id;
     private long        projectId;
     private String      taskId;
     private String      resultText;

@@ -1,14 +1,16 @@
 package com.jcspider;
 
+import java.io.IOException;
+import java.net.URISyntaxException;
+import java.net.URL;
+
 import com.alibaba.fastjson.JSON;
-import com.jcspider.server.component.JCQueue;
-import com.jcspider.server.dao.ProjectDao;
-import com.jcspider.server.model.*;
+import com.jcspider.server.model.DebugTask;
+import com.jcspider.server.model.JSONResult;
+import com.jcspider.server.model.SimpleTask;
 import com.jcspider.server.starter.JCSpiderApplication;
-import com.jcspider.server.utils.Constant;
-import com.jcspider.server.utils.IPUtils;
+
 import org.apache.commons.io.IOUtils;
-import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -18,12 +20,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.boot.web.server.LocalServerPort;
 import org.springframework.http.ResponseEntity;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.junit4.SpringRunner;
-
-import java.io.IOException;
-import java.net.URISyntaxException;
-import java.net.URL;
 
 /**
  * Unit test for simple App.

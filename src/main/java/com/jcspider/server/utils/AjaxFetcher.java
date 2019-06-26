@@ -20,7 +20,7 @@ public class AjaxFetcher implements Fetcher{
 
     public AjaxFetcher() {
         WebDriverFactory factory = new WebDriverFactory();
-        GenericObjectPoolConfig config = new GenericObjectPoolConfig();
+        GenericObjectPoolConfig<WebDriver> config = new GenericObjectPoolConfig<>();
         config.setMaxTotal(maxDriver);
         config.setMaxWaitMillis(getDriverTimeout);
         this.pool = new WebDriverPool(factory, config);

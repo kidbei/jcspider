@@ -4,8 +4,8 @@ import com.jcspider.server.model.JSONResult;
 import com.jcspider.server.model.WebUser;
 import com.jcspider.server.utils.Constant;
 import com.jcspider.server.web.api.service.UserService;
-import com.jcspider.server.web.filter.LoginFilter;
 import com.jcspider.server.web.filter.LoginInfo;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;

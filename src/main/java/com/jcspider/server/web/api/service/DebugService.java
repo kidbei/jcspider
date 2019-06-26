@@ -39,6 +39,7 @@ public class DebugService {
     }
 
     public DebugResult debug(DebugTask debugTask) {
+        LOGGER.info("debug task", debugTask);
         final String requestId = IDUtils.genUUID();
         debugTask.setRequestId(requestId);
         debugTask.setProcessNode(this.selectRandom());

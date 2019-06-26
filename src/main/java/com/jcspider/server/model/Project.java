@@ -9,7 +9,8 @@ import java.sql.Timestamp;
  */
 public class Project implements Serializable {
 
-    private Long        id;
+    private static final long serialVersionUID = -744816240911656974L;
+    private Long id;
     private String      name;
     private String      startUrl;
     private String      scriptText;

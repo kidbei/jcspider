@@ -1,6 +1,5 @@
 package com.jcspider.server.model;
 
-import java.io.Serializable;
 import java.sql.Timestamp;
 
 /**
@@ -9,7 +8,8 @@ import java.sql.Timestamp;
  */
 public class Task extends SimpleTask {
 
-    private String  status;
+    private static final long serialVersionUID = -6807799756209612420L;
+    private String status;
     private String  scheduleType;
     private String  stack;
     private Long    projectId = 0L;

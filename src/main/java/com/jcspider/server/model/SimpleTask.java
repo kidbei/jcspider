@@ -1,7 +1,6 @@
 package com.jcspider.server.model;
 
 import java.io.Serializable;
-import java.sql.Timestamp;
 
 /**
  * @author zhuang.hu
@@ -9,7 +8,8 @@ import java.sql.Timestamp;
  */
 public class SimpleTask implements Serializable {
 
-    private String  id;
+    private static final long serialVersionUID = 8059376589343829631L;
+    private String id;
     private String  method;
     private String  sourceUrl;
     private String  headers;

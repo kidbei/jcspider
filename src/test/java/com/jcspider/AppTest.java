@@ -1,6 +1,6 @@
 package com.jcspider;
 
-import static org.junit.Assert.assertTrue;
+import java.io.IOException;
 
 import com.jcspider.server.component.JCQueue;
 import com.jcspider.server.dao.ProjectDao;
@@ -8,6 +8,7 @@ import com.jcspider.server.model.Project;
 import com.jcspider.server.starter.JCSpiderApplication;
 import com.jcspider.server.utils.Constant;
 import com.jcspider.server.utils.IPUtils;
+
 import org.apache.commons.io.IOUtils;
 import org.junit.After;
 import org.junit.Before;
@@ -17,8 +18,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.junit4.SpringRunner;
-
-import java.io.IOException;
 
 /**
  * Unit test for simple App.

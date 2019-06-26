@@ -56,6 +56,11 @@ public class WebUserDao {
         }
     }
 
+    public void updateTokenById(long id, String token) {
+        final String sql = "update web_user set token = ? where id = ?";
+        this.jdbcTemplate.update(sql, token, id);
+    }
+
 
     public WebUser getByUid(String uid) {
         final String sql = "select id, " + COLUMNS + " from web_user where uid = ? limit 1";

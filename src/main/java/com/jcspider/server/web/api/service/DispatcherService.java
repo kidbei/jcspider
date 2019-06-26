@@ -25,6 +25,7 @@ public class DispatcherService {
     public String selectDispatcherNode() {
         List<String> dispatcherNodes = this.jcRegistry.listDispatchers();
         if (CollectionUtils.isEmpty(dispatcherNodes)) {
+            LOGGER.error("no dispatcher node active");
             throw new RuntimeException("no dispatcher nodes found");
         }
         if (dispatcherNodes.size() == 1) {

@@ -18,7 +18,8 @@ import java.util.Map;
  */
 public class Self implements Serializable {
 
-    private long        projectId;
+    private static final long serialVersionUID = -224319223758375720L;
+    private long projectId;
     private List<Task> newTasks = new ArrayList<>();
 
     public Self(long projectId) {

@@ -1,5 +1,9 @@
 package com.jcspider.server.web.api.service;
 
+import java.io.IOException;
+
+import javax.annotation.PostConstruct;
+
 import com.jcspider.server.component.JCQueue;
 import com.jcspider.server.dao.ProjectDao;
 import com.jcspider.server.dao.UserProjectDao;
@@ -8,6 +12,7 @@ import com.jcspider.server.model.Project;
 import com.jcspider.server.model.ProjectQueryExp;
 import com.jcspider.server.model.UserProject;
 import com.jcspider.server.utils.Constant;
+
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -17,10 +22,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import javax.annotation.PostConstruct;
-import java.io.IOException;
-import java.util.List;
 
 /**
  * @author zhuang.hu
