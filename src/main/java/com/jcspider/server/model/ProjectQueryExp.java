@@ -12,6 +12,11 @@ public class ProjectQueryExp {
     private String  name;
     private Long    projectId;
     private String  description;
+    private String  createdAtStart;
+    private String  createdAtEnd;
+    private String  updatedAtStart;
+    private String  updatedAtEnd;
+
 
     public String getUid() {
         return uid;
@@ -51,5 +56,37 @@ public class ProjectQueryExp {
 
     public void setProjectId(Long projectId) {
         this.projectId = projectId;
+    }
+
+    public String getCreatedAtStart() {
+        return createdAtStart;
+    }
+
+    public void setCreatedAtStart(String createdAtStart) {
+        this.createdAtStart = createdAtStart;
+    }
+
+    public String getCreatedAtEnd() {
+        return createdAtEnd;
+    }
+
+    public void setCreatedAtEnd(String createdAtEnd) {
+        this.createdAtEnd = createdAtEnd;
+    }
+
+    public String getUpdatedAtStart() {
+        return updatedAtStart;
+    }
+
+    public void setUpdatedAtStart(String updatedAtStart) {
+        this.updatedAtStart = updatedAtStart;
+    }
+
+    public String getUpdatedAtEnd() {
+        return updatedAtEnd;
+    }
+
+    public void setUpdatedAtEnd(String updatedAtEnd) {
+        this.updatedAtEnd = updatedAtEnd;
     }
 }

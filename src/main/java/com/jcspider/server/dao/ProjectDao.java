@@ -13,8 +13,12 @@ import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Repository;
 
+import java.sql.SQLException;
 import java.sql.Timestamp;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -150,6 +154,14 @@ public class ProjectDao {
         return this.jdbcTemplate.queryForObject(sb.toString(), params.toArray(), int.class);
     }
 
+
+    private Timestamp parseStandardTime(String timeStr) throws ParseException {
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        Date date = sdf.parse(timeStr);
+        return new Timestamp(date.getTime());
+    }
+
+
     public Page<Project> queryByExp(ProjectQueryExp exp, Pageable pageable) {
         List<Object> params = new ArrayList<>();
         StringBuilder sb = new StringBuilder("select id,").append(COLUMNS).append(" from project where 1=1");
@@ -173,6 +185,38 @@ public class ProjectDao {
         if (exp.getUid() != null) {
             sqlBuilder.append("and id in (select project_id from user_project where uid = ?) ");
             params.add(exp.getUid());
+        }
+        if (exp.getCreatedAtStart() != null) {
+            sqlBuilder.append("and created_at >= ? ");
+            try {
+                params.add(this.parseStandardTime(exp.getCreatedAtStart()));
+            } catch (ParseException e) {
+                throw new RuntimeException(e);
+            }
+        }
+        if (exp.getCreatedAtEnd() != null) {
+            sqlBuilder.append("and created_at <= ? ");
+            try {
+                params.add(this.parseStandardTime(exp.getCreatedAtEnd()));
+            } catch (ParseException e) {
+                throw new RuntimeException(e);
+            }
+        }
+        if (exp.getUpdatedAtStart() != null) {
+            sqlBuilder.append("and updated_at >= ? ");
+            try {
+                params.add(this.parseStandardTime(exp.getUpdatedAtStart()));
+            } catch (ParseException e) {
+                throw new RuntimeException(e);
+            }
+        }
+        if (exp.getUpdatedAtStart() != null) {
+            sqlBuilder.append("and updated_at <= ? ");
+            try {
+                params.add(this.parseStandardTime(exp.getUpdatedAtEnd()));
+            } catch (ParseException e) {
+                throw new RuntimeException(e);
+            }
         }
         String countSql = "select count(1) from project where 1=1 " + sqlBuilder.toString();
         int count = this.jdbcTemplate.queryForObject(countSql, params.toArray(), int.class);

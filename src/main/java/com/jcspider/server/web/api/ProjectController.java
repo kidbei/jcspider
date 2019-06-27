@@ -55,19 +55,27 @@ public class ProjectController {
     @RequestMapping(value = "/start/{projectId}", method = RequestMethod.GET)
     public JSONResult<String> start(@PathVariable long projectId) {
         Project project = this.projectService.get(projectId);
+        JSONResult<String> result = this.checkPermission(project);
+        if (!result.isSuccess()) {
+            return result;
+        }
+        this.projectService.startProject(project);
+        return JSONResult.success("ok");
+    }
+
+
+    private JSONResult<String> checkPermission(Project project) {
         if (project == null) {
-            return JSONResult.error("project is not found:" + projectId);
+            return JSONResult.error("project is not found:" + project.getId());
         }
         WebUser webUser = LoginInfo.getLoginInfo();
 
         if (webUser.getRole().equals(Constant.USER_ROLE_NORMAL)) {
-            UserProject userProject = this.projectService.get(webUser.getUid(), projectId);
+            UserProject userProject = this.projectService.get(webUser.getUid(), project.getId());
             if (userProject == null) {
                 return JSONResult.error("permission required");
             }
         }
-
-        this.projectService.startProject(project);
         return JSONResult.success("ok");
     }
 
@@ -75,16 +83,9 @@ public class ProjectController {
     @RequestMapping(value = "/stop/{projectId}", method = RequestMethod.GET)
     public JSONResult<String> stop(@PathVariable long projectId) {
         Project project = this.projectService.get(projectId);
-        if (project == null) {
-            return JSONResult.error("project is not found:" + projectId);
-        }
-        WebUser webUser = LoginInfo.getLoginInfo();
-
-        if (webUser.getRole().equals(Constant.USER_ROLE_NORMAL)) {
-            UserProject userProject = this.projectService.get(webUser.getUid(), projectId);
-            if (userProject == null) {
-                return JSONResult.error("permission required");
-            }
+        JSONResult<String> result = this.checkPermission(project);
+        if (!result.isSuccess()) {
+            return result;
         }
 
         this.projectService.stopProject(project);
