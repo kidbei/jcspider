@@ -1,6 +1,7 @@
 package com.jcspider.server.web.api.service;
 
 import com.jcspider.server.dao.WebUserDao;
+import com.jcspider.server.model.UserQueryExp;
 import com.jcspider.server.model.WebUser;
 import com.jcspider.server.utils.Constant;
 import org.apache.commons.codec.digest.DigestUtils;
@@ -8,6 +9,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
@@ -74,5 +77,12 @@ public class UserService {
         this.webUserDao.updateTokenById(webUser.getId(), token);
         return webUser;
     }
+
+
+    public Page<WebUser> query(UserQueryExp exp, Integer curPage, Integer pageSize) {
+        PageRequest request = PageRequest.of(curPage == null ? 0 : curPage - 1, pageSize == null ? 10 : pageSize);
+        return this.webUserDao.queryByExp(exp, request);
+    }
+
 
 }

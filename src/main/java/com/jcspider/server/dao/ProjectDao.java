@@ -3,6 +3,7 @@ package com.jcspider.server.dao;
 import com.jcspider.server.model.Project;
 import com.jcspider.server.model.ProjectQueryExp;
 import com.jcspider.server.model.SqlParam;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.data.domain.Page;
@@ -162,7 +163,7 @@ public class ProjectDao {
             sqlBuilder.append("and id in (select project_id from user_project where uid = ?) ");
             params.add(exp.getUid());
         }
-        if (exp.getCreatedAtStart() != null) {
+        if (StringUtils.isNotBlank(exp.getCreatedAtStart())) {
             sqlBuilder.append("and created_at >= ? ");
             try {
                 params.add(this.parseStandardTime(exp.getCreatedAtStart()));
@@ -170,7 +171,7 @@ public class ProjectDao {
                 throw new RuntimeException(e);
             }
         }
-        if (exp.getCreatedAtEnd() != null) {
+        if (StringUtils.isNotBlank(exp.getCreatedAtEnd())) {
             sqlBuilder.append("and created_at <= ? ");
             try {
                 params.add(this.parseStandardTime(exp.getCreatedAtEnd()));
@@ -178,7 +179,7 @@ public class ProjectDao {
                 throw new RuntimeException(e);
             }
         }
-        if (exp.getUpdatedAtStart() != null) {
+        if (StringUtils.isNotBlank(exp.getUpdatedAtStart())) {
             sqlBuilder.append("and updated_at >= ? ");
             try {
                 params.add(this.parseStandardTime(exp.getUpdatedAtStart()));
@@ -186,7 +187,7 @@ public class ProjectDao {
                 throw new RuntimeException(e);
             }
         }
-        if (exp.getUpdatedAtStart() != null) {
+        if (StringUtils.isNotBlank(exp.getUpdatedAtStart())) {
             sqlBuilder.append("and updated_at <= ? ");
             try {
                 params.add(this.parseStandardTime(exp.getUpdatedAtEnd()));

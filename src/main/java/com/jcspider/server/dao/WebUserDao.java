@@ -1,13 +1,21 @@
 package com.jcspider.server.dao;
 
+import com.jcspider.server.model.SqlParam;
+import com.jcspider.server.model.UserQueryExp;
 import com.jcspider.server.model.WebUser;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
 import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author zhuang.hu
@@ -75,6 +83,45 @@ public class WebUserDao {
     public void deleteById(long id) {
         final String sql = "delete from web_user where id = ?";
         this.jdbcTemplate.update(sql, id);
+    }
+
+
+    private SqlParam queryParams(String selectPrefix, UserQueryExp exp) {
+        StringBuilder sb = new StringBuilder(selectPrefix).append(" ");
+        List<Object> params = new ArrayList<>();
+        if (StringUtils.isNotBlank(exp.getCnName())) {
+            sb.append("and cn_name like ? ");
+            params.add("%" + exp.getCnName() + "%");
+        }
+        if (StringUtils.isNotBlank(exp.getUid())) {
+            sb.append("and uid = ? ");
+            params.add(exp.getUid());
+        }
+        if (StringUtils.isNotBlank(exp.getRole())) {
+            sb.append("and role = ? ");
+            params.add(exp.getRole());
+        }
+        if (StringUtils.isNotBlank(exp.getInviteUid())) {
+            sb.append("and invite_uid = ? ");
+            params.add(exp.getInviteUid());
+        }
+        return new SqlParam(sb.toString(), params);
+    }
+
+    int count(UserQueryExp exp) {
+        SqlParam sqlParam = this.queryParams("select count(id) from web_user where 1 = 1", exp);
+        return this.jdbcTemplate.queryForObject(sqlParam.getSql(), sqlParam.toSqlParaqms(), int.class);
+    }
+
+    public Page<WebUser> queryByExp(UserQueryExp exp, Pageable pageable) {
+        SqlParam sqlParam = this.queryParams("select " + COLUMNS + " from web_user where 1 = 1", exp);
+        sqlParam.appendSql(" order by id asc limit ? offset ?");
+        sqlParam.addParam(pageable.getPageSize());
+        sqlParam.addParam(pageable.getOffset());
+
+        int count = this.count(exp);
+        List<WebUser> result = this.jdbcTemplate.query(sqlParam.getSql(), sqlParam.toSqlParaqms(), new BeanPropertyRowMapper<>(WebUser.class));
+        return new PageImpl<>(result, pageable, count);
     }
 
 }

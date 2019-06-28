@@ -77,7 +77,7 @@ public class ProjectService {
 
 
     public Page<Project> query(ProjectQueryExp exp, Integer curPage, Integer pageSize) {
-        PageRequest request = PageRequest.of(curPage == null ? 0 : curPage, pageSize == null ? 10 : pageSize);
+        PageRequest request = PageRequest.of(curPage == null ? 0 : curPage - 1, pageSize == null ? 10 : pageSize);
         return this.projectDao.queryByExp(exp, request);
     }
 
