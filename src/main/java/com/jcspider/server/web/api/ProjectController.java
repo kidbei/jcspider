@@ -40,6 +40,9 @@ public class ProjectController {
     @RequestMapping(value = "query", method = RequestMethod.POST)
     public JSONResult<Page<Project>> listUserProjects(@RequestBody(required = false) ProjectQueryExp exp,
                                                       Integer curPage, Integer pageSize) {
+        if (exp == null) {
+            exp = new ProjectQueryExp();
+        }
         WebUser webUser = LoginInfo.getLoginInfo();
         if (webUser.getRole().equals(Constant.USER_ROLE_NORMAL)) {
             if (StringUtils.isBlank(exp.getUid())) {

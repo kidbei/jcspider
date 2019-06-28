@@ -18,6 +18,7 @@ import com.jcspider.server.dao.WebUserDao;
 import com.jcspider.server.model.JSONResult;
 import com.jcspider.server.model.WebUser;
 
+import com.jcspider.server.utils.Constant;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -58,8 +59,8 @@ public class LoginFilter implements Filter {
     public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain) throws IOException, ServletException {
         HttpServletRequest request = (HttpServletRequest) servletRequest;
         HttpServletResponse response = (HttpServletResponse) servletResponse;
-
-        if (EXCLUDES.contains(request.getRequestURI()) || setLoginInfo(request)) {
+        String method = request.getMethod();
+        if (method.equals(Constant.CORS_METHOD) || EXCLUDES.contains(request.getRequestURI()) || setLoginInfo(request)) {
             filterChain.doFilter(request, response);
         } else {
             this.writeErrorResponse(response);
@@ -97,6 +98,7 @@ public class LoginFilter implements Filter {
 
             JSONResult<String> result = JSONResult.error("login required");
             response.setStatus(401);
+            response.setHeader("Content-Type", "application/json;charset=utf-8");
             response.getWriter().write(JSON.toJSONString(result));
             response.getWriter().flush();
         } catch (Exception e) {

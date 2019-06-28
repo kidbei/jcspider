@@ -58,4 +58,6 @@ public class Constant {
 
     public static final String  TOKEN_SALT = "UXsXsdaaXDsE";
 
+    public static final String CORS_METHOD = "OPTIONS";
+
 }

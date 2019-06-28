@@ -2,6 +2,7 @@ package com.jcspider.server.dao;
 
 import com.jcspider.server.model.Project;
 import com.jcspider.server.model.ProjectQueryExp;
+import com.jcspider.server.model.SqlParam;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.data.domain.Page;
@@ -133,39 +134,14 @@ public class ProjectDao {
 
 
     public int countByExp(ProjectQueryExp exp) {
-        List<Object> params = new ArrayList<>();
-        StringBuilder sb = new StringBuilder("select count(id) from project where 1=1 ");
-        if (exp.getName() != null) {
-            sb.append("and name like ? ");
-            params.add("%" + exp.getName() + "%");
-        }
-        if (exp.getProjectId() != null) {
-            sb.append("and project = ? ");
-            params.add(exp.getProjectId());
-        }
-        if (exp.getStatus() != null) {
-            sb.append("and status = ? ");
-            params.add(exp.getStatus());
-        }
-        if (exp.getUid() != null) {
-            sb.append("and uid = ? ");
-            params.add(exp.getUid());
-        }
-        return this.jdbcTemplate.queryForObject(sb.toString(), params.toArray(), int.class);
+        SqlParam sqlParam = queryParams("select count(id) from project where 1=1", exp);
+        return this.jdbcTemplate.queryForObject(sqlParam.getSql(), sqlParam.toSqlParaqms(), int.class);
     }
 
 
-    private Timestamp parseStandardTime(String timeStr) throws ParseException {
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        Date date = sdf.parse(timeStr);
-        return new Timestamp(date.getTime());
-    }
-
-
-    public Page<Project> queryByExp(ProjectQueryExp exp, Pageable pageable) {
+    private SqlParam queryParams(String selectPrefix, ProjectQueryExp exp) {
+        StringBuilder sqlBuilder = new StringBuilder(selectPrefix).append(" ");
         List<Object> params = new ArrayList<>();
-        StringBuilder sb = new StringBuilder("select id,").append(COLUMNS).append(" from project where 1=1");
-        StringBuilder sqlBuilder = new StringBuilder();
         if (exp.getProjectId() != null) {
             sqlBuilder.append("and project_id = ? ");
             params.add(exp.getProjectId());
@@ -218,13 +194,29 @@ public class ProjectDao {
                 throw new RuntimeException(e);
             }
         }
-        String countSql = "select count(1) from project where 1=1 " + sqlBuilder.toString();
-        int count = this.jdbcTemplate.queryForObject(countSql, params.toArray(), int.class);
-        sb.append(sqlBuilder).append("limit ? offset ? order by id asc");
-        params.add(pageable.getPageSize(), pageable.getOffset());
+        return new SqlParam(sqlBuilder.toString(), params);
+    }
 
-        List<Project> result = this.jdbcTemplate.query(sb.toString(), params.toArray(),
-                new BeanPropertyRowMapper<>(Project.class));
+
+    private Timestamp parseStandardTime(String timeStr) throws ParseException {
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        Date date = sdf.parse(timeStr);
+        return new Timestamp(date.getTime());
+    }
+
+
+    public Page<Project> queryByExp(ProjectQueryExp exp, Pageable pageable) {
+        String selectPrefix = "select id," + COLUMNS + " from project where 1=1";
+        SqlParam sqlParam = this.queryParams(selectPrefix, exp);
+
+        sqlParam.addParam(pageable.getPageSize());
+        sqlParam.addParam(pageable.getOffset());
+
+        String sql = sqlParam.appendSql(" order by id asc limit ? offset ?");
+
+        int count = this.countByExp(exp);
+
+        List<Project> result = this.jdbcTemplate.query(sql, sqlParam.toSqlParaqms(), new BeanPropertyRowMapper<>(Project.class));
         return new PageImpl<>(result, pageable, count);
     }
 
