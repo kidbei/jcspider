@@ -25,7 +25,7 @@ public class TaskController {
     private TaskService     taskService;
 
 
-    @RequestMapping(value = "", method = RequestMethod.POST)
+    @RequestMapping(value = "/query", method = RequestMethod.POST)
     public JSONResult<Page<Task>> query(Integer curPage, Integer pageSize,
                                         @RequestBody(required = false) TaskQueryExp exp) {
         if (exp == null) {

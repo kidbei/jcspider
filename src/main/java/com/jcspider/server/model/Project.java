@@ -143,4 +143,24 @@ public class Project implements Serializable {
     public void setDescription(String description) {
         this.description = description;
     }
+
+    @Override
+    public String toString() {
+        return "Project{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                ", startUrl='" + startUrl + '\'' +
+                ", scriptText='" + scriptText + '\'' +
+                ", status='" + status + '\'' +
+                ", rateUnit='" + rateUnit + '\'' +
+                ", rateUnitMultiple=" + rateUnitMultiple +
+                ", rateNumber=" + rateNumber +
+                ", dispatcher='" + dispatcher + '\'' +
+                ", createdAt=" + createdAt +
+                ", updatedAt=" + updatedAt +
+                ", scheduleType='" + scheduleType + '\'' +
+                ", scheduleValue=" + scheduleValue +
+                ", description='" + description + '\'' +
+                '}';
+    }
 }

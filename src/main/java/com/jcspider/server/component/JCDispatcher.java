@@ -7,6 +7,7 @@ import com.jcspider.server.model.Project;
 import com.jcspider.server.model.ProjectProcessNode;
 import com.jcspider.server.utils.Constant;
 import com.jcspider.server.utils.IPUtils;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -49,6 +50,7 @@ public class JCDispatcher implements JCComponent {
             DispatcherScheduleFactory.init(maxScheduleSize);
             this.subProjectStart();
             LOGGER.info("reg dispatcher ip:{}, max schedule size:{}", this.localIp, maxScheduleSize);
+            this.recoveryLocalProject();
         } catch (Exception e) {
             throw new ComponentInitException(e, name());
         }
@@ -62,6 +64,22 @@ public class JCDispatcher implements JCComponent {
 
     }
 
+    /**
+     * 恢复本节点下的项目调度
+     */
+    private void recoveryLocalProject() {
+        List<Project> localProjects = this.projectDao.findByDispatcher(this.localIp);
+        if (CollectionUtils.isEmpty(localProjects)) {
+            return;
+        }
+        for (Project localProject : localProjects) {
+            if (!DispatcherScheduleFactory.isDispatcherStarted(localProject.getId())) {
+                LOGGER.info("recovery project:{}", localProject);
+                this.startAtLocal(localProject);
+            }
+        }
+    }
+
 
     @Transactional(rollbackFor = Exception.class)
     public synchronized void toStartProject(long projectId) {
@@ -69,7 +87,8 @@ public class JCDispatcher implements JCComponent {
         if (project == null) {
             throw new NullPointerException("project not found:" + projectId);
         }
-        if (project.getStatus().equals(Constant.PROJECT_STATUS_START)) {
+        if (project.getStatus().equals(Constant.PROJECT_STATUS_START)
+                && DispatcherScheduleFactory.isDispatcherStarted(projectId)) {
             LOGGER.info("project is already started");
             return;
         }
