@@ -19,7 +19,7 @@ public class TaskService {
 
 
     public Page<Task> find(TaskQueryExp exp, Integer curPage, Integer pageSize) {
-        PageRequest pageRequest = PageRequest.of(curPage == null ? 1 : curPage, pageSize == null ? 10 : pageSize);
-        return this.taskDao.findByExp(exp, pageRequest);
+        PageRequest request = PageRequest.of(curPage == null ? 0 : curPage - 1, pageSize == null ? 10 : pageSize);
+        return this.taskDao.findByExp(exp, request);
     }
 }

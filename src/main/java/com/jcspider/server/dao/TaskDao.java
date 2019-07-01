@@ -1,5 +1,6 @@
 package com.jcspider.server.dao;
 
+import com.jcspider.server.model.SqlParam;
 import com.jcspider.server.model.Task;
 import com.jcspider.server.model.TaskQueryExp;
 import com.jcspider.server.utils.Constant;
@@ -195,49 +196,39 @@ public class TaskDao {
 
 
     public Page<Task> findByExp(TaskQueryExp exp, Pageable pageable) {
-        List<Object> params = new ArrayList<>();
-        List<Object> countP = new ArrayList<>();
+        SqlParam sqlParam = this.queryParams("select id," + COLUMNS + " from task where 1=1", exp);
+        sqlParam.appendSql(" limit ? offset ?");
+        sqlParam.addParam(pageable.getPageSize());
+        sqlParam.addParam(pageable.getOffset());
 
-        StringBuilder countB = new StringBuilder("select count(1) from task where 1=1 ");
-        StringBuilder sb = new StringBuilder("select id,").append(COLUMNS)
-                .append(" from task where 1=1 ");
-        if (exp.getProjectId() != null) {
-            sb.append("and project_id = ?");
-            countB.append("and project_id = ?");
-            params.add(exp.getProjectId());
-            countP.add(exp.getProjectId());
-        }
-        if (exp.getStatus() != null) {
-            sb.append("and status = ?");
-            countB.append("and status = ?");
-            params.add(exp.getStatus());
-            countP.add(exp.getStatus());
-        }
-        sb.append(" limit ? offset ?");
-        params.add(pageable.getPageSize());
-        params.add(pageable.getOffset());
+        int count = this.countByExp(exp);
 
-        int count = this.jdbcTemplate.queryForObject(countB.toString(), countP.toArray(), int.class);
-
-        List<Task> result =  this.jdbcTemplate.query(sb.toString(),
-                params.toArray(), new BeanPropertyRowMapper<>(Task.class));
+        List<Task> result =  this.jdbcTemplate.query(sqlParam.getSql(),
+                sqlParam.toSqlParaqms(), new BeanPropertyRowMapper<>(Task.class));
         Page<Task> page = new PageImpl<>(result, pageable, count);
         return page;
     }
 
 
 
-    public int countByExp(TaskQueryExp exp) {
+    private SqlParam queryParams(String selectPrefix, TaskQueryExp exp) {
+        StringBuilder sb = new StringBuilder(selectPrefix).append(" ");
         List<Object> params = new ArrayList<>();
-        StringBuilder sb = new StringBuilder("select count(id) from task where 1=1 ");
         if (exp.getProjectId() != null) {
-            sb.append("and project_id = ? ");
+            sb.append("and project_id = ?");
             params.add(exp.getProjectId());
         }
         if (exp.getStatus() != null) {
-            sb.append("and status = ? ");
+            sb.append("and status = ?");
             params.add(exp.getStatus());
         }
-        return this.jdbcTemplate.queryForObject(sb.toString(), params.toArray(), int.class);
+        return new SqlParam(sb.toString(), params);
+    }
+
+
+
+    public int countByExp(TaskQueryExp exp) {
+        SqlParam sqlParam = this.queryParams("select count(id) from task where 1=1", exp);
+        return this.jdbcTemplate.queryForObject(sqlParam.getSql(), sqlParam.toSqlParaqms(), int.class);
     }
 }

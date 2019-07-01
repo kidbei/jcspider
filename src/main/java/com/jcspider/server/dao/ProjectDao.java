@@ -221,4 +221,11 @@ public class ProjectDao {
         return new PageImpl<>(result, pageable, count);
     }
 
+
+
+    public List<Project> findByDispatcher(String dispatcher) {
+        final String sql = "select id," + COLUMNS + " from project where dispatcher = ?";
+        return this.jdbcTemplate.query(sql, new Object[]{dispatcher}, new BeanPropertyRowMapper<>(Project.class));
+    }
+
 }
