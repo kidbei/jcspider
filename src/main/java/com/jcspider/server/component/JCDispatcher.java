@@ -48,6 +48,7 @@ public class JCDispatcher implements JCComponent {
             this.jcRegistry.registerDispatcher(this.localIp);
             DispatcherScheduleFactory.init(maxScheduleSize);
             this.subProjectStart();
+            this.subProjectStop();
             LOGGER.info("reg dispatcher ip:{}, max schedule size:{}", this.localIp, maxScheduleSize);
         } catch (Exception e) {
             throw new ComponentInitException(e, name());
@@ -56,10 +57,26 @@ public class JCDispatcher implements JCComponent {
 
 
     private void subProjectStart() {
-        this.jcQueue.subDispatcherStart((topic, projectId) -> {
-            this.toStartProject((Long) projectId);
-        });
+        this.jcQueue.subDispatcherStart((topic, projectId) -> this.toStartProject((Long) projectId));
+    }
 
+    private void subProjectStop() {
+        this.jcQueue.subDispatcherStop((topic, projectId) -> this.toStopProject((Long) projectId));
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    public synchronized void toStopProject(long projectId) {
+        Project project = this.projectDao.getById(projectId);
+        if (project == null) {
+            LOGGER.warn("project not found:{}", projectId);
+            return;
+        }
+        if (!project.getStatus().equals(Constant.PROJECT_STATUS_START)) {
+            LOGGER.warn("project {} is already stoped", projectId);
+            return;
+        }
+        this.projectDao.updateStatusById(projectId, Constant.PROJECT_STATUS_STOP);
+        DispatcherScheduleFactory.stopProjectRunner(projectId);
     }
 
 
