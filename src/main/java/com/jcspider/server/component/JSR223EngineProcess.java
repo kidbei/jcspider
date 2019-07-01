@@ -24,8 +24,8 @@ import java.util.concurrent.ConcurrentHashMap;
  * @author zhuang.hu
  * @since 31 May 2019
  */
-public class JCNashornProcess extends JCProcess {
-    private static final Logger LOGGER = LoggerFactory.getLogger(JCNashornProcess.class);
+public class JSR223EngineProcess extends JCProcess {
+    private static final Logger LOGGER = LoggerFactory.getLogger(JSR223EngineProcess.class);
 
     private static final int INSERT_BATCH_SIZE = 100;
 

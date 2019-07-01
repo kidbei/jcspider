@@ -63,8 +63,8 @@ public class DynamicServiceRegister {
                 }
                 if (processEnable) {
                     if (processModel.equals("nashorn")) {
-                        registry.registerBeanDefinition("jCNashornProcess",
-                                BeanDefinitionBuilder.rootBeanDefinition(JCNashornProcess.class).getBeanDefinition());
+                        registry.registerBeanDefinition("jSR223EngineProcess",
+                                BeanDefinitionBuilder.rootBeanDefinition(JSR223EngineProcess.class).getBeanDefinition());
                     }
                     List<String> exporterComponents = Arrays.asList(resultExporter.split(","));
                     if (exporterComponents.contains(Constant.DB_RESULT_EXPORTER)) {
