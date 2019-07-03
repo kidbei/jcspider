@@ -46,6 +46,8 @@ public class DispatcherScheduleFactory {
             timeUnit = TimeUnit.SECONDS;
         } else if (Constant.UNIT_TYPE_MINUTES.equals(rateUnit)) {
             timeUnit = TimeUnit.MINUTES;
+        } else if (Constant.UNIT_TYPE_HOURS.equals(rateUnit)) {
+            timeUnit = TimeUnit.HOURS;
         } else {
             throw new IllegalArgumentException("not support rate unit:" + rateUnit);
         }

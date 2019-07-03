@@ -30,7 +30,12 @@ public class DebugController {
             return JSONResult.error("simpleTask.method must not be null");
         }
 
-        return JSONResult.success(debugService.debug(debugTask));
+        DebugResult result = this.debugService.debug(debugTask);
+        if (result.isSuccess()) {
+            return JSONResult.success(result);
+        } else {
+            return JSONResult.error(result.getStack());
+        }
     }
 
 

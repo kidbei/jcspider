@@ -17,7 +17,7 @@ public class DbResultExporter implements ResultExporter {
 
     @Override
     public void export(TaskResult result) {
-        this.taskResultDao.insert(result);
+        this.taskResultDao.upsert(result);
     }
 
     @Override

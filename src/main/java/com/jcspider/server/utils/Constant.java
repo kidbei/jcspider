@@ -35,6 +35,7 @@ public class Constant {
 
     public static final String  UNIT_TYPE_SECONDS = "seconds";
     public static final String  UNIT_TYPE_MINUTES = "minutes";
+    public static final String  UNIT_TYPE_HOURS = "hours";
 
 
     public static final String  DB_RESULT_EXPORTER = "dbResultExporter";
@@ -59,5 +60,7 @@ public class Constant {
     public static final String  TOKEN_SALT = "UXsXsdaaXDsE";
 
     public static final String CORS_METHOD = "OPTIONS";
+
+    public static final long    TOKEN_EXPIRE_TIME = 1000 * 60 * 60 * 24 * 15;
 
 }

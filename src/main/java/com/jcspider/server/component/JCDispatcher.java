@@ -2,10 +2,12 @@ package com.jcspider.server.component;
 
 import com.jcspider.server.dao.ProjectDao;
 import com.jcspider.server.dao.ProjectProcessNodeDao;
+import com.jcspider.server.dao.TaskDao;
 import com.jcspider.server.model.ComponentInitException;
 import com.jcspider.server.model.Project;
 import com.jcspider.server.model.ProjectProcessNode;
 import com.jcspider.server.utils.Constant;
+import com.jcspider.server.utils.IDUtils;
 import com.jcspider.server.utils.IPUtils;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -39,8 +41,11 @@ public class JCDispatcher implements JCComponent {
     private JCLockTool  jcLockTool;
     @Autowired
     private ProjectDao  projectDao;
+    @Autowired
+    private TaskDao     taskDao;
 
     private String      localIp;
+
 
     @Override
     public void start() throws ComponentInitException {
@@ -90,6 +95,9 @@ public class JCDispatcher implements JCComponent {
             return;
         }
         for (Project localProject : localProjects) {
+            if (localProject.getStatus().equals(Constant.PROJECT_STATUS_STOP)) {
+                continue;
+            }
             if (!DispatcherScheduleFactory.isDispatcherStarted(localProject.getId())) {
                 LOGGER.info("recovery project:{}", localProject);
                 this.startAtLocal(localProject);
@@ -130,7 +138,11 @@ public class JCDispatcher implements JCComponent {
         }
     }
 
+
+
     private void startAtLocal(Project project) {
+        String startTaskId = IDUtils.genTaskId(project.getId(), project.getStartUrl(), Constant.METHOD_START);
+        this.taskDao.updateStatusAndStackById(startTaskId, "", Constant.TASK_STATUS_NONE);
         long projectId = project.getId();
         if (DispatcherScheduleFactory.isDispatcherStarted(projectId)) {
             LOGGER.info("project {} is already started at this node", projectId);

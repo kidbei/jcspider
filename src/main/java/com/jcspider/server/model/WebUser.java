@@ -17,6 +17,7 @@ public class WebUser {
     private String  inviteUid;
     private Timestamp   createdAt;
     private Timestamp   updatedAt;
+    private Timestamp   tokenCreatedAt;
 
 
     public Long getId() {
@@ -89,5 +90,13 @@ public class WebUser {
 
     public void setInviteUid(String inviteUid) {
         this.inviteUid = inviteUid;
+    }
+
+    public Timestamp getTokenCreatedAt() {
+        return tokenCreatedAt;
+    }
+
+    public void setTokenCreatedAt(Timestamp tokenCreatedAt) {
+        this.tokenCreatedAt = tokenCreatedAt;
     }
 }

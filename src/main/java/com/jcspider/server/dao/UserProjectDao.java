@@ -57,6 +57,12 @@ public class UserProjectDao {
     }
 
 
+    public void deleteByProjectId(long projectId) {
+        final String sql = "delete from user_project where project_id = ?";
+        this.jdbcTemplate.update(sql, projectId);
+    }
+
+
     public Page<UserProject> findByUid(String uid, Pageable pageable) {
         final String sql = "select id, " + COLUMNS + " from user_project where uid = ?  limit ? offset ?";
         final String countSql = "select count(1) from user_project where uid = ?";

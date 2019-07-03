@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSON;
 import com.jcspider.server.model.Task;
 import com.jcspider.server.utils.Constant;
 import com.jcspider.server.utils.IDUtils;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 
 import java.io.Serializable;
@@ -26,11 +27,12 @@ public class Self implements Serializable {
         this.projectId = projectId;
     }
 
+
     public void crawl(String url, Map<String, Object> options) {
         this.checkOptions(options);
         String method = MapUtils.getString(options, "method");
         Task task = new Task();
-        task.setId(IDUtils.genTaskId(url, method));
+        task.setId(IDUtils.genTaskId(projectId, url, method));
         task.setCreatedAt(new Timestamp(System.currentTimeMillis()));
         task.setProjectId(projectId);
         task.setSourceUrl(url);

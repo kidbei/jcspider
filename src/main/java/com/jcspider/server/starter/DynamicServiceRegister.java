@@ -1,6 +1,11 @@
 package com.jcspider.server.starter;
 
-import com.jcspider.server.component.*;
+import com.jcspider.server.component.DbResultExporter;
+import com.jcspider.server.component.JCDispatcher;
+import com.jcspider.server.component.JSR223EngineProcess;
+import com.jcspider.server.component.local.JCLocalLockTool;
+import com.jcspider.server.component.local.JCLocalQueue;
+import com.jcspider.server.component.local.JCLocalRegistry;
 import com.jcspider.server.utils.Constant;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,6 +38,7 @@ public class DynamicServiceRegister {
         final String  processModel = env.getProperty("process.model", "nashorn");
         final String  model = env.getProperty("model");
         final String  resultExporter = env.getProperty("process.result.exporter", "dbResultExporter");
+        final boolean dbExporterDisable = Boolean.valueOf(env.getProperty("process.dbExporter.disable", "false"));
         return new BeanDefinitionRegistryPostProcessor() {
             @Override
             public void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) throws BeansException {
@@ -55,24 +61,22 @@ public class DynamicServiceRegister {
                 } else {
                     throw new BeanCreationException("invalid model:" + model);
                 }
-
-                if (dispatcherEnable) {
-                    LOGGER.info("start model:jcDispatcher");
-                    registry.registerBeanDefinition("jcDispatcher",
-                            BeanDefinitionBuilder.rootBeanDefinition(JCDispatcher.class).getBeanDefinition());
-                }
                 if (processEnable) {
                     if (processModel.equals("nashorn")) {
                         registry.registerBeanDefinition("jSR223EngineProcess",
                                 BeanDefinitionBuilder.rootBeanDefinition(JSR223EngineProcess.class).getBeanDefinition());
                     }
                     List<String> exporterComponents = Arrays.asList(resultExporter.split(","));
-                    if (exporterComponents.contains(Constant.DB_RESULT_EXPORTER)) {
-                        registry.registerBeanDefinition(Constant.DB_RESULT_EXPORTER,
-                                BeanDefinitionBuilder.rootBeanDefinition(DbResultExporter.class).getBeanDefinition());
-                    }
                 }
-
+                if (dispatcherEnable) {
+                    LOGGER.info("start model:jcDispatcher");
+                    registry.registerBeanDefinition("jcDispatcher",
+                            BeanDefinitionBuilder.rootBeanDefinition(JCDispatcher.class).getBeanDefinition());
+                }
+                if (!dbExporterDisable) {
+                    registry.registerBeanDefinition(Constant.DB_RESULT_EXPORTER,
+                            BeanDefinitionBuilder.rootBeanDefinition(DbResultExporter.class).getBeanDefinition());
+                }
             }
         };
     }

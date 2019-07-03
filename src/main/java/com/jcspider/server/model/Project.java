@@ -16,13 +16,13 @@ public class Project implements Serializable {
     private String      scriptText;
     private String      status;
     private String      rateUnit;
-    private Integer     rateUnitMultiple = 0;
-    private Integer     rateNumber = 0;
+    private Integer     rateUnitMultiple;
+    private Integer     rateNumber;
     private String      dispatcher;
     private Timestamp   createdAt;
     private Timestamp   updatedAt;
     private String      scheduleType;
-    private Long        scheduleValue = 0L;
+    private Long        scheduleValue;
     private String      description;
 
     public Project() {

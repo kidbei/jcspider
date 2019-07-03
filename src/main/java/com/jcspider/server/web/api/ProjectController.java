@@ -21,13 +21,11 @@ public class ProjectController {
     private ProjectService  projectService;
 
 
-    @RequestMapping(value = "/", method = RequestMethod.POST)
+    @RequestMapping(value = "", method = RequestMethod.POST)
     public JSONResult<Project> create(@RequestBody CreateProjectReq createProjectReq) {
-        if (StringUtils.isBlank(createProjectReq.getName())) {
-            return JSONResult.error("name is empty");
-        }
-        if (StringUtils.isBlank(createProjectReq.getStartUrl())) {
-            return JSONResult.error("startUrl is empty");
+        JSONResult checkResult = this.checkProject(createProjectReq);
+        if (!checkResult.isSuccess()) {
+            return checkResult;
         }
         WebUser webUser = LoginInfo.getLoginInfo();
         createProjectReq.setUid(webUser.getUid());
@@ -51,6 +49,21 @@ public class ProjectController {
         }
         Page<Project> page = this.projectService.query(exp, curPage, pageSize);
         return JSONResult.success(page);
+    }
+
+
+    @RequestMapping(value = "/{projectId}", method = RequestMethod.DELETE)
+    public JSONResult<String> delete(@PathVariable long projectId) {
+        WebUser webUser = LoginInfo.getLoginInfo();
+        if (webUser.getRole().equals(Constant.USER_ROLE_NORMAL)) {
+            UserProject userProject = this.projectService.get(webUser.getUid(), projectId);
+            if (userProject == null) {
+                return JSONResult.error("permission required");
+            }
+        }
+
+        this.projectService.deleteProject(projectId);
+        return JSONResult.success("ok");
     }
 
 
@@ -108,6 +121,31 @@ public class ProjectController {
                 return JSONResult.error("permission required");
             }
         }
+        return JSONResult.success(project);
+    }
+
+
+    private JSONResult<Object> checkProject(Project project) {
+        if (StringUtils.isBlank(project.getName())) {
+            return JSONResult.error("name is empty");
+        }
+        if (StringUtils.isBlank(project.getStartUrl())) {
+            return JSONResult.error("startUrl is empty");
+        }
+        if (project.getRateNumber() == null || project.getRateNumber() <= 0) {
+            return JSONResult.error("频率值必须大于0");
+        }
+        return JSONResult.success(null);
+    }
+
+
+    @RequestMapping(value = "", method = RequestMethod.PUT)
+    public JSONResult<Project> update(@RequestBody Project project) {
+        JSONResult checkResult = this.checkProject(project);
+        if (!checkResult.isSuccess()) {
+            return checkResult;
+        }
+        this.projectService.update(project);
         return JSONResult.success(project);
     }
 

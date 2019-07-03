@@ -1,4 +1,6 @@
-package com.jcspider.server.component;
+package com.jcspider.server.component.local;
+
+import com.jcspider.server.component.JCLockTool;
 
 /**
  * @author zhuang.hu

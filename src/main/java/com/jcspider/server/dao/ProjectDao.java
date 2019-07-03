@@ -80,6 +80,12 @@ public class ProjectDao {
     }
 
 
+    public void deleteById(long projectId) {
+        final String sql = "delete from project where id = ?";
+        this.jdbcTemplate.update(sql, projectId);
+    }
+
+
     public void updateByExp(Project project) {
         final StringBuilder sb = new StringBuilder("update project set ");
         final List<Object> params = new ArrayList<>();

@@ -1,6 +1,8 @@
-package com.jcspider.server.component;
+package com.jcspider.server.component.local;
 
 import com.google.common.collect.ArrayListMultimap;
+import com.jcspider.server.component.JCQueue;
+import com.jcspider.server.component.QueueOnMessage;
 import com.jcspider.server.model.DebugResult;
 import com.jcspider.server.model.DebugTask;
 import com.jcspider.server.utils.Constant;

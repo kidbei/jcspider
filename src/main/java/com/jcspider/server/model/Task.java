@@ -17,6 +17,7 @@ public class Task extends SimpleTask {
     private Long    nextRunTime = 0L;
     private Timestamp   createdAt;
     private Timestamp   updatedAt;
+    private String  processNode;
 
     public Task() {
     }
@@ -95,5 +96,13 @@ public class Task extends SimpleTask {
 
     public void setNextRunTime(Long nextRunTime) {
         this.nextRunTime = nextRunTime;
+    }
+
+    public String getProcessNode() {
+        return processNode;
+    }
+
+    public void setProcessNode(String processNode) {
+        this.processNode = processNode;
     }
 }

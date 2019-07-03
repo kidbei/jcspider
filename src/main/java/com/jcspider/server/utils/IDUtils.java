@@ -10,8 +10,8 @@ import java.util.UUID;
  */
 public class IDUtils {
 
-    public static String genTaskId(String sourceUrl, String method) {
-        return DigestUtils.md5Hex(sourceUrl + "|" + method);
+    public static String genTaskId(long projectId, String sourceUrl, String method) {
+        return DigestUtils.md5Hex(projectId + "|" + sourceUrl + "|" + method);
     }
 
 

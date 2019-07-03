@@ -28,8 +28,25 @@ public class TaskResultDao {
     }
 
 
+    public void upsert(TaskResult taskResult) {
+        if (taskResult.getCreatedAt() == null) {
+            taskResult.setCreatedAt(new Timestamp(System.currentTimeMillis()));
+        }
+        final String sql = "insert into result(" + COLUMNS + ") values (?,?,?,?) on conflict (task_id) " +
+                "do update set result_text = excluded.result_text, created_at = excluded.created_at";
+        this.jdbcTemplate.update(sql, taskResult.getProjectId(),
+                taskResult.getTaskId(), taskResult.getResultText(), taskResult.getCreatedAt());
+    }
+
+
     public void deleteByProjectIdAndTaskId(long projectId, String taskId) {
         final String sql = "delete from result where project_id = ? and task_id = ?";
         this.jdbcTemplate.update(sql, projectId, taskId);
     }
+
+    public void deleteByProjectId(long projectId) {
+        final String sql = "delete from result where project_id = ?";
+        this.jdbcTemplate.update(sql, projectId);
+    }
+
 }

@@ -52,6 +52,7 @@ public class DebugService {
         try {
             return future.get(1, TimeUnit.MINUTES);
         } catch (Exception e) {
+            LOGGER.error("debug error", e);
             DebugResult debugResult = new DebugResult();
             debugResult.setSuccess(false);
             debugResult.setStack(e.toString());

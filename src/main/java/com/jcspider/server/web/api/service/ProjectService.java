@@ -4,8 +4,11 @@ import java.io.IOException;
 
 import javax.annotation.PostConstruct;
 
+import com.jcspider.server.component.DbResultExporter;
 import com.jcspider.server.component.JCQueue;
 import com.jcspider.server.dao.ProjectDao;
+import com.jcspider.server.dao.TaskDao;
+import com.jcspider.server.dao.TaskResultDao;
 import com.jcspider.server.dao.UserProjectDao;
 import com.jcspider.server.model.CreateProjectReq;
 import com.jcspider.server.model.Project;
@@ -33,13 +36,18 @@ public class ProjectService {
     private static final Logger LOGGER = LoggerFactory.getLogger(ProjectService.class);
 
     @Autowired
-    private ProjectDao      projectDao;
+    private ProjectDao          projectDao;
     @Autowired
-    private UserProjectDao  userProjectDao;
+    private UserProjectDao      userProjectDao;
     @Autowired
     private DispatcherService   dispatcherService;
     @Autowired
-    private JCQueue         jcQueue;
+    private JCQueue             jcQueue;
+    @Autowired
+    private TaskDao             taskDao;
+    @Autowired
+    private TaskResultDao       taskResultDao;
+
 
     private String defaultScript;
 
@@ -76,9 +84,23 @@ public class ProjectService {
 
 
 
+    public void update(Project project) {
+        this.projectDao.updateByExp(project);
+    }
+
+
     public Page<Project> query(ProjectQueryExp exp, Integer curPage, Integer pageSize) {
         PageRequest request = PageRequest.of(curPage == null ? 0 : curPage - 1, pageSize == null ? 10 : pageSize);
         return this.projectDao.queryByExp(exp, request);
+    }
+
+
+    @Transactional(rollbackFor = Exception.class)
+    public void deleteProject(long projectId) {
+        this.projectDao.deleteById(projectId);
+        this.userProjectDao.deleteByProjectId(projectId);
+        this.taskDao.deleteByProjectId(projectId);
+        this.taskResultDao.deleteByProjectId(projectId);
     }
 
 
@@ -113,6 +135,7 @@ public class ProjectService {
 
         this.jcQueue.pubDispatcherStart(projectId);
     }
+
 
 
 

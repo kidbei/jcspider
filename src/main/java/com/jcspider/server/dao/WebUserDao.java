@@ -26,7 +26,7 @@ public class WebUserDao {
     @Autowired
     private JdbcTemplate    jdbcTemplate;
 
-    private static final String COLUMNS = "uid,cn_name,role,token,password,created_at,updated_at,invite_uid";
+    private static final String COLUMNS = "uid,cn_name,role,token,password,created_at,updated_at,invite_uid, token_created_at";
 
 
     public void insert(WebUser webUser) {
@@ -36,10 +36,10 @@ public class WebUserDao {
         if (webUser.getUpdatedAt() == null) {
             webUser.setUpdatedAt(webUser.getCreatedAt());
         }
-        final String sql = "insert into web_user (" + COLUMNS + ") values (?,?,?,?,?,?,?,?)";
+        final String sql = "insert into web_user (" + COLUMNS + ") values (?,?,?,?,?,?,?,?,?)";
         this.jdbcTemplate.update(sql, webUser.getUid(), webUser.getCnName(), webUser.getRole(),
                 webUser.getToken(), webUser.getPassword(), webUser.getCreatedAt(), webUser.getUpdatedAt(),
-                webUser.getInviteUid());
+                webUser.getInviteUid(), webUser.getTokenCreatedAt());
     }
 
 
@@ -122,6 +122,43 @@ public class WebUserDao {
         int count = this.count(exp);
         List<WebUser> result = this.jdbcTemplate.query(sqlParam.getSql(), sqlParam.toSqlParaqms(), new BeanPropertyRowMapper<>(WebUser.class));
         return new PageImpl<>(result, pageable, count);
+    }
+
+
+    public void updateByExp(WebUser user) {
+        if (user.getId() == null) {
+            throw new NullPointerException("id must not be null");
+        }
+        user.setUpdatedAt(new Timestamp(System.currentTimeMillis()));
+        StringBuilder sb = new StringBuilder("update web_user set ");
+        List<Object> params = new ArrayList<>();
+        if (StringUtils.isNotBlank(user.getRole())) {
+            sb.append("role = ?,");
+            params.add(user.getRole());
+        }
+        if (StringUtils.isNotBlank(user.getCnName())) {
+            sb.append("cn_name = ?,");
+            params.add(user.getCnName());
+        }
+        if (StringUtils.isNotBlank(user.getPassword())) {
+            sb.append("password = ?,");
+            params.add(user.getPassword());
+        }
+        if (StringUtils.isNotBlank(user.getToken())) {
+            sb.append("token = ?,");
+            params.add(user.getToken());
+        }
+        if (user.getUpdatedAt() != null) {
+            sb.append("updated_at = ?,");
+            params.add(user.getUpdatedAt());
+        }
+        if (user.getTokenCreatedAt() != null) {
+            sb.append("token_created_at = ?,");
+            params.add(user.getTokenCreatedAt());
+        }
+        String sql = sb.substring(0, sb.length() - 1) + " where id = ?";
+        params.add(user.getId());
+        this.jdbcTemplate.update(sql, params.toArray());
     }
 
 }

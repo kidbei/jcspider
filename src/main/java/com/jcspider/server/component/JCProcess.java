@@ -188,7 +188,7 @@ public abstract class JCProcess implements JCComponent{
     private void startProject(Long projectId) {
         LOGGER.info("start project:{}", projectId);
         Project project = this.getProject(projectId);
-        String taskId = IDUtils.genTaskId(project.getStartUrl(), "start");
+        String taskId = IDUtils.genTaskId(projectId, project.getStartUrl(), "start");
         Task task = this.taskDao.getById(taskId);
         if (task == null) {
             task = new Task();

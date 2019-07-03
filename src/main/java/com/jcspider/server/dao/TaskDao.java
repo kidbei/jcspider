@@ -231,4 +231,9 @@ public class TaskDao {
         SqlParam sqlParam = this.queryParams("select count(id) from task where 1=1", exp);
         return this.jdbcTemplate.queryForObject(sqlParam.getSql(), sqlParam.toSqlParaqms(), int.class);
     }
+
+    public void deleteByProjectId(long projectId) {
+        final String sql = "delete from task where project_id = ?";
+        this.jdbcTemplate.update(sql, projectId);
+    }
 }
