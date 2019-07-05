@@ -4,6 +4,7 @@ import com.jcspider.server.dao.ProjectDao;
 import com.jcspider.server.dao.ProjectProcessNodeDao;
 import com.jcspider.server.model.Project;
 import com.jcspider.server.model.ProjectProcessNode;
+import com.jcspider.server.utils.Constant;
 import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -58,6 +59,7 @@ public class ProjectDispatcherLoopRunner implements Runnable {
             return;
         }
         LOGGER.info("run project loop {}", this.projectId);
+        projectDao.updateStatusById(projectId, Constant.PROJECT_STATUS_START);
         List<String> nodes = projectProcessNodes.stream().map(p -> p.getProcessNode()).collect(Collectors.toList());;
         ProjectDispatcherRunner dispatcherRunner = new ProjectDispatcherRunner(this.projectId, project.getRateNumber(), nodes);
         DispatcherScheduleFactory.setProjectRunner(this.projectId, dispatcherRunner, project.getRateUnit(), project.getRateUnitMultiple());

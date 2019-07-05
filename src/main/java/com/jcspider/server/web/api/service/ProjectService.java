@@ -1,6 +1,10 @@
 package com.jcspider.server.web.api.service;
 
 import java.io.IOException;
+import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
 
@@ -10,10 +14,7 @@ import com.jcspider.server.dao.ProjectDao;
 import com.jcspider.server.dao.TaskDao;
 import com.jcspider.server.dao.TaskResultDao;
 import com.jcspider.server.dao.UserProjectDao;
-import com.jcspider.server.model.CreateProjectReq;
-import com.jcspider.server.model.Project;
-import com.jcspider.server.model.ProjectQueryExp;
-import com.jcspider.server.model.UserProject;
+import com.jcspider.server.model.*;
 import com.jcspider.server.utils.Constant;
 
 import org.apache.commons.io.IOUtils;
@@ -91,7 +92,17 @@ public class ProjectService {
 
     public Page<Project> query(ProjectQueryExp exp, Integer curPage, Integer pageSize) {
         PageRequest request = PageRequest.of(curPage == null ? 0 : curPage - 1, pageSize == null ? 10 : pageSize);
-        return this.projectDao.queryByExp(exp, request);
+        Page<Project> page = this.projectDao.queryByExp(exp, request);
+        if (page.hasContent()) {
+            List<ProjectResultCount> projectResultCountList = this.taskResultDao.findByProjectIds(page.getContent().stream().map(p -> p.getId()).collect(Collectors.toList()));
+            Map<Long, ProjectResultCount> countMap = projectResultCountList.stream().collect(Collectors.toMap(ProjectResultCount::getProjectId, Function.identity()));
+            page.getContent().forEach(project -> {
+                if (countMap.containsKey(project.getId())) {
+                    project.setResultCount(countMap.get(project.getId()).getResultCount());
+                }
+            });
+        }
+        return page;
     }
 
 

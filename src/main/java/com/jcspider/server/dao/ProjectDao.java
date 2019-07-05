@@ -134,6 +134,10 @@ public class ProjectDao {
             sb.append("name = ?,");
             params.add(project.getName());
         }
+        if (project.getUpdatedAt() != null) {
+            sb.append("updated_at = ?,");
+            params.add(project.getUpdatedAt());
+        }
         final String sql = sb.substring(0, sb.length() - 1) + " where id = ?";
         params.add(project.getId());
         this.jdbcTemplate.update(sql, params.toArray());

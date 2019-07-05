@@ -25,6 +25,10 @@ public class Project implements Serializable {
     private Long        scheduleValue;
     private String      description;
 
+
+
+    private Integer     resultCount;
+
     public Project() {
     }
 
@@ -142,6 +146,14 @@ public class Project implements Serializable {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    public Integer getResultCount() {
+        return resultCount;
+    }
+
+    public void setResultCount(Integer resultCount) {
+        this.resultCount = resultCount;
     }
 
     @Override

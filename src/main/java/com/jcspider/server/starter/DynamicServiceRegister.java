@@ -6,6 +6,9 @@ import com.jcspider.server.component.JSR223EngineProcess;
 import com.jcspider.server.component.local.JCLocalLockTool;
 import com.jcspider.server.component.local.JCLocalQueue;
 import com.jcspider.server.component.local.JCLocalRegistry;
+import com.jcspider.server.component.redis.RedisLockTool;
+import com.jcspider.server.component.redis.RedisQueue;
+import com.jcspider.server.component.redis.RedisRegistry;
 import com.jcspider.server.utils.Constant;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -52,12 +55,18 @@ public class DynamicServiceRegister {
                     LOGGER.info("current model is local, register JCLocalQueue, JCLocalRegistry");
                     registry.registerBeanDefinition("jcQueue",
                             BeanDefinitionBuilder.rootBeanDefinition(JCLocalQueue.class).getBeanDefinition());
-                    registry.registerBeanDefinition("jcLocalRegistry",
+                    registry.registerBeanDefinition("jcRegistry",
                             BeanDefinitionBuilder.rootBeanDefinition(JCLocalRegistry.class).getBeanDefinition());
                     registry.registerBeanDefinition("jcLockTool",
                             BeanDefinitionBuilder.rootBeanDefinition(JCLocalLockTool.class).getBeanDefinition());
                 } else if (Constant.MODEL_CLUSTER.equalsIgnoreCase(model)){
                     LOGGER.info("current model is cluster ");
+                    registry.registerBeanDefinition("jcQueue",
+                            BeanDefinitionBuilder.rootBeanDefinition(RedisQueue.class).getBeanDefinition());
+                    registry.registerBeanDefinition("jcRegistry",
+                            BeanDefinitionBuilder.rootBeanDefinition(RedisRegistry.class).getBeanDefinition());
+                    registry.registerBeanDefinition("jcLockTool",
+                            BeanDefinitionBuilder.rootBeanDefinition(RedisLockTool.class).getBeanDefinition());
                 } else {
                     throw new BeanCreationException("invalid model:" + model);
                 }
@@ -80,6 +89,7 @@ public class DynamicServiceRegister {
             }
         };
     }
+
 
 
 }

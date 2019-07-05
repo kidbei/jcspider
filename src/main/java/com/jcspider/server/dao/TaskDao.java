@@ -96,9 +96,9 @@ public class TaskDao {
     }
 
 
-    public void updateStatusAndStackById(String taskId, String stack, String status) {
+    public int updateStatusAndStackById(String taskId, String stack, String status) {
         final String sql = "update task set stack = ?, status = ?, updated_at = ? where id = ?";
-        this.jdbcTemplate.update(sql, stack, status, new Timestamp(System.currentTimeMillis()), taskId);
+        return this.jdbcTemplate.update(sql, stack, status, new Timestamp(System.currentTimeMillis()), taskId);
     }
 
     public List<Task> findByIds(Collection<String> taskIds) {
