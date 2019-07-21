@@ -83,7 +83,7 @@ public class JSR223EngineProcess extends JCProcess {
             List<List<Task>> batchTaskList = Lists.partition(self.getNewTasks(), INSERT_BATCH_SIZE);
             batchTaskList.forEach(tasks -> this.taskDao.insertBatch(self.getNewTasks()));
         } else {
-            LOGGER.info("tast {} has no new url found", task.getId());
+            LOGGER.info("task {} has no new url found", task.getId());
         }
         if (result != null) {
             TaskResult taskResult = new TaskResult();

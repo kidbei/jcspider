@@ -19,7 +19,7 @@ public class Constant {
 
     public static final String  TASK_STATUS_ERROR = "error";
     public static final String  TASK_STATUS_RUNNING = "running";
-    public static final String  TASK_STATUS_NONE = "none";
+    public static final String  TASK_STATUS_NONE = "init";
     public static final String  TASK_STATUS_DONE = "done";
 
     public static final String  PROJECT_STATUS_START = "start";

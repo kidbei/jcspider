@@ -81,7 +81,7 @@ public class UserService {
             }
         }
         String token = DigestUtils.md5Hex(userName + System.currentTimeMillis() + secretPassword);
-
+        webUser.setToken(token);
         WebUser update = new WebUser();
         update.setId(webUser.getId());
         update.setToken(token);
@@ -96,5 +96,12 @@ public class UserService {
         return this.webUserDao.queryByExp(exp, request);
     }
 
+
+    public void logout(String uid) {
+        WebUser webUser = this.webUserDao.getByUid(uid);
+        if (webUser != null) {
+            this.webUserDao.updateTokenById(webUser.getId(), null);
+        }
+    }
 
 }
