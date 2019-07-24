@@ -8,8 +8,8 @@ import java.io.Serializable;
  */
 public class SimpleTask implements Serializable {
 
-    private static final long serialVersionUID = 8059376589343829631L;
-    private String id;
+    private static  final long serialVersionUID = 8059376589343829631L;
+    private String  id;
     private String  method;
     private String  sourceUrl;
     private String  headers;
