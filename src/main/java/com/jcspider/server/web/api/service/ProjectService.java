@@ -148,6 +148,9 @@ public class ProjectService {
     }
 
 
+    public List<Project> suggest(String name) {
+        return this.projectDao.findByNameList(name, 10);
+    }
 
 
     public void stopProject(long projectId) {

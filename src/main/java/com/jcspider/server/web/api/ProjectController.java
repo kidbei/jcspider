@@ -10,6 +10,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 /**
  * @author zhuang.hu
  * @since 13 June 2019
@@ -54,6 +56,12 @@ public class ProjectController {
             page.getContent().forEach(project -> project.setScheduleValue(project.getScheduleValue() / (1000 * 60)));
         }
         return JSONResult.success(page);
+    }
+
+
+    @RequestMapping(value = "/suggest", method = RequestMethod.POST)
+    public JSONResult<List<Project>> suggest(@RequestBody ProjectQueryExp exp) {
+        return JSONResult.success(this.projectService.suggest(exp.getName()));
     }
 
 

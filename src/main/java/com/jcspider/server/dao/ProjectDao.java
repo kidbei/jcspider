@@ -231,6 +231,10 @@ public class ProjectDao {
         return new PageImpl<>(result, pageable, count);
     }
 
+    public List<Project> findByNameList(String name, int limit) {
+        final String sql = "select id, " + COLUMNS + " from project where name like ? limit ?";
+        return this.jdbcTemplate.query(sql, new Object[]{"%" + name + "%", limit}, new BeanPropertyRowMapper<>(Project.class));
+    }
 
 
     public List<Project> findByDispatcher(String dispatcher) {
