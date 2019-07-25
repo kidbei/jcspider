@@ -62,25 +62,34 @@ public class HttpFetcher implements Fetcher {
             clientBuilder.proxy(new Proxy(Proxy.Type.SOCKS, this.parseProxyAddress(task)));
         }
 
-        final Response response;
-        response = httpClient.newCall(reqBuilder.build()).execute();
+        Response response = null;
+        try {
+            response = httpClient.newCall(reqBuilder.build()).execute();
 
-        if (response.code() >= 400) {
-            result.setStatus(response.code());
-            result.setSuccess(false);
-            return result;
-        }
+            if (response.code() >= 400) {
+                result.setStatus(response.code());
+                result.setSuccess(false);
+                return result;
+            }
 
-        LOGGER.info("fetch success, url:{}", url);
+            LOGGER.info("fetch success, url:{}", url);
 
-        final InputStream resultStream = response.body().byteStream();
-        final String content = StringUtils.isBlank(task.getCharset()) ?
+            final InputStream resultStream = response.body().byteStream();
+            final String content = StringUtils.isBlank(task.getCharset()) ?
                     IOUtils.toString(resultStream, DEFAULT_CHARSET) : IOUtils.toString(resultStream, task.getCharset());
 
-        result.setSuccess(true);
-        result.setStatus(response.code());
-        result.setContent(content);
-        result.setHeaders(this.flatMapHeaders(response.headers()));
+            result.setSuccess(true);
+            result.setStatus(response.code());
+            result.setContent(content);
+            result.setHeaders(this.flatMapHeaders(response.headers()));
+        } catch (Exception e) {
+            LOGGER.error("request failed, url:{}", url, e);
+            result.setSuccess(false);
+        } finally {
+            if (response != null) {
+                response.close();
+            }
+        }
         return result;
     }
 
