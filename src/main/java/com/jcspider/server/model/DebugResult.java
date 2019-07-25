@@ -14,6 +14,7 @@ public class DebugResult {
     private String  currentMethod;
     private List<? extends SimpleTask> simpleTasks;
     private Object  result;
+    private List<SelfLog>    logs;
 
     public String getRequestId() {
         return requestId;
@@ -61,5 +62,13 @@ public class DebugResult {
 
     public void setResult(Object result) {
         this.result = result;
+    }
+
+    public List<SelfLog> getLogs() {
+        return logs;
+    }
+
+    public void setLogs(List<SelfLog> logs) {
+        this.logs = logs;
     }
 }

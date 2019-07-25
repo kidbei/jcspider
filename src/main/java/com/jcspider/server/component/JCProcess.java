@@ -239,9 +239,11 @@ public abstract class JCProcess implements JCComponent{
                 debugResult.setResult(result);
                 debugResult.setSuccess(true);
                 debugResult.setSimpleTasks(self.getNewTasks());
+                debugResult.setLogs(self.getLogs());
             } catch (Exception e) {
                 debugResult.setSuccess(false);
                 debugResult.setStack(e.toString());
+                debugResult.setLogs(self.getLogs());
                 return debugResult;
             }
         } else {
@@ -258,6 +260,12 @@ public abstract class JCProcess implements JCComponent{
                 if (StringUtils.isNotBlank(simpleTask.getExtra())) {
                     response.setExtras(JSON.parseObject(simpleTask.getExtra()));
                 }
+                if (fetchResult.getStatus() >= 400) {
+                    debugResult.setSuccess(false);
+                    debugResult.setStack("remote response http status:" + fetchResult.getStatus());
+                    debugResult.setLogs(self.getLogs());
+                    return debugResult;
+                }
             } catch (IOException e) {
                 debugResult.setSuccess(false);
                 debugResult.setStack(e.toString());
@@ -268,11 +276,13 @@ public abstract class JCProcess implements JCComponent{
             } catch (Exception e) {
                 debugResult.setSuccess(false);
                 debugResult.setStack(e.toString());
+                debugResult.setLogs(self.getLogs());
                 return debugResult;
             }
             debugResult.setSuccess(true);
             debugResult.setResult(result);
             debugResult.setSimpleTasks(self.getNewTasks());
+            debugResult.setLogs(self.getLogs());
             if (CollectionUtils.isNotEmpty(self.getNewTasks())) {
                 debugResult.setSimpleTasks(self.getNewTasks().stream().map(t -> (SimpleTask)t).collect(Collectors.toList()));
             }

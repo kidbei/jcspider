@@ -1,11 +1,14 @@
 package com.jcspider.server.component;
 
 import com.alibaba.fastjson.JSON;
+import com.jcspider.server.model.SelfLog;
 import com.jcspider.server.model.Task;
 import com.jcspider.server.utils.Constant;
 import com.jcspider.server.utils.IDUtils;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.Serializable;
 import java.sql.Timestamp;
@@ -18,10 +21,13 @@ import java.util.Map;
  * @since 06 June 2019
  */
 public class Self implements Serializable {
+    private static final Logger LOGGER = LoggerFactory.getLogger(Self.class);
 
     private static final long serialVersionUID = -224319223758375720L;
     private long projectId;
     private List<Task> newTasks = new ArrayList<>();
+    private List<SelfLog>   logs;
+
 
     public Self(long projectId) {
         this.projectId = projectId;
@@ -68,6 +74,21 @@ public class Self implements Serializable {
         this.newTasks.add(task);
     }
 
+
+    public void log(String logText) {
+        if (this.logs == null) {
+            this.logs = new ArrayList<>();
+        }
+        this.logs.add(new SelfLog(logText));
+        LOGGER.info(logText);
+    }
+
+    public void log(String logText, boolean persistent) {
+        this.logs.add(new SelfLog(logText, persistent));
+        LOGGER.info(logText);
+    }
+
+
     public long getProjectId() {
         return projectId;
     }
@@ -89,5 +110,13 @@ public class Self implements Serializable {
 
     public void setNewTasks(List<Task> newTasks) {
         this.newTasks = newTasks;
+    }
+
+    public List<SelfLog> getLogs() {
+        return logs;
+    }
+
+    public boolean hasLog() {
+        return this.logs != null;
     }
 }
