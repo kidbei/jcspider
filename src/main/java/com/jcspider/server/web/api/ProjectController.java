@@ -4,6 +4,7 @@ import com.jcspider.server.model.*;
 import com.jcspider.server.utils.Constant;
 import com.jcspider.server.web.api.service.ProjectService;
 import com.jcspider.server.web.filter.LoginInfo;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -23,6 +24,7 @@ public class ProjectController {
 
     @RequestMapping(value = "", method = RequestMethod.POST)
     public JSONResult<Project> create(@RequestBody CreateProjectReq createProjectReq) {
+        createProjectReq.setScheduleValue(createProjectReq.getScheduleValue() * 1000 * 60);
         JSONResult checkResult = this.checkProject(createProjectReq);
         if (!checkResult.isSuccess()) {
             return checkResult;
@@ -48,6 +50,9 @@ public class ProjectController {
             }
         }
         Page<Project> page = this.projectService.query(exp, curPage, pageSize);
+        if (CollectionUtils.isNotEmpty(page.getContent())) {
+            page.getContent().forEach(project -> project.setScheduleValue(project.getScheduleValue() / (1000 * 60)));
+        }
         return JSONResult.success(page);
     }
 
@@ -121,6 +126,7 @@ public class ProjectController {
                 return JSONResult.error("permission required");
             }
         }
+        project.setScheduleValue(project.getScheduleValue() / (1000 * 60));
         return JSONResult.success(project);
     }
 
@@ -141,6 +147,7 @@ public class ProjectController {
 
     @RequestMapping(value = "", method = RequestMethod.PUT)
     public JSONResult<Project> update(@RequestBody Project project) {
+        project.setScheduleValue(project.getScheduleValue() * 1000 * 60);
         JSONResult checkResult = this.checkProject(project);
         if (!checkResult.isSuccess()) {
             return checkResult;

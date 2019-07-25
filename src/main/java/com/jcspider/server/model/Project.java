@@ -1,5 +1,8 @@
 package com.jcspider.server.model;
 
+import com.alibaba.fastjson.annotation.JSONField;
+import com.fasterxml.jackson.annotation.JsonFormat;
+
 import java.io.Serializable;
 import java.sql.Timestamp;
 
@@ -19,7 +22,11 @@ public class Project implements Serializable {
     private Integer     rateUnitMultiple;
     private Integer     rateNumber;
     private String      dispatcher;
+    @JSONField(format = "yyyy-MM-dd HH:mm:ss")
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private Timestamp   createdAt;
+    @JSONField(format = "yyyy-MM-dd HH:mm:ss")
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private Timestamp   updatedAt;
     private String      scheduleType;
     private Long        scheduleValue;

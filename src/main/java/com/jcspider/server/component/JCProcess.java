@@ -1,10 +1,12 @@
 package com.jcspider.server.component;
 
+import com.alibaba.fastjson.JSON;
 import com.jcspider.server.dao.ProjectDao;
 import com.jcspider.server.dao.TaskDao;
 import com.jcspider.server.model.*;
 import com.jcspider.server.utils.*;
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.jboss.netty.util.internal.LinkedTransferQueue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -253,6 +255,9 @@ public abstract class JCProcess implements JCComponent{
             try {
                 FetchResult fetchResult = fetcher.fetch(simpleTask);
                 response = new Response(fetchResult.getHeaders(), fetchResult.getContent());
+                if (StringUtils.isNotBlank(simpleTask.getExtra())) {
+                    response.setExtras(JSON.parseObject(simpleTask.getExtra()));
+                }
             } catch (IOException e) {
                 debugResult.setSuccess(false);
                 debugResult.setStack(e.toString());

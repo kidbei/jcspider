@@ -6,6 +6,7 @@ import com.jcspider.server.model.*;
 import com.jcspider.server.utils.Constant;
 import com.jcspider.server.utils.Fetcher;
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -72,6 +73,9 @@ public class JSR223EngineProcess extends JCProcess {
                 throw new RunMethodException("fetch failed,http status:" + fetchResult.getStatus(), task.getMethod());
             }
             Response response = new Response(fetchResult.getHeaders(), fetchResult.getContent());
+            if (StringUtils.isNotBlank(task.getExtra())) {
+                response.setExtras(JSON.parseObject(task.getExtra()));
+            }
             try {
                 result = ((Invocable)scriptEngine).invokeFunction(task.getMethod(), self, response);
             } catch (Exception e) {

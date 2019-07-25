@@ -3,6 +3,9 @@ package com.jcspider.server.dao;
 import com.jcspider.server.model.ProjectResultCount;
 import com.jcspider.server.model.TaskResult;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
@@ -62,6 +65,23 @@ public class TaskResultDao {
         MapSqlParameterSource parameters = new MapSqlParameterSource();
         parameters.addValue("projectIds", projectIds);
         return this.namedParameterJdbcTemplate.query(sql, parameters, new BeanPropertyRowMapper<>(ProjectResultCount.class));
+    }
+
+
+    public int countByProjectId(long projectId) {
+        final String sql = "select count(id) from result where project_id = ?";
+        return this.jdbcTemplate.queryForObject(sql, new Object[]{projectId}, int.class);
+    }
+
+    public Page<TaskResult> findByProjectId(long projectId, PageRequest request) {
+        final String sql = "select id, " + COLUMNS + " from result where project_id = ? order by id desc limit ? offset ?";
+
+        int count = this.countByProjectId(projectId);
+
+        List<TaskResult> taskResults = this.jdbcTemplate.query(sql,
+                new Object[]{projectId, request.getPageSize(), request.getOffset()}, new BeanPropertyRowMapper<>(TaskResult.class));
+
+        return new PageImpl<>(taskResults, request, count);
     }
 
 }

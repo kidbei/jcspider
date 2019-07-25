@@ -16,6 +16,7 @@ public class Response {
 
     private Map<String, String> headers;
     private String  content;
+    private Map<String, Object> extras;
 
     public Response(Map<String, String> headers, String content) {
         this.headers = headers;
@@ -58,5 +59,25 @@ public class Response {
             return elements.stream().map(element -> element.attr(attr)).collect(Collectors.toList());
         }
         return Collections.emptyList();
+    }
+
+    public Elements doc(String[] selectors) {
+        Elements elements = doc();
+        for (String selector : selectors) {
+            elements = elements.select(selector);
+        }
+        return elements;
+    }
+
+    public Map<String, Object> getExtras() {
+        return extras;
+    }
+
+    public void setExtras(Map<String, Object> extras) {
+        this.extras = extras;
+    }
+
+    public Object getExtra(String name) {
+        return this.extras != null ? extras.get(name) : null;
     }
 }
