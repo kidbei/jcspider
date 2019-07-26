@@ -24,7 +24,9 @@ public class AjaxFetcher implements Fetcher{
         config.setMaxTotal(maxDriver);
         config.setMaxWaitMillis(getDriverTimeout);
         this.pool = new WebDriverPool(factory, config);
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> this.pool.close()));
     }
+
 
     @Override
     public FetchResult fetch(SimpleTask task) throws IOException {

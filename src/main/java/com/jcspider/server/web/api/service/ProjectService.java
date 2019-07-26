@@ -87,6 +87,7 @@ public class ProjectService {
 
     public void update(Project project) {
         this.projectDao.updateByExp(project);
+        this.jcQueue.pubDispatcherStop(project.getId());
     }
 
 
