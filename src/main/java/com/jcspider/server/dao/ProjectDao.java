@@ -223,7 +223,7 @@ public class ProjectDao {
         sqlParam.addParam(pageable.getPageSize());
         sqlParam.addParam(pageable.getOffset());
 
-        String sql = sqlParam.appendSql(" order by id asc limit ? offset ?");
+        String sql = sqlParam.appendSql(" order by id desc limit ? offset ?");
 
         int count = this.countByExp(exp);
 
