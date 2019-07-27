@@ -1,6 +1,5 @@
 package com.jcspider.server.model;
 
-import java.sql.Timestamp;
 
 /**
  * @author zhuang.hu
@@ -15,9 +14,9 @@ public class WebUser {
     private String  password;
     private String  token;
     private String  inviteUid;
-    private Timestamp   createdAt;
-    private Timestamp   updatedAt;
-    private Timestamp   tokenCreatedAt;
+    private Long   createdAt;
+    private Long   updatedAt;
+    private Long   tokenCreatedAt;
 
 
     public Long getId() {
@@ -68,19 +67,19 @@ public class WebUser {
         this.token = token;
     }
 
-    public Timestamp getCreatedAt() {
+    public Long getCreatedAt() {
         return createdAt;
     }
 
-    public void setCreatedAt(Timestamp createdAt) {
+    public void setCreatedAt(Long createdAt) {
         this.createdAt = createdAt;
     }
 
-    public Timestamp getUpdatedAt() {
+    public Long getUpdatedAt() {
         return updatedAt;
     }
 
-    public void setUpdatedAt(Timestamp updatedAt) {
+    public void setUpdatedAt(Long updatedAt) {
         this.updatedAt = updatedAt;
     }
 
@@ -92,11 +91,11 @@ public class WebUser {
         this.inviteUid = inviteUid;
     }
 
-    public Timestamp getTokenCreatedAt() {
+    public Long getTokenCreatedAt() {
         return tokenCreatedAt;
     }
 
-    public void setTokenCreatedAt(Timestamp tokenCreatedAt) {
+    public void setTokenCreatedAt(Long tokenCreatedAt) {
         this.tokenCreatedAt = tokenCreatedAt;
     }
 }

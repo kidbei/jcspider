@@ -93,7 +93,7 @@ public class JSR223EngineProcess extends JCProcess {
             TaskResult taskResult = new TaskResult();
             taskResult.setTaskId(task.getId());
             taskResult.setProjectId(projectId);
-            taskResult.setCreatedAt(new Timestamp(System.currentTimeMillis()));
+            taskResult.setCreatedAt(System.currentTimeMillis());
             taskResult.setResultText(JSON.toJSONString(result));
             this.resultExporters.forEach(resultExporter -> {
                 try {

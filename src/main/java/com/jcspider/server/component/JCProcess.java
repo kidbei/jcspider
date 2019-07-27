@@ -196,7 +196,7 @@ public abstract class JCProcess implements JCComponent{
             task = new Task();
             task.setId(taskId);
             task.setMethod(Constant.METHOD_START);
-            task.setCreatedAt(new Timestamp(System.currentTimeMillis()));
+            task.setCreatedAt(System.currentTimeMillis());
             task.setScheduleType(project.getScheduleType());
             task.setScheduleValue(project.getScheduleValue());
             task.setSourceUrl(project.getStartUrl());

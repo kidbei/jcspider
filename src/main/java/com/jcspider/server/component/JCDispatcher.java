@@ -151,7 +151,7 @@ public class JCDispatcher implements JCComponent {
             List<String> processNodes = this.jcRegistry.listProcesses();
             ProjectDispatcherRunner runner = new ProjectDispatcherRunner(projectId, project.getRateNumber(), processNodes);
             DispatcherScheduleFactory.setProjectRunner(projectId, runner, project.getRateUnit(), project.getRateUnitMultiple());
-            Timestamp now = new Timestamp(System.currentTimeMillis());
+            Long now = System.currentTimeMillis();
             List<ProjectProcessNode> projectProcessNodes = processNodes.stream()
                     .map(p -> new ProjectProcessNode(projectId, p, now))
                     .collect(Collectors.toList());

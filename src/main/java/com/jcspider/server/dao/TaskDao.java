@@ -41,7 +41,7 @@ public class TaskDao {
 
     public void insert(Task task) {
         if (task.getUpdatedAt() == null) {
-            task.setUpdatedAt(new Timestamp(System.currentTimeMillis()));
+            task.setUpdatedAt(System.currentTimeMillis());
         }
         final String sql = "insert into task (" + COLUMNS + ") values (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
         this.jdbcTemplate.update(sql, task.getId(), task.getStatus(), task.getMethod(), task.getSourceUrl(), task.getScheduleType(),
@@ -53,7 +53,7 @@ public class TaskDao {
     public void insertBatch(List<Task> tasks) {
         tasks.forEach(t -> {
             if (t.getUpdatedAt() == null) {
-                t.setUpdatedAt(new Timestamp(System.currentTimeMillis()));
+                t.setUpdatedAt(System.currentTimeMillis());
             }
         });
         final String sql = "insert into task (" + COLUMNS + ") values (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
@@ -73,8 +73,8 @@ public class TaskDao {
                 ps.setString(10, task.getExtra());
                 ps.setString(11, task.getFetchType());
                 ps.setString(12, task.getProxy());
-                ps.setTimestamp(13, task.getCreatedAt());
-                ps.setTimestamp(14, task.getUpdatedAt());
+                ps.setLong(13, task.getCreatedAt());
+                ps.setLong(14, task.getUpdatedAt());
                 ps.setString(15, task.getCharset());
                 ps.setLong(16, task.getNextRunTime());
             }

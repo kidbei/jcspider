@@ -39,7 +39,7 @@ public class Self implements Serializable {
         String method = MapUtils.getString(options, "method");
         Task task = new Task();
         task.setId(IDUtils.genTaskId(projectId, url, method));
-        task.setCreatedAt(new Timestamp(System.currentTimeMillis()));
+        task.setCreatedAt(System.currentTimeMillis());
         task.setProjectId(projectId);
         task.setSourceUrl(url);
         task.setMethod(method);

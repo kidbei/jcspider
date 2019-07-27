@@ -1,10 +1,9 @@
 package com.jcspider.server.model;
 
-import com.alibaba.fastjson.annotation.JSONField;
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
 import java.io.Serializable;
-import java.sql.Timestamp;
 
 /**
  * @author zhuang.hu
@@ -22,12 +21,10 @@ public class Project implements Serializable {
     private Integer     rateUnitMultiple;
     private Integer     rateNumber;
     private String      dispatcher;
-    @JSONField(format = "yyyy-MM-dd HH:mm:ss")
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-    private Timestamp   createdAt;
-    @JSONField(format = "yyyy-MM-dd HH:mm:ss")
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-    private Timestamp   updatedAt;
+    @JsonSerialize(using = LongTimeFormat.Serialize.class)
+    private Long        createdAt;
+    @JsonSerialize(using = LongTimeFormat.Serialize.class)
+    private Long        updatedAt;
     private String      scheduleType;
     private Long        scheduleValue;
     private String      description;
@@ -115,19 +112,19 @@ public class Project implements Serializable {
         this.dispatcher = dispatcher;
     }
 
-    public Timestamp getCreatedAt() {
+    public Long getCreatedAt() {
         return createdAt;
     }
 
-    public void setCreatedAt(Timestamp createdAt) {
+    public void setCreatedAt(Long createdAt) {
         this.createdAt = createdAt;
     }
 
-    public Timestamp getUpdatedAt() {
+    public Long getUpdatedAt() {
         return updatedAt;
     }
 
-    public void setUpdatedAt(Timestamp updatedAt) {
+    public void setUpdatedAt(Long updatedAt) {
         this.updatedAt = updatedAt;
     }
 

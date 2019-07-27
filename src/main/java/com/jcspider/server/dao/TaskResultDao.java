@@ -31,7 +31,7 @@ public class TaskResultDao {
 
     public void insert(TaskResult taskResult) {
         if (taskResult.getCreatedAt() == null) {
-            taskResult.setCreatedAt(new Timestamp(System.currentTimeMillis()));
+            taskResult.setCreatedAt(System.currentTimeMillis());
         }
         final String sql = "insert into result(" + COLUMNS + ") values (?,?,?,?)";
         this.jdbcTemplate.update(sql, taskResult.getProjectId(),
@@ -41,7 +41,7 @@ public class TaskResultDao {
 
     public void upsert(TaskResult taskResult) {
         if (taskResult.getCreatedAt() == null) {
-            taskResult.setCreatedAt(new Timestamp(System.currentTimeMillis()));
+            taskResult.setCreatedAt(System.currentTimeMillis());
         }
         final String sql = "insert into result(" + COLUMNS + ") values (?,?,?,?) on conflict (task_id) " +
                 "do update set result_text = excluded.result_text, created_at = excluded.created_at";

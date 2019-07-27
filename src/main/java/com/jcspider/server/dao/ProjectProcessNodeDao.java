@@ -27,7 +27,7 @@ public class ProjectProcessNodeDao {
 
     public void insert(ProjectProcessNode projectProcessNode) {
         if (projectProcessNode.getCreatedAt() == null) {
-            projectProcessNode.setCreatedAt(new Timestamp(System.currentTimeMillis()));
+            projectProcessNode.setCreatedAt(System.currentTimeMillis());
         }
         final String sql = "insert into project_process_node (" + COLUMNS + ") values (?,?,?)";
         this.jdbcTemplate.update(sql,
@@ -44,7 +44,7 @@ public class ProjectProcessNodeDao {
                 ProjectProcessNode projectProcessNode = projectProcessNodes.get(i);
                 preparedStatement.setLong(1, projectProcessNode.getProjectId());
                 preparedStatement.setString(2, projectProcessNode.getProcessNode());
-                preparedStatement.setTimestamp(3, projectProcessNode.getCreatedAt());
+                preparedStatement.setLong(3, projectProcessNode.getCreatedAt());
             }
 
             @Override

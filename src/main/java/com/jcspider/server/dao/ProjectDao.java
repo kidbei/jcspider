@@ -40,7 +40,7 @@ public class ProjectDao {
 
     public long insert(Project project) {
         if (project.getUpdatedAt() == null) {
-            project.setUpdatedAt(new Timestamp(System.currentTimeMillis()));
+            project.setUpdatedAt(System.currentTimeMillis());
         }
         if (project.getCreatedAt() == null) {
             project.setCreatedAt(project.getUpdatedAt());
@@ -93,7 +93,7 @@ public class ProjectDao {
             sb.append("status = ?,");
             params.add(project.getStatus());
         }
-        project.setUpdatedAt(new Timestamp(System.currentTimeMillis()));
+        project.setUpdatedAt(System.currentTimeMillis());
         if (project.getDescription() != null) {
             sb.append("description = ?,");
             params.add(project.getDescription());

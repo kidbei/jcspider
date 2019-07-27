@@ -1,6 +1,5 @@
 package com.jcspider.server.model;
 
-import java.sql.Timestamp;
 
 /**
  * @author zhuang.hu
@@ -11,8 +10,8 @@ public class UserProject {
     private Long        id;
     private String      uid;
     private String      role;
-    private Timestamp   createdAt;
-    private Timestamp   updatedAt;
+    private Long   createdAt;
+    private Long   updatedAt;
     private Long        projectId;
 
     public UserProject() {
@@ -48,19 +47,19 @@ public class UserProject {
         this.role = role;
     }
 
-    public Timestamp getCreatedAt() {
+    public Long getCreatedAt() {
         return createdAt;
     }
 
-    public void setCreatedAt(Timestamp createdAt) {
+    public void setCreatedAt(Long createdAt) {
         this.createdAt = createdAt;
     }
 
-    public Timestamp getUpdatedAt() {
+    public Long getUpdatedAt() {
         return updatedAt;
     }
 
-    public void setUpdatedAt(Timestamp updatedAt) {
+    public void setUpdatedAt(Long updatedAt) {
         this.updatedAt = updatedAt;
     }
 

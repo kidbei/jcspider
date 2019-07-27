@@ -1,6 +1,7 @@
 package com.jcspider.server.model;
 
-import java.sql.Timestamp;
+
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
 /**
  * @author zhuang.hu
@@ -15,8 +16,10 @@ public class Task extends SimpleTask {
     private Long    projectId = 0L;
     private Long    scheduleValue = 0L;
     private Long    nextRunTime = 0L;
-    private Timestamp   createdAt;
-    private Timestamp   updatedAt;
+    @JsonSerialize(using = LongTimeFormat.Serialize.class)
+    private Long   createdAt;
+    @JsonSerialize(using = LongTimeFormat.Serialize.class)
+    private Long   updatedAt;
     private String  processNode;
 
     public Task() {
@@ -61,19 +64,19 @@ public class Task extends SimpleTask {
         this.projectId = projectId;
     }
 
-    public Timestamp getCreatedAt() {
+    public Long getCreatedAt() {
         return createdAt;
     }
 
-    public void setCreatedAt(Timestamp createdAt) {
+    public void setCreatedAt(Long createdAt) {
         this.createdAt = createdAt;
     }
 
-    public Timestamp getUpdatedAt() {
+    public Long getUpdatedAt() {
         return updatedAt;
     }
 
-    public void setUpdatedAt(Timestamp updatedAt) {
+    public void setUpdatedAt(Long updatedAt) {
         this.updatedAt = updatedAt;
     }
 

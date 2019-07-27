@@ -26,7 +26,7 @@ public class UserProjectDao {
 
     public void insert(UserProject userProject) {
         if (userProject.getCreatedAt() == null) {
-            userProject.setCreatedAt(new Timestamp(System.currentTimeMillis()));
+            userProject.setCreatedAt(System.currentTimeMillis());
         }
         if (userProject.getUpdatedAt() == null) {
             userProject.setUpdatedAt(userProject.getCreatedAt());

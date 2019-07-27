@@ -31,7 +31,7 @@ public class WebUserDao {
 
     public void insert(WebUser webUser) {
         if (webUser.getCreatedAt() == null) {
-            webUser.setCreatedAt(new Timestamp(System.currentTimeMillis()));
+            webUser.setCreatedAt(System.currentTimeMillis());
         }
         if (webUser.getUpdatedAt() == null) {
             webUser.setUpdatedAt(webUser.getCreatedAt());
@@ -129,7 +129,7 @@ public class WebUserDao {
         if (user.getId() == null) {
             throw new NullPointerException("id must not be null");
         }
-        user.setUpdatedAt(new Timestamp(System.currentTimeMillis()));
+        user.setUpdatedAt(System.currentTimeMillis());
         StringBuilder sb = new StringBuilder("update web_user set ");
         List<Object> params = new ArrayList<>();
         if (StringUtils.isNotBlank(user.getRole())) {

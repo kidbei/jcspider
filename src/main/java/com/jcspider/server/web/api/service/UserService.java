@@ -76,7 +76,7 @@ public class UserService {
         }
         if (StringUtils.isNotBlank(webUser.getToken())) {
             long now = System.currentTimeMillis();
-            if (webUser != null && webUser.getTokenCreatedAt() != null && now - webUser.getTokenCreatedAt().getTime() < Constant.TOKEN_EXPIRE_TIME ) {
+            if (webUser != null && webUser.getTokenCreatedAt() != null && now - webUser.getTokenCreatedAt() < Constant.TOKEN_EXPIRE_TIME ) {
                 return webUser;
             }
         }
@@ -85,7 +85,7 @@ public class UserService {
         WebUser update = new WebUser();
         update.setId(webUser.getId());
         update.setToken(token);
-        update.setTokenCreatedAt(new Timestamp(System.currentTimeMillis()));
+        update.setTokenCreatedAt(System.currentTimeMillis());
         this.webUserDao.updateByExp(update);
         return webUser;
     }
@@ -103,5 +103,6 @@ public class UserService {
             this.webUserDao.updateTokenById(webUser.getId(), null);
         }
     }
+
 
 }

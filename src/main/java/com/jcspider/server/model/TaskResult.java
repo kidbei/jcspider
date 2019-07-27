@@ -1,7 +1,8 @@
 package com.jcspider.server.model;
 
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+
 import java.io.Serializable;
-import java.sql.Timestamp;
 
 /**
  * @author zhuang.hu
@@ -10,25 +11,26 @@ import java.sql.Timestamp;
 public class TaskResult implements Serializable {
 
     private static final long serialVersionUID = -1575371272023064284L;
-    private long id;
-    private long        projectId;
+    private Long        id;
+    private Long        projectId;
     private String      taskId;
     private String      resultText;
-    private Timestamp   createdAt;
+    @JsonSerialize(using = LongTimeFormat.Serialize.class)
+    private Long        createdAt;
 
-    public long getId() {
+    public Long getId() {
         return id;
     }
 
-    public void setId(long id) {
+    public void setId(Long id) {
         this.id = id;
     }
 
-    public long getProjectId() {
+    public Long getProjectId() {
         return projectId;
     }
 
-    public void setProjectId(long projectId) {
+    public void setProjectId(Long projectId) {
         this.projectId = projectId;
     }
 
@@ -48,11 +50,11 @@ public class TaskResult implements Serializable {
         this.resultText = resultText;
     }
 
-    public Timestamp getCreatedAt() {
+    public Long getCreatedAt() {
         return createdAt;
     }
 
-    public void setCreatedAt(Timestamp createdAt) {
+    public void setCreatedAt(Long createdAt) {
         this.createdAt = createdAt;
     }
 
