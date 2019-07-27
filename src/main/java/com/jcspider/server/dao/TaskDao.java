@@ -98,7 +98,7 @@ public class TaskDao {
 
     public int updateStatusAndStackById(String taskId, String stack, String status) {
         final String sql = "update task set stack = ?, status = ?, updated_at = ? where id = ?";
-        return this.jdbcTemplate.update(sql, stack, status, new Timestamp(System.currentTimeMillis()), taskId);
+        return this.jdbcTemplate.update(sql, stack, status, System.currentTimeMillis(), taskId);
     }
 
     public List<Task> findByIds(Collection<String> taskIds) {
@@ -113,7 +113,7 @@ public class TaskDao {
         MapSqlParameterSource parameters = new MapSqlParameterSource();
         parameters.addValue("status", status);
         parameters.addValue("ids", taskIds);
-        parameters.addValue("updatedAt", new Timestamp(System.currentTimeMillis()));
+        parameters.addValue("updatedAt", System.currentTimeMillis());
         this.namedParameterJdbcTemplate.update(sql, parameters);
     }
 

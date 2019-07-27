@@ -209,10 +209,10 @@ public class ProjectDao {
     }
 
 
-    private Timestamp parseStandardTime(String timeStr) throws ParseException {
+    private Long parseStandardTime(String timeStr) throws ParseException {
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         Date date = sdf.parse(timeStr);
-        return new Timestamp(date.getTime());
+        return date.getTime();
     }
 
 
