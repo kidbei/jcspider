@@ -97,6 +97,7 @@ public abstract class JCProcess implements JCComponent{
             LOGGER.info("subscript topic:{}", topic);
             while (!Thread.interrupted() && !isStop) {
                 Long projectId =  this.jcQueue.blockingPopProcessProjectStart(this.localIp);
+                LOGGER.info("start project:{}", projectId);
                 this.startProject(projectId);
             }
         });
@@ -108,8 +109,7 @@ public abstract class JCProcess implements JCComponent{
                 DebugTask debugTask = this.jcQueue.blockingPopProcessDebugTask(this.localIp);
                 try {
                     LOGGER.info("debug task:{}", debugTask);
-                    DebugResult debugResult = this.debug(debugTask.getRequestId(),
-                            debugTask.getScriptText(), debugTask.getSimpleTask());
+                    DebugResult debugResult = this.debug(debugTask.getRequestId(), debugTask.getScriptText(), debugTask.getSimpleTask());
                     this.jcQueue.blockingPushProcessDebugTaskReturn(debugResult);
                 } catch (Exception e) {
                     LOGGER.error("debug error", e);

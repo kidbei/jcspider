@@ -100,6 +100,8 @@ public class JCLocalQueue implements JCQueue {
             return queue.take();
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
+        } finally {
+            return this.bPop(topic);
         }
     }
 
