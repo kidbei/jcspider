@@ -102,7 +102,6 @@ public abstract class JCProcess implements JCComponent{
             while (!Thread.interrupted() && !isStop) {
                 try {
                     Long projectId =  this.jcQueue.blockingPopProcessProjectStart(this.localIp);
-                    LOGGER.info("start project:{}", projectId);
                     this.startProject(projectId);
                 } catch (Exception e) {
                     LOGGER.error("start failed", e);

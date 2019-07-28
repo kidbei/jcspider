@@ -93,6 +93,7 @@ public class ProjectDispatcherRunner implements Runnable {
                     LOGGER.info("project {} has no new task, stop it", this.projectId);
                     projectDao.updateStatusById(this.projectId, Constant.PROJECT_STATUS_STOP);
                     DispatcherScheduleFactory.stopProjectRunner(this.projectId);
+                    jcQueue.pubDispatcherStop(this.projectId);
                 } else {
                     LOGGER.info("project {} has no task now, wait for next schedule time", this.projectId);
                 }
