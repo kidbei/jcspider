@@ -151,7 +151,7 @@ public abstract class JCProcess implements JCComponent{
                 return;
             }
            if (task.getScheduleType().equals(Constant.SCHEDULE_TYPE_LOOP)) {
-                if (task.getNextRunTime() == 0L) {
+                if (task.getNextRunTime() == null || task.getNextRunTime() == 0L) {
                     this.clearResult(task.getProjectId(), taskId);
                 }
                 this.runMethod(task.getProjectId(), task);
