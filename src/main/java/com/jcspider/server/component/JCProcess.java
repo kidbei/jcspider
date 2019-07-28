@@ -87,8 +87,12 @@ public abstract class JCProcess implements JCComponent{
             final String topic = Constant.TOPIC_PROCESS_TASK + this.localIp;
             LOGGER.info("subscript topic:{}", topic);
             while (!Thread.interrupted() && !isStop) {
-                String taskId = this.jcQueue.blockingPopProcessTask(this.localIp);
-                this.processTask(taskId);
+                try {
+                    String taskId = this.jcQueue.blockingPopProcessTask(this.localIp);
+                    this.processTask(taskId);
+                } catch (Exception e) {
+                    LOGGER.error("process failed", e);
+                }
             }
         });
 
@@ -96,9 +100,13 @@ public abstract class JCProcess implements JCComponent{
             final String topic = Constant.TOPIC_PROCESS_PROJECT_START + this.localIp;
             LOGGER.info("subscript topic:{}", topic);
             while (!Thread.interrupted() && !isStop) {
-                Long projectId =  this.jcQueue.blockingPopProcessProjectStart(this.localIp);
-                LOGGER.info("start project:{}", projectId);
-                this.startProject(projectId);
+                try {
+                    Long projectId =  this.jcQueue.blockingPopProcessProjectStart(this.localIp);
+                    LOGGER.info("start project:{}", projectId);
+                    this.startProject(projectId);
+                } catch (Exception e) {
+                    LOGGER.error("start failed", e);
+                }
             }
         });
 
@@ -118,8 +126,12 @@ public abstract class JCProcess implements JCComponent{
         });
 
         this.jcQueue.subDispatcherStop((topic, message) -> {
-            LOGGER.info("stop project:{}", message);
-            stopProject((Long) message);
+            try {
+                LOGGER.info("stop project:{}", message);
+                stopProject((Long) message);
+            } catch (Exception e) {
+                LOGGER.error("stop failed", e);
+            }
         });
 
     }
