@@ -304,14 +304,15 @@ public abstract class JCProcess implements JCComponent{
     }
 
 
-    protected void removeRepeatTask(List<Task> newTasks) {
+    protected List<Task> removeRepeatTask(List<Task> newTasks) {
         if (CollectionUtils.isEmpty(newTasks)) {
-            return;
+            return newTasks;
         }
         List<Task> oldTask = this.taskDao.findByIds(newTasks.stream().map(t -> t.getId()).collect(Collectors.toList()));
         if (CollectionUtils.isNotEmpty(oldTask)) {
             newTasks.removeAll(oldTask);
         }
+        return newTasks;
     }
 
 

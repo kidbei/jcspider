@@ -83,9 +83,11 @@ public class JSR223EngineProcess extends JCProcess {
             }
         }
         if (CollectionUtils.isNotEmpty(self.getNewTasks())) {
-            this.removeRepeatTask(self.getNewTasks());
-            List<List<Task>> batchTaskList = Lists.partition(self.getNewTasks(), INSERT_BATCH_SIZE);
-            batchTaskList.forEach(tasks -> this.taskDao.insertBatch(self.getNewTasks()));
+            List<Task> newTasks = this.removeRepeatTask(self.getNewTasks());
+            if (CollectionUtils.isNotEmpty(newTasks)) {
+                List<List<Task>> batchTaskList = Lists.partition(newTasks, INSERT_BATCH_SIZE);
+                batchTaskList.forEach(tasks -> this.taskDao.insertBatch(newTasks));
+            }
         } else {
             LOGGER.info("task {} has no new url found", task.getId());
         }
