@@ -72,7 +72,7 @@ public class JSR223EngineProcess extends JCProcess {
             if (!fetchResult.isSuccess()) {
                 throw new RunMethodException("fetch failed,http status:" + fetchResult.getStatus(), task.getMethod());
             }
-            Response response = new Response(fetchResult.getHeaders(), fetchResult.getContent());
+            Response response = new Response(fetchResult.getHeaders(), fetchResult.getContent(), task.getSourceUrl());
             if (StringUtils.isNotBlank(task.getExtra())) {
                 response.setExtras(JSON.parseObject(task.getExtra()));
             }

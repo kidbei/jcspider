@@ -17,10 +17,12 @@ public class Response {
     private Map<String, String> headers;
     private String  content;
     private Map<String, Object> extras;
+    private String  url;
 
-    public Response(Map<String, String> headers, String content) {
+    public Response(Map<String, String> headers, String content, String url) {
         this.headers = headers;
         this.content = content;
+        this.url = url;
     }
 
     public Response() {
@@ -79,5 +81,9 @@ public class Response {
 
     public Object getExtra(String name) {
         return this.extras != null ? extras.get(name) : null;
+    }
+
+    public String getUrl() {
+        return url;
     }
 }

@@ -256,7 +256,7 @@ public abstract class JCProcess implements JCComponent{
             Response response;
             try {
                 FetchResult fetchResult = fetcher.fetch(simpleTask);
-                response = new Response(fetchResult.getHeaders(), fetchResult.getContent());
+                response = new Response(fetchResult.getHeaders(), fetchResult.getContent(), simpleTask.getSourceUrl());
                 if (StringUtils.isNotBlank(simpleTask.getExtra())) {
                     response.setExtras(JSON.parseObject(simpleTask.getExtra()));
                 }

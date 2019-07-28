@@ -1,6 +1,7 @@
 package com.jcspider.server.model;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
 import java.io.Serializable;
@@ -22,8 +23,10 @@ public class Project implements Serializable {
     private Integer     rateNumber;
     private String      dispatcher;
     @JsonSerialize(using = LongTimeFormat.Serialize.class)
+    @JsonDeserialize(using = LongTimeFormat.Deserialize.class)
     private Long        createdAt;
     @JsonSerialize(using = LongTimeFormat.Serialize.class)
+    @JsonDeserialize(using = LongTimeFormat.Deserialize.class)
     private Long        updatedAt;
     private String      scheduleType;
     private Long        scheduleValue;
