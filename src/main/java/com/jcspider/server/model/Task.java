@@ -13,9 +13,9 @@ public class Task extends SimpleTask {
     private String status;
     private String  scheduleType;
     private String  stack;
-    private Long    projectId = 0L;
-    private Long    scheduleValue = 0L;
-    private Long    nextRunTime = 0L;
+    private Long    projectId;
+    private Long    scheduleValue;
+    private Long    nextRunTime;
     @JsonSerialize(using = LongTimeFormat.Serialize.class)
     private Long   createdAt;
     @JsonSerialize(using = LongTimeFormat.Serialize.class)
