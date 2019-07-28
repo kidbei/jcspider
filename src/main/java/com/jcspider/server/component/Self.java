@@ -5,14 +5,13 @@ import com.jcspider.server.model.SelfLog;
 import com.jcspider.server.model.Task;
 import com.jcspider.server.utils.Constant;
 import com.jcspider.server.utils.IDUtils;
-import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.Serializable;
-import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -25,14 +24,13 @@ public class Self implements Serializable {
 
     private static final long serialVersionUID = -224319223758375720L;
     private long projectId;
-    private List<Task> newTasks = new ArrayList<>();
+    private Map<String, Task> newTasks = new HashMap<>();
     private List<SelfLog>   logs;
 
 
     public Self(long projectId) {
         this.projectId = projectId;
     }
-
 
     public void crawl(String url, Map<String, Object> options) {
         this.checkOptions(options);
@@ -71,7 +69,7 @@ public class Self implements Serializable {
         } else {
             task.setScheduleValue(0L);
         }
-        this.newTasks.add(task);
+        this.newTasks.putIfAbsent(task.getId(), task);
     }
 
 
@@ -105,12 +103,9 @@ public class Self implements Serializable {
     }
 
     public List<Task> getNewTasks() {
-        return newTasks;
+        return new ArrayList<>(newTasks.values());
     }
 
-    public void setNewTasks(List<Task> newTasks) {
-        this.newTasks = newTasks;
-    }
 
     public List<SelfLog> getLogs() {
         return logs;

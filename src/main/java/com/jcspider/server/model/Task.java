@@ -93,6 +93,7 @@ public class Task extends SimpleTask {
         return this.getId().equals(((Task)obj).getId());
     }
 
+
     public Long getNextRunTime() {
         return nextRunTime;
     }

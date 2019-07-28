@@ -82,8 +82,8 @@ public class JSR223EngineProcess extends JCProcess {
                 throw new RunMethodException(e, task.getMethod());
             }
         }
-        this.removeRepeatTask(self.getNewTasks());
         if (CollectionUtils.isNotEmpty(self.getNewTasks())) {
+            this.removeRepeatTask(self.getNewTasks());
             List<List<Task>> batchTaskList = Lists.partition(self.getNewTasks(), INSERT_BATCH_SIZE);
             batchTaskList.forEach(tasks -> this.taskDao.insertBatch(self.getNewTasks()));
         } else {
