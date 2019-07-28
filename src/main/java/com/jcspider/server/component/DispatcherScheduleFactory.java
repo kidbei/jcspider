@@ -19,6 +19,7 @@ public class DispatcherScheduleFactory {
     private static ScheduledThreadPoolExecutor schedulePool;
 
     private static final Map<Long, ProjectDispatcherRunner> PROJECT_DISPATCHER_RUNNER_MAP = new ConcurrentHashMap<>();
+    private static final Map<Long, ProjectDispatcherLoopRunner> PROJECT_DISPATCHER_LOOP_RUNNER_MAP = new ConcurrentHashMap<>();
 
 
     public static synchronized void init(int maxScheduleSize) {
@@ -61,15 +62,17 @@ public class DispatcherScheduleFactory {
         if (runner != null) {
             runner.setStop(true);
         }
+        ProjectDispatcherLoopRunner loopRunner = PROJECT_DISPATCHER_LOOP_RUNNER_MAP.remove(projectId);
+        if (loopRunner != null) {
+            schedulePool.getQueue().remove(loopRunner);
+        }
     }
 
     public synchronized static final void setProjectDispatcherLoopRunner(long projectId, String scheduleType, long scheduleValue) {
-        if (scheduleType.equals(Constant.SCHEDULE_TYPE_ONCE)) {
-            schedulePool.schedule(new ProjectDispatcherLoopRunner(projectId), scheduleValue, TimeUnit.MILLISECONDS);
-        } else if (scheduleType.equals(Constant.SCHEDULE_TYPE_LOOP)){
-            schedulePool.scheduleWithFixedDelay(new ProjectDispatcherLoopRunner(projectId), 0L, scheduleValue, TimeUnit.MILLISECONDS);
-        } else {
-
+        if (scheduleType.equals(Constant.SCHEDULE_TYPE_LOOP)){
+            ProjectDispatcherLoopRunner loopRunner = new ProjectDispatcherLoopRunner(projectId);
+            schedulePool.scheduleWithFixedDelay(loopRunner, 0L, scheduleValue, TimeUnit.MILLISECONDS);
+            PROJECT_DISPATCHER_LOOP_RUNNER_MAP.put(projectId, loopRunner);
         }
     }
 
