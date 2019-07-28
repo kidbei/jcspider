@@ -69,6 +69,7 @@ public class Self implements Serializable {
         } else {
             task.setScheduleValue(0L);
         }
+        task.setNextRunTime(0L);
         this.newTasks.putIfAbsent(task.getId(), task);
     }
 

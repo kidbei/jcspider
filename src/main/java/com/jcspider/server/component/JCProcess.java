@@ -150,23 +150,7 @@ public abstract class JCProcess implements JCComponent{
                 LOGGER.warn("task not found:{}", taskId);
                 return;
             }
-            if (task.getScheduleType().equals(Constant.SCHEDULE_TYPE_ONCE)) {
-                Long nextRunTime = task.getNextRunTime();
-                //第一次运行
-                if (nextRunTime == 0L) {
-                    this.runMethod(task.getProjectId(), task);
-                    Task update = new Task(taskId, Constant.TASK_STATUS_DONE, System.currentTimeMillis() + task.getScheduleValue());
-                    this.taskDao.upgrade(update);
-                } else if (nextRunTime.equals(Long.MAX_VALUE)){
-                    //不运行
-                } else {
-                    //第2次运行
-                    this.clearResult(task.getProjectId(), taskId);
-                    this.runMethod(task.getProjectId(), task);
-                    Task update = new Task(taskId, Constant.TASK_STATUS_DONE, Long.MAX_VALUE);
-                    this.taskDao.upgrade(update);
-                }
-            } else if (task.getScheduleType().equals(Constant.SCHEDULE_TYPE_LOOP)) {
+           if (task.getScheduleType().equals(Constant.SCHEDULE_TYPE_LOOP)) {
                 if (task.getNextRunTime() == 0L) {
                     this.clearResult(task.getProjectId(), taskId);
                 }
