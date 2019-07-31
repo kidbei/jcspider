@@ -150,9 +150,9 @@ public abstract class JCProcess implements JCComponent{
                 return;
             }
            if (task.getScheduleType().equals(Constant.SCHEDULE_TYPE_LOOP)) {
-                if (task.getNextRunTime() == null || task.getNextRunTime() == 0L) {
-                    this.clearResult(task.getProjectId(), taskId);
-                }
+               if (task.getNextRunTime() <= System.currentTimeMillis()) {
+                   this.clearResult(task.getProjectId(), taskId);
+               }
                 this.runMethod(task.getProjectId(), task);
                 Task update = new Task(taskId, Constant.TASK_STATUS_DONE, System.currentTimeMillis() + task.getScheduleValue());
                 this.taskDao.upgrade(update);
@@ -293,7 +293,9 @@ public abstract class JCProcess implements JCComponent{
         }
         List<Task> oldTask = this.taskDao.findByIds(newTasks.stream().map(t -> t.getId()).collect(Collectors.toList()));
         if (CollectionUtils.isNotEmpty(oldTask)) {
-            newTasks.removeAll(oldTask);
+            long now = System.currentTimeMillis();
+            List<Task> notExpireTaskList = oldTask.stream().filter(task -> task.getNextRunTime() >= now).collect(Collectors.toList());
+            newTasks.removeAll(notExpireTaskList);
         }
         return newTasks;
     }
