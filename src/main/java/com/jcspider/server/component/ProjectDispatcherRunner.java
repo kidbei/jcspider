@@ -83,23 +83,7 @@ public class ProjectDispatcherRunner implements Runnable {
             tasks = taskDao.findByOutOfNextRunTime(this.projectId, System.currentTimeMillis(), this.rateNumber);
         }
         if (CollectionUtils.isEmpty(tasks)) {
-            LOGGER.info("project {} has no task to crawl", this.projectId);
-            if (this.firstNoTaskTime == 0L) {
-                this.firstNoTaskTime = System.currentTimeMillis();
-            }
-            Project project = projectDao.getById(this.projectId);
-            if (project.getStatus().equals(Constant.PROJECT_STATUS_START)) {
-                if (System.currentTimeMillis() - this.firstNoTaskTime > 1000 * 60L) {
-                    LOGGER.info("project {} has no new task, stop it", this.projectId);
-                    projectDao.updateStatusById(this.projectId, Constant.PROJECT_STATUS_STOP);
-                    DispatcherScheduleFactory.stopProjectRunner(this.projectId);
-                    jcQueue.pubDispatcherStop(this.projectId);
-                } else {
-                    LOGGER.info("project {} has no task now, wait for next schedule time", this.projectId);
-                }
-            } else {
-                LOGGER.info("project {} has no task now, wait for next schedule time", this.projectId);
-            }
+            this.doNoTaskFound();
         } else {
             if (this.firstNoTaskTime != 0L) {
                 this.firstNoTaskTime = 0L;
@@ -111,7 +95,29 @@ public class ProjectDispatcherRunner implements Runnable {
                 taskIds.forEach(taskId -> jcQueue.blockingPushProcessTask(roundProcessNode(), taskId));
                 taskDao.updateStatusByIds(taskIds, Constant.TASK_STATUS_RUNNING);
                 LOGGER.info("start crawl task list:{}", taskIds);
+            } else {
+                this.doNoTaskFound();
             }
+        }
+    }
+
+    private void doNoTaskFound() {
+        LOGGER.info("project {} has no task to crawl", this.projectId);
+        if (this.firstNoTaskTime == 0L) {
+            this.firstNoTaskTime = System.currentTimeMillis();
+        }
+        Project project = projectDao.getById(this.projectId);
+        if (project.getStatus().equals(Constant.PROJECT_STATUS_START)) {
+            if (System.currentTimeMillis() - this.firstNoTaskTime > 1000 * 60L) {
+                LOGGER.info("project {} has no new task, stop it", this.projectId);
+                projectDao.updateStatusById(this.projectId, Constant.PROJECT_STATUS_STOP);
+                DispatcherScheduleFactory.stopProjectRunner(this.projectId);
+                jcQueue.pubDispatcherStop(this.projectId);
+            } else {
+                LOGGER.info("project {} has no task now, wait for next schedule time", this.projectId);
+            }
+        } else {
+            LOGGER.info("project {} has no task now, wait for next schedule time", this.projectId);
         }
     }
 
