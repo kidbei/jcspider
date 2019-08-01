@@ -104,7 +104,9 @@ public class ProjectDispatcherRunner implements Runnable {
             if (this.firstNoTaskTime != 0L) {
                 this.firstNoTaskTime = 0L;
             }
-            List<String> taskIds = tasks.stream().map(t -> t.getId()).collect(Collectors.toList());
+            List<String> taskIds = tasks.stream()
+                    .filter(t -> t.getMethod().equals(Constant.METHOD_START))
+                    .map(t -> t.getId()).collect(Collectors.toList());
             taskIds.forEach(taskId -> jcQueue.blockingPushProcessTask(roundProcessNode(), taskId));
             taskDao.updateStatusByIds(taskIds, Constant.TASK_STATUS_RUNNING);
             LOGGER.info("start crawl task list:{}", taskIds);
