@@ -96,7 +96,7 @@ public class JSR223EngineProcess extends JCProcess {
             if (deleteOldTask) {
                 if (self.hasNewTasks()) {
                     newTasks = self.getNewTasks();
-                    this.taskDao.deleteByIds(self.getNewTasks().stream().map(t -> t.getId()).collect(Collectors.toList()));
+                    this.taskDao.deleteByIds(newTasks.stream().map(t -> t.getId()).collect(Collectors.toList()));
                     for (ResultExporter resultExporter : this.resultExporters) {
                         newTasks.forEach(t -> resultExporter.delete(projectId, t.getId()));
                     }
@@ -106,7 +106,15 @@ public class JSR223EngineProcess extends JCProcess {
             }
             if (CollectionUtils.isNotEmpty(newTasks)) {
                 List<List<Task>> batchTaskList = Lists.partition(newTasks, INSERT_BATCH_SIZE);
-                batchTaskList.forEach(tasks -> this.taskDao.insertBatch(tasks));
+                batchTaskList.forEach(tasks -> {
+                    try {
+                        this.taskDao.insertBatch(tasks);
+                    } catch (Exception e) {
+                        LOGGER.error("insert error", e);
+                    }
+                });
+            } else {
+                LOGGER.info("task {} has no new url found", task.getId());
             }
         } else {
             LOGGER.info("task {} has no new url found", task.getId());

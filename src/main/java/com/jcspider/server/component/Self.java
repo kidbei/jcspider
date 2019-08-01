@@ -10,10 +10,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * @author zhuang.hu
@@ -24,7 +21,7 @@ public class Self implements Serializable {
 
     private static final long serialVersionUID = -224319223758375720L;
     private long projectId;
-    private Map<String, Task> newTasks = new HashMap<>();
+    private TreeMap<String, Task> newTasks = new TreeMap<>();
     private List<SelfLog>   logs;
 
 

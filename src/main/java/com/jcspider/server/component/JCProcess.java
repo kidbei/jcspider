@@ -127,7 +127,7 @@ public abstract class JCProcess implements JCComponent{
         this.jcQueue.subDispatcherStop((topic, message) -> {
             try {
                 LOGGER.info("stop project:{}", message);
-                stopProject((Long) message);
+                this.stopProject((Long) message);
             } catch (Exception e) {
                 LOGGER.error("stop failed", e);
             }
