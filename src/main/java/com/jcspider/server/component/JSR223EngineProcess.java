@@ -95,8 +95,11 @@ public class JSR223EngineProcess extends JCProcess {
             List<Task> newTasks = null;
             if (deleteOldTask) {
                 if (self.hasNewTasks()) {
-                    this.taskDao.deleteByIds(self.getNewTasks().stream().map(t -> t.getId()).collect(Collectors.toList()));
                     newTasks = self.getNewTasks();
+                    this.taskDao.deleteByIds(self.getNewTasks().stream().map(t -> t.getId()).collect(Collectors.toList()));
+                    for (ResultExporter resultExporter : this.resultExporters) {
+                        newTasks.forEach(t -> resultExporter.delete(projectId, t.getId()));
+                    }
                 }
             } else {
                 newTasks = this.removeRepeatTask(self.getNewTasks());
