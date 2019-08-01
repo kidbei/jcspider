@@ -8,4 +8,5 @@ public interface JCLockTool {
 
     boolean getLock(String key);
 
+    void releaseLock(String key);
 }

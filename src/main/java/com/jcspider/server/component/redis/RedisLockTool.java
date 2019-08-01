@@ -20,4 +20,9 @@ public class RedisLockTool implements JCLockTool {
         String result = ((JedisCommands)redisConnection.getNativeConnection()).set(key, "lock", "NX", "PX", 1000);
         return "OK".equals(result);
     }
+
+    @Override
+    public void releaseLock(String key) {
+    this.redisTemplate.delete(key);
+    }
 }

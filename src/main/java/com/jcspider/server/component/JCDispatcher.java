@@ -123,17 +123,12 @@ public class JCDispatcher implements JCComponent {
             this.projectDao.updateDispatcherById(projectId, this.localIp);
         }
         if (project.getDispatcher().equals(this.localIp)) {
-
             this.startAtLocal(project);
-
         } else {
             if (dispatcherNodes.contains(project.getDispatcher())) {
                 LOGGER.info("project {} on dispatcher node:{}, skip to start", projectId, project.getDispatcher());
             } else {
-                if (this.jcLockTool.getLock("start_lock:" + projectId)) {
-                    LOGGER.info("project {} dispatcher node {} is offline, start at local", projectId, project.getDispatcher());
-                    this.startAtLocal(project);
-                }
+                this.startAtLocal(project);
             }
         }
     }
@@ -141,25 +136,36 @@ public class JCDispatcher implements JCComponent {
 
 
     private void startAtLocal(Project project) {
-        String startTaskId = IDUtils.genTaskId(project.getId(), project.getStartUrl(), Constant.METHOD_START);
-        this.taskDao.updateStatusAndStackById(startTaskId, "", Constant.TASK_STATUS_NONE);
         long projectId = project.getId();
-        if (DispatcherScheduleFactory.isDispatcherStarted(projectId)) {
-            LOGGER.info("project {} is already started at this node", projectId);
+        final String lockKey = "start_lock:" + projectId;
+        if (this.jcLockTool.getLock(lockKey)) {
+            try {
+                LOGGER.info("project {} start at node:{}", projectId, project.getDispatcher());
+                String startTaskId = IDUtils.genTaskId(project.getId(), project.getStartUrl(), Constant.METHOD_START);
+                this.taskDao.updateStatusAndStackById(startTaskId, "", Constant.TASK_STATUS_NONE);
+                if (DispatcherScheduleFactory.isDispatcherStarted(projectId)) {
+                    LOGGER.info("project {} is already started at this node", projectId);
+                } else {
+                    this.projectProcessNodeDao.deleteByProjectId(projectId);
+                    List<String> processNodes = this.jcRegistry.listProcesses();
+                    ProjectDispatcherRunner runner = new ProjectDispatcherRunner(projectId, project.getRateNumber(), processNodes);
+                    DispatcherScheduleFactory.setProjectRunner(projectId, runner, project.getRateUnit(), project.getRateUnitMultiple());
+                    Long now = System.currentTimeMillis();
+                    List<ProjectProcessNode> projectProcessNodes = processNodes.stream()
+                            .map(p -> new ProjectProcessNode(projectId, p, now))
+                            .collect(Collectors.toList());
+                    this.projectProcessNodeDao.insertBatch(projectProcessNodes);
+                    this.jcQueue.blockingPushProcessProjectStart(processNodes.get(0), projectId);
+                    DispatcherScheduleFactory.setProjectDispatcherLoopRunner(projectId, project.getScheduleType(), project.getScheduleValue());
+                    this.projectDao.updateStatusById(projectId, Constant.PROJECT_STATUS_START);
+                }
+            } finally {
+                this.jcLockTool.releaseLock(lockKey);
+            }
         } else {
-            this.projectProcessNodeDao.deleteByProjectId(projectId);
-            List<String> processNodes = this.jcRegistry.listProcesses();
-            ProjectDispatcherRunner runner = new ProjectDispatcherRunner(projectId, project.getRateNumber(), processNodes);
-            DispatcherScheduleFactory.setProjectRunner(projectId, runner, project.getRateUnit(), project.getRateUnitMultiple());
-            Long now = System.currentTimeMillis();
-            List<ProjectProcessNode> projectProcessNodes = processNodes.stream()
-                    .map(p -> new ProjectProcessNode(projectId, p, now))
-                    .collect(Collectors.toList());
-            this.projectProcessNodeDao.insertBatch(projectProcessNodes);
-            this.jcQueue.blockingPushProcessProjectStart(processNodes.get(0), projectId);
-            DispatcherScheduleFactory.setProjectDispatcherLoopRunner(projectId, project.getScheduleType(), project.getScheduleValue());
-            this.projectDao.updateStatusById(projectId, Constant.PROJECT_STATUS_START);
+            LOGGER.info("get lock failed, skip to start project {} at node:{}", projectId, this.localIp);
         }
+
     }
 
 
