@@ -20,6 +20,7 @@ import java.sql.Timestamp;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
 
 /**
  * @author zhuang.hu
@@ -83,10 +84,26 @@ public class JSR223EngineProcess extends JCProcess {
             }
         }
         if (CollectionUtils.isNotEmpty(self.getNewTasks())) {
-            List<Task> newTasks = this.removeRepeatTask(self.getNewTasks());
+            boolean deleteOldTask = false;
+            if (Constant.METHOD_START.equals(task.getMethod())) {
+                Project project = this.getProject(projectId);
+                if (project != null && project.getScheduleType().equals(Constant.SCHEDULE_TYPE_LOOP)) {
+                    LOGGER.info("loop start project :{}, delete task of method fetched", projectId);
+                    deleteOldTask = true;
+                }
+            }
+            List<Task> newTasks = null;
+            if (deleteOldTask) {
+                if (self.hasNewTasks()) {
+                    this.taskDao.deleteByIds(self.getNewTasks().stream().map(t -> t.getId()).collect(Collectors.toList()));
+                    newTasks = self.getNewTasks();
+                }
+            } else {
+                newTasks = this.removeRepeatTask(self.getNewTasks());
+            }
             if (CollectionUtils.isNotEmpty(newTasks)) {
                 List<List<Task>> batchTaskList = Lists.partition(newTasks, INSERT_BATCH_SIZE);
-                batchTaskList.forEach(tasks -> this.taskDao.insertBatch(newTasks));
+                batchTaskList.forEach(tasks -> this.taskDao.insertBatch(tasks));
             }
         } else {
             LOGGER.info("task {} has no new url found", task.getId());

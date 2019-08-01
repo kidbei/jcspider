@@ -236,4 +236,11 @@ public class TaskDao {
         final String sql = "delete from task where project_id = ?";
         this.jdbcTemplate.update(sql, projectId);
     }
+
+    public void deleteByIds(Collection<String> taskIds) {
+        final String sql = "delete from task where id in (:ids)";
+        MapSqlParameterSource parameters = new MapSqlParameterSource();
+        parameters.addValue("ids", taskIds);
+        this.namedParameterJdbcTemplate.update(sql, parameters);
+    }
 }

@@ -293,9 +293,7 @@ public abstract class JCProcess implements JCComponent{
         }
         List<Task> oldTask = this.taskDao.findByIds(newTasks.stream().map(t -> t.getId()).collect(Collectors.toList()));
         if (CollectionUtils.isNotEmpty(oldTask)) {
-            long now = System.currentTimeMillis();
-            List<Task> notExpireTaskList = oldTask.stream().filter(task -> task.getNextRunTime() >= now).collect(Collectors.toList());
-            newTasks.removeAll(notExpireTaskList);
+            newTasks.removeAll(oldTask);
         }
         return newTasks;
     }

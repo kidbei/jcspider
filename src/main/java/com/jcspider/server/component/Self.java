@@ -69,15 +69,7 @@ public class Self implements Serializable {
         } else {
             task.setScheduleValue(0L);
         }
-        if (task.getScheduleType().equals(Constant.SCHEDULE_TYPE_LOOP)) {
-            if (options.containsKey("expireValue")) {
-                long expireValue = MapUtils.getLongValue(options, "expireValue");
-                LOGGER.info("url {} expire value:{}", url, expireValue);
-                task.setNextRunTime(System.currentTimeMillis() + expireValue);
-            }
-        } else {
-            task.setNextRunTime(0L);
-        }
+        task.setNextRunTime(0L);
         this.newTasks.putIfAbsent(task.getId(), task);
     }
 
@@ -113,6 +105,10 @@ public class Self implements Serializable {
 
     public List<Task> getNewTasks() {
         return new ArrayList<>(newTasks.values());
+    }
+
+    public boolean hasNewTasks() {
+        return !this.newTasks.isEmpty();
     }
 
 
