@@ -107,9 +107,11 @@ public class ProjectDispatcherRunner implements Runnable {
             List<String> taskIds = tasks.stream()
                     .filter(t -> !t.getMethod().equals(Constant.METHOD_START))
                     .map(t -> t.getId()).collect(Collectors.toList());
-            taskIds.forEach(taskId -> jcQueue.blockingPushProcessTask(roundProcessNode(), taskId));
-            taskDao.updateStatusByIds(taskIds, Constant.TASK_STATUS_RUNNING);
-            LOGGER.info("start crawl task list:{}", taskIds);
+            if (CollectionUtils.isNotEmpty(taskIds)) {
+                taskIds.forEach(taskId -> jcQueue.blockingPushProcessTask(roundProcessNode(), taskId));
+                taskDao.updateStatusByIds(taskIds, Constant.TASK_STATUS_RUNNING);
+                LOGGER.info("start crawl task list:{}", taskIds);
+            }
         }
     }
 
