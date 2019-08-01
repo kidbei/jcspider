@@ -14,5 +14,6 @@ public interface Fetcher {
 
     FetchResult fetch(SimpleTask task) throws IOException;
 
+    void shutdown();
 
 }

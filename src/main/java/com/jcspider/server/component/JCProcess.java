@@ -316,6 +316,7 @@ public abstract class JCProcess implements JCComponent{
     public void shutdown() {
         this.isStop = true;
         this.threadPoolExecutor.shutdownNow();
+        this.fetcherMap.values().forEach(fetcher -> fetcher.shutdown());
     }
 
 }

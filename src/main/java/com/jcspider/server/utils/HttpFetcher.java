@@ -93,6 +93,11 @@ public class HttpFetcher implements Fetcher {
         return result;
     }
 
+    @Override
+    public void shutdown() {
+
+    }
+
 
     private Map<String, String> flatMapHeaders(Headers headers) {
         Map<String, String> headerMap = new HashMap<>(headers.size());

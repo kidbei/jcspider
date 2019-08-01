@@ -52,6 +52,11 @@ public class AjaxFetcher implements Fetcher{
        }
     }
 
+    @Override
+    public void shutdown() {
+        this.pool.close();
+    }
+
 
     public int getGetDriverTimeout() {
         return getDriverTimeout;

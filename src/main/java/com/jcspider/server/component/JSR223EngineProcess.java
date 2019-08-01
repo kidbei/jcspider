@@ -49,6 +49,7 @@ public class JSR223EngineProcess extends JCProcess {
 
     @Override
     public void runMethod(long projectId, SimpleTask task) throws RunMethodException {
+        LOGGER.info("run method,projectId:{},method:{}", projectId, task.getMethod());
         ScriptEngine scriptEngine = this.getProjectEngine(projectId);
         Fetcher fetcher = this.fetcherMap.get(task.getFetchType());
         if (fetcher == null) {
@@ -136,7 +137,7 @@ public class JSR223EngineProcess extends JCProcess {
     }
 
 
-    private ScriptEngine getProjectEngine(long projectId) {
+    private synchronized ScriptEngine getProjectEngine(long projectId) {
         ScriptEngine scriptEngine = this.projectEngineCache.get(projectId);
         if (scriptEngine == null) {
             LOGGER.info("init nashorn script engine for project {}", projectId);
