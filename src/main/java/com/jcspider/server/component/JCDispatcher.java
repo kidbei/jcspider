@@ -64,7 +64,18 @@ public class JCDispatcher implements JCComponent {
 
 
     private void subProjectStart() {
-        this.jcQueue.subDispatcherStart((topic, projectId) -> this.toStartProject((Long) projectId));
+        this.jcQueue.subDispatcherStart((topic, projectId) -> {
+            final String lockKey = "start:lock:" + projectId;
+            if (this.jcLockTool.getLock(lockKey)) {
+                try {
+                    this.toStartProject((Long) projectId);
+                } catch (Exception e) {
+                    LOGGER.error("dispatcher start project error,project:{}", projectId, e);
+                } finally {
+                    this.jcLockTool.releaseLock(lockKey);
+                }
+            }
+        });
     }
 
     private void subProjectStop() {

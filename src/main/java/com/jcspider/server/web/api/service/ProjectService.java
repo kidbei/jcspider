@@ -134,17 +134,6 @@ public class ProjectService {
         }
 
         LOGGER.info("start project {}", projectId);
-
-        Project updateExp = new Project(projectId);
-        if (StringUtils.isBlank(project.getDispatcher()) ||
-                !this.dispatcherService.listDispatcherNodes().contains(project.getDispatcher())) {
-            String dispatcherNode = this.dispatcherService.selectDispatcherNode();
-            updateExp.setDispatcher(dispatcherNode);
-            project.setDispatcher(dispatcherNode);
-            this.projectDao.updateByExp(updateExp);
-            LOGGER.info("update dispatcher node for project {}, the new dispatcher node is {}", projectId, dispatcherNode);
-        }
-
         this.jcQueue.pubDispatcherStart(projectId);
     }
 

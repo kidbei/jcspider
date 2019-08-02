@@ -29,6 +29,8 @@ public class ProjectDispatcherLoopRunner implements Runnable {
 
     private static ProjectProcessNodeDao    projectProcessNodeDao;
 
+    private static JCQueue  jcQueue;
+
     @Autowired
     public void setProjectDao(ProjectDao projectDao) {
         ProjectDispatcherLoopRunner.projectDao = projectDao;
@@ -37,6 +39,11 @@ public class ProjectDispatcherLoopRunner implements Runnable {
     @Autowired
     public void setProjectProcessNodeDao(ProjectProcessNodeDao projectProcessNodeDao) {
         ProjectDispatcherLoopRunner.projectProcessNodeDao = projectProcessNodeDao;
+    }
+
+    @Autowired
+    public void setJcQueue(JCQueue jcQueue) {
+        ProjectDispatcherLoopRunner.jcQueue = jcQueue;
     }
 
     public ProjectDispatcherLoopRunner() {
@@ -59,9 +66,6 @@ public class ProjectDispatcherLoopRunner implements Runnable {
             return;
         }
         LOGGER.info("run project loop {}", this.projectId);
-        projectDao.updateStatusById(projectId, Constant.PROJECT_STATUS_START);
-        List<String> nodes = projectProcessNodes.stream().map(p -> p.getProcessNode()).collect(Collectors.toList());;
-        ProjectDispatcherRunner dispatcherRunner = new ProjectDispatcherRunner(this.projectId, project.getRateNumber(), nodes);
-        DispatcherScheduleFactory.setProjectRunner(this.projectId, dispatcherRunner, project.getRateUnit(), project.getRateUnitMultiple());
+        jcQueue.pubDispatcherStart(this.projectId);
     }
 }
