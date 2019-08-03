@@ -87,6 +87,7 @@ public class JCDispatcher implements JCComponent {
 
     @Transactional(rollbackFor = Exception.class)
     public  void toStopProject(long projectId) {
+        LOGGER.info("to stop project {}", projectId);
         Project project = this.projectDao.getById(projectId);
         if (project == null) {
             LOGGER.warn("project not found:{}", projectId);
