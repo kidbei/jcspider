@@ -62,10 +62,6 @@ public class DispatcherScheduleFactory {
         if (runner != null) {
             runner.setStop(true);
         }
-        ProjectDispatcherLoopRunner loopRunner = PROJECT_DISPATCHER_LOOP_RUNNER_MAP.remove(projectId);
-        if (loopRunner != null) {
-            schedulePool.getQueue().remove(loopRunner);
-        }
     }
 
     public synchronized static final void setProjectDispatcherLoopRunner(long projectId, String scheduleType, long scheduleValue) {
