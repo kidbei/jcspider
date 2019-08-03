@@ -84,6 +84,13 @@ public class Self implements Serializable {
         LOGGER.info(logText);
     }
 
+    public void log(String level, String logText, boolean persistent) {
+        SelfLog log = new SelfLog(logText, persistent);
+        log.setLevel(level);
+        this.logs.add(log);
+        LOGGER.info(logText);
+    }
+
 
     public long getProjectId() {
         return projectId;

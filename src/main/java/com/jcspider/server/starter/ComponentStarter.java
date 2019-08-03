@@ -9,6 +9,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.stereotype.Component;
 
+import javax.annotation.PreDestroy;
 import java.util.Map;
 
 /**
@@ -19,9 +20,11 @@ import java.util.Map;
 public class ComponentStarter implements ApplicationContextAware {
     private static final Logger LOGGER = LoggerFactory.getLogger(ComponentStarter.class);
 
+    private Map<String, JCComponent> componentMap;
+
     @Override
     public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
-        Map<String, JCComponent> componentMap = applicationContext.getBeansOfType(JCComponent.class);
+        componentMap = applicationContext.getBeansOfType(JCComponent.class);
         componentMap.values().forEach(jcComponent -> {
             try {
                 LOGGER.info("start component {}", jcComponent.name());
@@ -30,6 +33,17 @@ public class ComponentStarter implements ApplicationContextAware {
             } catch (ComponentInitException e) {
                 LOGGER.error("start component {} error", jcComponent.name(), e);
                 throw new RuntimeException(e);
+            }
+        });
+    }
+
+    @PreDestroy
+    public void shutdown() {
+        this.componentMap.values().forEach(jcComponent -> {
+            try {
+                jcComponent.shutdown();
+            } catch (Exception e) {
+                LOGGER.error("shutdown component {} error", jcComponent.name(), e);
             }
         });
     }

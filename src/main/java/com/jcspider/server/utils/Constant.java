@@ -63,4 +63,8 @@ public class Constant {
 
     public static final long    TOKEN_EXPIRE_TIME = 1000 * 60 * 60 * 24 * 15;
 
+    public static final String  LEVEL_DEBUG = "debug";
+    public static final String  LEVEL_INFO = "info";
+    public static final String  LEVEL_ERROR = "error";
+
 }

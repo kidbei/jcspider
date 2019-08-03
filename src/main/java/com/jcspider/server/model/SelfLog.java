@@ -1,5 +1,9 @@
 package com.jcspider.server.model;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.jcspider.server.utils.Constant;
+
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
@@ -9,31 +13,41 @@ import java.util.Date;
  */
 public class SelfLog {
 
-    private long    logTime;
+    private Long    id;
+    @JsonSerialize(using = LongTimeFormat.Serialize.class)
+    @JsonDeserialize(using = LongTimeFormat.Deserialize.class)
+    private Long    logTime;
     private String  logText;
-    private boolean persistent;
-    private long    projectId;
+    private Boolean persistent;
+    private Long    projectId;
     private String  taskId;
+    private String  level;
 
     public SelfLog(String logText) {
-        this(System.currentTimeMillis(), logText, false);
+        this(Constant.LEVEL_DEBUG, System.currentTimeMillis(), logText, false);
     }
 
-    public SelfLog(String logText, boolean persistent) {
-        this(System.currentTimeMillis(), logText, persistent);
+    public SelfLog(String level, String logText) {
+        this(level, System.currentTimeMillis(), logText, false);
     }
 
-    public SelfLog(long logTime, String logText, boolean persistent) {
+
+    public SelfLog(String logText, Boolean persistent) {
+        this(Constant.LEVEL_DEBUG, System.currentTimeMillis(), logText, persistent);
+    }
+
+    public SelfLog(String level, Long logTime, String logText, Boolean persistent) {
+        this.level = level;
         this.logTime = logTime;
         this.logText = logText;
         this.persistent = persistent;
     }
 
-    public long getLogTime() {
+    public Long getLogTime() {
         return logTime;
     }
 
-    public void setLogTime(long logTime) {
+    public void setLogTime(Long logTime) {
         this.logTime = logTime;
     }
 
@@ -45,19 +59,11 @@ public class SelfLog {
         this.logText = logText;
     }
 
-    public boolean isPersistent() {
-        return persistent;
-    }
-
-    public void setPersistent(boolean persistent) {
-        this.persistent = persistent;
-    }
-
-    public long getProjectId() {
+    public Long getProjectId() {
         return projectId;
     }
 
-    public void setProjectId(long projectId) {
+    public void setProjectId(Long projectId) {
         this.projectId = projectId;
     }
 
@@ -69,9 +75,29 @@ public class SelfLog {
         this.taskId = taskId;
     }
 
+    public String getLevel() {
+        return level;
+    }
+
+    public void setLevel(String level) {
+        this.level = level;
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public Boolean getPersistent() {
+        return persistent;
+    }
+
     @Override
     public String toString() {
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.sss");
-        return sdf.format(new Date(this.logTime)) + " " + this.logText;
+        return "[" + this.level + "] " + sdf.format(new Date(this.logTime)) + " " + this.logText;
     }
 }

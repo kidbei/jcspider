@@ -9,6 +9,7 @@ import com.jcspider.server.model.ProjectProcessNode;
 import com.jcspider.server.utils.Constant;
 import com.jcspider.server.utils.IDUtils;
 import com.jcspider.server.utils.IPUtils;
+import com.jcspider.server.web.api.service.SelfLogService;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -43,6 +44,8 @@ public class JCDispatcher implements JCComponent {
     private ProjectDao  projectDao;
     @Autowired
     private TaskDao     taskDao;
+    @Autowired
+    private SelfLogService  selfLogService;
 
     private String      localIp;
 
@@ -83,10 +86,14 @@ public class JCDispatcher implements JCComponent {
     }
 
     @Transactional(rollbackFor = Exception.class)
-    public synchronized void toStopProject(long projectId) {
+    public  void toStopProject(long projectId) {
         Project project = this.projectDao.getById(projectId);
         if (project == null) {
             LOGGER.warn("project not found:{}", projectId);
+            return;
+        }
+        if (!this.localIp.equals(project.getDispatcher())) {
+            LOGGER.info("project {} is not running at this node, skip to stop", projectId);
             return;
         }
         if (!project.getStatus().equals(Constant.PROJECT_STATUS_START)) {
@@ -95,6 +102,7 @@ public class JCDispatcher implements JCComponent {
         }
         this.projectDao.updateStatusById(projectId, Constant.PROJECT_STATUS_STOP);
         DispatcherScheduleFactory.stopProjectRunner(projectId);
+        this.selfLogService.addLog(projectId, Constant.LEVEL_INFO, "项目:" + project.getName() + " 停止");
     }
 
     /**
@@ -145,18 +153,18 @@ public class JCDispatcher implements JCComponent {
     }
 
 
-
-    private void startAtLocal(Project project) {
+    @Transactional(rollbackFor = Exception.class)
+    public void startAtLocal(Project project) {
         long projectId = project.getId();
         final String lockKey = "start_lock:" + projectId;
         if (this.jcLockTool.getLock(lockKey)) {
             try {
                 LOGGER.info("project {} start at node:{}", projectId, project.getDispatcher());
-                String startTaskId = IDUtils.genTaskId(project.getId(), project.getStartUrl(), Constant.METHOD_START);
-                this.taskDao.updateStatusAndStackById(startTaskId, "", Constant.TASK_STATUS_NONE);
                 if (DispatcherScheduleFactory.isDispatcherStarted(projectId)) {
                     LOGGER.info("project {} is already started at this node", projectId);
                 } else {
+                    String startTaskId = IDUtils.genTaskId(project.getId(), project.getStartUrl(), Constant.METHOD_START);
+                    this.taskDao.updateStatusAndStackById(startTaskId, "", Constant.TASK_STATUS_NONE);
                     this.projectProcessNodeDao.deleteByProjectId(projectId);
                     List<String> processNodes = this.jcRegistry.listProcesses();
                     ProjectDispatcherRunner runner = new ProjectDispatcherRunner(projectId, project.getRateNumber(), processNodes);
@@ -166,9 +174,10 @@ public class JCDispatcher implements JCComponent {
                             .map(p -> new ProjectProcessNode(projectId, p, now))
                             .collect(Collectors.toList());
                     this.projectProcessNodeDao.insertBatch(projectProcessNodes);
+                    this.projectDao.updateStatusById(projectId, Constant.PROJECT_STATUS_START);
                     this.jcQueue.blockingPushProcessProjectStart(processNodes.get(0), projectId);
                     DispatcherScheduleFactory.setProjectDispatcherLoopRunner(projectId, project.getScheduleType(), project.getScheduleValue());
-                    this.projectDao.updateStatusById(projectId, Constant.PROJECT_STATUS_START);
+                    this.selfLogService.addLog(projectId, Constant.LEVEL_INFO, "项目:" + project.getName() + " 启动成功");
                 }
             } finally {
                 this.jcLockTool.releaseLock(lockKey);
