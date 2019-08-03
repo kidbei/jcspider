@@ -23,6 +23,9 @@ public class SelfLog {
     private String  taskId;
     private String  level;
 
+    public SelfLog() {
+    }
+
     public SelfLog(String logText) {
         this(Constant.LEVEL_DEBUG, System.currentTimeMillis(), logText, false);
     }
