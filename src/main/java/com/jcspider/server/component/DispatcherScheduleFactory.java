@@ -64,12 +64,11 @@ public class DispatcherScheduleFactory {
         }
     }
 
-    public synchronized static final void setProjectDispatcherLoopRunner(long projectId, String scheduleType, long scheduleValue) {
-        if (scheduleType.equals(Constant.SCHEDULE_TYPE_LOOP)){
-            ProjectDispatcherLoopRunner loopRunner = new ProjectDispatcherLoopRunner(projectId);
-            schedulePool.scheduleWithFixedDelay(loopRunner, 0L, scheduleValue, TimeUnit.MILLISECONDS);
-            PROJECT_DISPATCHER_LOOP_RUNNER_MAP.put(projectId, loopRunner);
-        }
+    public synchronized static final void setProjectDispatcherLoopRunner(long projectId, long scheduleValue) {
+        LOGGER.info("set dispatcher loop,project:{}, scheduleValue:{}", projectId, scheduleValue);
+        ProjectDispatcherLoopRunner loopRunner = new ProjectDispatcherLoopRunner(projectId);
+        schedulePool.scheduleWithFixedDelay(loopRunner, 0L, scheduleValue, TimeUnit.MILLISECONDS);
+        PROJECT_DISPATCHER_LOOP_RUNNER_MAP.put(projectId, loopRunner);
     }
 
 

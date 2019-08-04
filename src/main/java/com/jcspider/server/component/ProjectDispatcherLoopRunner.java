@@ -60,11 +60,6 @@ public class ProjectDispatcherLoopRunner implements Runnable {
             LOGGER.warn("project not exist:{}", this.projectId);
             return;
         }
-        List<ProjectProcessNode> projectProcessNodes = projectProcessNodeDao.findByProjectId(this.projectId);
-        if (CollectionUtils.isEmpty(projectProcessNodes)) {
-            LOGGER.warn("project has no process node:{}", this.projectId);
-            return;
-        }
         LOGGER.info("run project loop {}", this.projectId);
         jcQueue.pubDispatcherStart(this.projectId);
     }

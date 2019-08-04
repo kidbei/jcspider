@@ -18,7 +18,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.sql.Timestamp;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -116,11 +115,15 @@ public class JCDispatcher implements JCComponent {
         }
         for (Project localProject : localProjects) {
             if (localProject.getStatus().equals(Constant.PROJECT_STATUS_STOP)) {
+                if (localProject.getScheduleType().equals(Constant.SCHEDULE_TYPE_LOOP)) {
+                    DispatcherScheduleFactory.setProjectDispatcherLoopRunner(localProject.getId(), localProject.getScheduleValue());
+                }
                 continue;
-            }
-            if (!DispatcherScheduleFactory.isDispatcherStarted(localProject.getId())) {
+            } else if (!DispatcherScheduleFactory.isDispatcherStarted(localProject.getId())) {
                 LOGGER.info("recovery project:{}", localProject);
                 this.startAtLocal(localProject);
+            } else {
+                LOGGER.info("already started at this node ,project:{}", localProject.getId());
             }
         }
     }
@@ -177,7 +180,7 @@ public class JCDispatcher implements JCComponent {
                     this.projectProcessNodeDao.insertBatch(projectProcessNodes);
                     this.projectDao.updateStatusById(projectId, Constant.PROJECT_STATUS_START);
                     this.jcQueue.blockingPushProcessProjectStart(processNodes.get(0), projectId);
-                    DispatcherScheduleFactory.setProjectDispatcherLoopRunner(projectId, project.getScheduleType(), project.getScheduleValue());
+                    DispatcherScheduleFactory.setProjectDispatcherLoopRunner(projectId, project.getScheduleValue());
                     this.selfLogService.addLog(projectId, Constant.LEVEL_INFO, "项目:" + project.getName() + " 启动成功");
                 }
             } finally {
