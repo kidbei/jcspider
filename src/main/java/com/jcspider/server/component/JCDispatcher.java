@@ -81,7 +81,18 @@ public class JCDispatcher implements JCComponent {
     }
 
     private void subProjectStop() {
-        this.jcQueue.subDispatcherStop((topic, projectId) -> this.toStopProject((Long) projectId));
+        this.jcQueue.subDispatcherStop((topic, projectId) -> {
+            final String lockKey = "stop:lock:" + projectId;
+            if (this.jcLockTool.getLock(lockKey)) {
+                try {
+                    this.toStopProject((Long) projectId);
+                } catch (Exception e) {
+                    LOGGER.error("stop project error", e);
+                } finally {
+                    this.jcLockTool.releaseLock(lockKey);
+                }
+            }
+        });
     }
 
     @Transactional(rollbackFor = Exception.class)
@@ -102,6 +113,9 @@ public class JCDispatcher implements JCComponent {
         }
         this.projectDao.updateStatusById(projectId, Constant.PROJECT_STATUS_STOP);
         DispatcherScheduleFactory.stopProjectRunner(projectId);
+        if (project.getScheduleType().equals(Constant.SCHEDULE_TYPE_LOOP)) {
+            DispatcherScheduleFactory.setProjectDispatcherLoopRunner(projectId, project.getScheduleValue());
+        }
         this.selfLogService.addLog(projectId, Constant.LEVEL_INFO, "项目:" + project.getName() + " 停止");
     }
 
