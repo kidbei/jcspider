@@ -5,10 +5,12 @@ import com.google.common.collect.Lists;
 import com.jcspider.server.model.*;
 import com.jcspider.server.utils.Constant;
 import com.jcspider.server.utils.Fetcher;
+import com.jcspider.server.web.api.service.SelfLogService;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 
 import javax.script.Invocable;
@@ -34,6 +36,8 @@ public class JSR223EngineProcess extends JCProcess {
     private Map<Long, ScriptEngine> projectEngineCache = new ConcurrentHashMap<>();
     @Value("${process.maxCodeCache:10000}")
     private int maxCodeCache;
+    @Autowired
+    private SelfLogService  selfLogService;
 
 
     @Override
@@ -81,10 +85,12 @@ public class JSR223EngineProcess extends JCProcess {
             try {
                 result = ((Invocable)scriptEngine).invokeFunction(task.getMethod(), self, response);
             } catch (Exception e) {
+                this.selfLogService.addLog(projectId, Constant.LEVEL_ERROR,
+                        "函数执行失败,project:" + projectId + ",url:" + task.getSourceUrl() + ",method:" + task.getMethod() + "error:" + e.getMessage());
                 throw new RunMethodException(e, task.getMethod());
             }
         }
-        if (CollectionUtils.isNotEmpty(self.getNewTasks())) {
+        if (self.hasNewTasks()) {
             boolean deleteOldTask = false;
             if (Constant.METHOD_START.equals(task.getMethod())) {
                 Project project = this.getProject(projectId);
@@ -119,6 +125,7 @@ public class JSR223EngineProcess extends JCProcess {
             }
         } else {
             LOGGER.info("task {} has no new url found", task.getId());
+            this.selfLogService.addLog(projectId, Constant.LEVEL_ERROR, "没有嗅探到新的URL,项目:" + projectId + ",url:" + task.getSourceUrl() + ",method:" + task.getMethod());
         }
         if (result != null) {
             TaskResult taskResult = new TaskResult();
