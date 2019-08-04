@@ -125,6 +125,7 @@ public class JCDispatcher implements JCComponent {
     private void recoveryLocalProject() {
         List<Project> localProjects = this.projectDao.findByDispatcher(this.localIp);
         if (CollectionUtils.isEmpty(localProjects)) {
+            LOGGER.info("no project at this node:{}", this.localIp);
             return;
         }
         for (Project localProject : localProjects) {
