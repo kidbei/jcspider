@@ -1,18 +1,11 @@
 package com.jcspider.server.component;
 
 import com.jcspider.server.dao.ProjectDao;
-import com.jcspider.server.dao.ProjectProcessNodeDao;
 import com.jcspider.server.model.Project;
-import com.jcspider.server.model.ProjectProcessNode;
-import com.jcspider.server.utils.Constant;
-import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-
-import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * @author zhuang.hu
@@ -27,18 +20,12 @@ public class ProjectDispatcherLoopRunner implements Runnable {
 
     private static ProjectDao projectDao;
 
-    private static ProjectProcessNodeDao    projectProcessNodeDao;
 
     private static JCQueue  jcQueue;
 
     @Autowired
     public void setProjectDao(ProjectDao projectDao) {
         ProjectDispatcherLoopRunner.projectDao = projectDao;
-    }
-
-    @Autowired
-    public void setProjectProcessNodeDao(ProjectProcessNodeDao projectProcessNodeDao) {
-        ProjectDispatcherLoopRunner.projectProcessNodeDao = projectProcessNodeDao;
     }
 
     @Autowired

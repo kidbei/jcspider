@@ -65,6 +65,9 @@ public class DispatcherScheduleFactory {
     }
 
     public synchronized static final void setProjectDispatcherLoopRunner(long projectId, long scheduleValue) {
+        if (PROJECT_DISPATCHER_LOOP_RUNNER_MAP.containsKey(projectId)) {
+            return;
+        }
         LOGGER.info("set dispatcher loop,project:{}, scheduleValue:{}", projectId, scheduleValue);
         ProjectDispatcherLoopRunner loopRunner = new ProjectDispatcherLoopRunner(projectId);
         schedulePool.scheduleWithFixedDelay(loopRunner, 0L, scheduleValue, TimeUnit.MILLISECONDS);

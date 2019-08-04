@@ -107,6 +107,10 @@ public class JCDispatcher implements JCComponent {
             LOGGER.info("project {} is not running at this node, skip to stop", projectId);
             return;
         }
+        if (project.getStatus().equals(Constant.PROJECT_STATUS_STOP)) {
+            LOGGER.info("project {} is already stopped", projectId);
+            return;
+        }
         this.projectDao.updateStatusById(projectId, Constant.PROJECT_STATUS_STOP);
         DispatcherScheduleFactory.stopProjectRunner(projectId);
         if (project.getScheduleType().equals(Constant.SCHEDULE_TYPE_LOOP)) {
