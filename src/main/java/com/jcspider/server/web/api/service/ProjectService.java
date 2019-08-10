@@ -86,8 +86,13 @@ public class ProjectService {
 
 
     public void update(Project project) {
+        Project old = this.projectDao.getById(project.getId());
         this.projectDao.updateByExp(project);
         this.jcQueue.pubDispatcherStop(project.getId());
+        if (!old.getScheduleType().equals(project.getScheduleType())) {
+            LOGGER.info("loop update,projectId:{}, old:{}->now:{}", project.getId(), old.getScheduleType(), project.getScheduleType());
+            this.jcQueue.pubDispatcherLoopUpdate(project.getId());
+        }
     }
 
 

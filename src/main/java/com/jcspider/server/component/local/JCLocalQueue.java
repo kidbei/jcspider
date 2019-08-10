@@ -154,8 +154,18 @@ public class JCLocalQueue implements JCQueue {
     }
 
     @Override
+    public void subDispatcherLoopUpdate(QueueOnMessage queueOnMessage) {
+        this.sub(Constant.TOPIC_DISPATCHER_LOOP_UPDATE, queueOnMessage);
+    }
+
+    @Override
     public void pubDispatcherStop(long projectId) {
         this.pub(Constant.TOPIC_DISPATCHER_PROJECT_STOP, projectId);
+    }
+
+    @Override
+    public void pubDispatcherLoopUpdate(long projectId) {
+        this.pub(Constant.TOPIC_DISPATCHER_LOOP_UPDATE, projectId);
     }
 
     @Override

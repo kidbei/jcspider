@@ -57,6 +57,7 @@ public class JCDispatcher implements JCComponent {
             DispatcherScheduleFactory.init(maxScheduleSize);
             this.subProjectStart();
             this.subProjectStop();
+            this.subScheduleTypeUpdate();
             LOGGER.info("reg dispatcher ip:{}, max schedule size:{}", this.localIp, maxScheduleSize);
             this.recoveryLocalProject();
         } catch (Exception e) {
@@ -91,6 +92,18 @@ public class JCDispatcher implements JCComponent {
                 } finally {
                     this.jcLockTool.releaseLock(lockKey);
                 }
+            }
+        });
+    }
+
+    private void subScheduleTypeUpdate() {
+        this.jcQueue.subDispatcherLoopUpdate((topic, projectId) -> {
+            Project project = this.projectDao.getById((Long) projectId);
+            LOGGER.info("project {} schedule type update", projectId);
+            if (project.getScheduleType().equals(Constant.SCHEDULE_TYPE_LOOP)) {
+                DispatcherScheduleFactory.setProjectDispatcherLoopRunner((Long) projectId, project.getScheduleValue());
+            } else {
+                DispatcherScheduleFactory.removeProjectDispatcherLoopRunner((Long) projectId);
             }
         });
     }

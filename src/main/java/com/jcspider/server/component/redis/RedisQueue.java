@@ -97,8 +97,18 @@ public class RedisQueue implements JCQueue {
     }
 
     @Override
+    public void subDispatcherLoopUpdate(QueueOnMessage queueOnMessage) {
+
+    }
+
+    @Override
     public void pubDispatcherStop(long projectId) {
         this.pub(Constant.TOPIC_DISPATCHER_PROJECT_STOP, projectId);
+    }
+
+    @Override
+    public void pubDispatcherLoopUpdate(long projectId) {
+
     }
 
     @Override

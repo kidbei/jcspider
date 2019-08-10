@@ -125,7 +125,10 @@ public class JSR223EngineProcess extends JCProcess {
             }
         } else {
             LOGGER.info("task {} has no new url found", task.getId());
-            this.selfLogService.addLog(projectId, Constant.LEVEL_ERROR, "没有嗅探到新的URL,项目:" + projectId + ",url:" + task.getSourceUrl() + ",method:" + task.getMethod());
+            if (result == null) {
+                this.selfLogService.addLog(projectId, Constant.LEVEL_ERROR,
+                        "没有嗅探到新的URL,项目:" + projectId + ",url:" + task.getSourceUrl() + ",method:" + task.getMethod());
+            }
         }
         if (result != null) {
             TaskResult taskResult = new TaskResult();

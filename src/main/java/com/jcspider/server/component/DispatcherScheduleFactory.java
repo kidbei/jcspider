@@ -74,6 +74,11 @@ public class DispatcherScheduleFactory {
         PROJECT_DISPATCHER_LOOP_RUNNER_MAP.put(projectId, loopRunner);
     }
 
+    public synchronized static final void removeProjectDispatcherLoopRunner(long projectId) {
+        ProjectDispatcherLoopRunner loopRunner = PROJECT_DISPATCHER_LOOP_RUNNER_MAP.remove(projectId);
+        schedulePool.getQueue().remove(loopRunner);
+    }
+
 
     public static boolean isDispatcherStarted(long projectId) {
         return PROJECT_DISPATCHER_RUNNER_MAP.containsKey(projectId);
