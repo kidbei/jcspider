@@ -15,8 +15,6 @@ import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Repository;
 
-import java.sql.SQLException;
-import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -30,8 +28,8 @@ import java.util.List;
 @Repository
 public class ProjectDao {
 
-    private String COLUMNS = "name, start_url, script_text, status, rate_unit, rate_number, dispatcher, created_at, updated_at," +
-            " schedule_type, schedule_value, rate_unit_multiple, description";
+    private String COLUMNS = "name, start_url, script_text, status, dispatcher, created_at, updated_at," +
+            " schedule_type, schedule_value, description,qps";
 
     @Autowired
     private JdbcTemplate    jdbcTemplate;
@@ -45,12 +43,10 @@ public class ProjectDao {
         if (project.getCreatedAt() == null) {
             project.setCreatedAt(project.getUpdatedAt());
         }
-        final String sql = "insert into project (" + COLUMNS + ") values (?,?,?,?,?,?,?,?,?,?,?,?,?) RETURNING id";
+        final String sql = "insert into project (" + COLUMNS + ") values (?,?,?,?,?,?,?,?,?,?,?,?,?,?) RETURNING id";
         return this.jdbcTemplate.queryForObject(sql, new Object[]{project.getName(), project.getStartUrl(),
-                project.getScriptText(), project.getStatus(), project.getRateUnit(),
-                project.getRateNumber(), project.getDispatcher(), project.getCreatedAt(),
-                project.getUpdatedAt(), project.getScheduleType(), project.getScheduleValue(),
-                project.getRateUnitMultiple(), project.getDescription()}, Long.class);
+                project.getScriptText(), project.getStatus(), project.getDispatcher(), project.getCreatedAt(),
+                project.getUpdatedAt(), project.getScheduleType(), project.getScheduleValue(), project.getDescription(), project.getQps()}, Long.class);
     }
 
     public Project getById(long id) {
@@ -98,21 +94,10 @@ public class ProjectDao {
             sb.append("description = ?,");
             params.add(project.getDescription());
         }
-        if (project.getRateUnitMultiple() != null) {
-            sb.append("rate_unit_multiple = ?,");
-            params.add(project.getRateUnitMultiple());
-        }
-        if (project.getRateUnit() != null) {
-            sb.append("rate_unit = ?,");
-            params.add(project.getRateUnit());
-        }
+
         if (project.getDispatcher() != null) {
             sb.append("dispatcher = ?,");
             params.add(project.getDispatcher());
-        }
-        if (project.getRateNumber() != null) {
-            sb.append("rate_number = ?,");
-            params.add(project.getRateNumber());
         }
         if (project.getScheduleType() != null) {
             sb.append("schedule_type = ?,");
@@ -137,6 +122,10 @@ public class ProjectDao {
         if (project.getUpdatedAt() != null) {
             sb.append("updated_at = ?,");
             params.add(project.getUpdatedAt());
+        }
+        if (project.getQps() != null) {
+            sb.append("qps = ?,");
+            params.add(project.getQps());
         }
         final String sql = sb.substring(0, sb.length() - 1) + " where id = ?";
         params.add(project.getId());

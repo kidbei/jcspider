@@ -1,4 +1,4 @@
-package com.jcspider.server.component;
+package com.jcspider.server.component.ifc;
 
 import com.jcspider.server.model.ComponentInitException;
 

@@ -2,7 +2,7 @@ package com.jcspider;
 
 import java.io.IOException;
 
-import com.jcspider.server.component.JCQueue;
+import com.jcspider.server.component.ifc.JCQueue;
 import com.jcspider.server.dao.ProjectDao;
 import com.jcspider.server.model.Project;
 import com.jcspider.server.starter.JCSpiderApplication;
@@ -44,8 +44,6 @@ public class AppTest {
         Project project = new Project();
         project.setName("开源中国");
         project.setStartUrl("https://www.oschina.net/news/project");
-        project.setRateNumber(1);
-        project.setRateUnit(Constant.UNIT_TYPE_SECONDS);
         project.setScheduleType(Constant.SCHEDULE_TYPE_NONE);
         project.setScriptText(scriptText);
         project.setStatus(Constant.PROJECT_STATUS_STOP);
@@ -53,15 +51,6 @@ public class AppTest {
         projectDao.insert(project);
     }
 
-    @Test
-    public void test_start() {
-        jcQueue.pub(Constant.TOPIC_DISPATCHER_PROJECT_START, 1l);
-        try {
-            Thread.sleep(Integer.MAX_VALUE);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-    }
 
     @After
     public void shutdown() {

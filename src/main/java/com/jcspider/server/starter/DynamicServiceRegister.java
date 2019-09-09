@@ -1,13 +1,11 @@
 package com.jcspider.server.starter;
 
-import com.jcspider.server.component.DbResultExporter;
-import com.jcspider.server.component.JCDispatcher;
-import com.jcspider.server.component.JSR223EngineProcess;
+import com.jcspider.server.component.core.DbResultExporter;
+import com.jcspider.server.component.core.JSR223EngineProcess;
 import com.jcspider.server.component.local.JCLocalLockTool;
 import com.jcspider.server.component.local.JCLocalQueue;
 import com.jcspider.server.component.local.JCLocalRegistry;
 import com.jcspider.server.component.redis.RedisLockTool;
-import com.jcspider.server.component.redis.RedisQueue;
 import com.jcspider.server.component.redis.RedisRegistry;
 import com.jcspider.server.utils.Constant;
 import org.slf4j.Logger;
@@ -34,6 +32,7 @@ public class DynamicServiceRegister {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DynamicServiceRegister.class);
 
+
     @Bean
     public BeanDefinitionRegistryPostProcessor addServiceBean(Environment env) {
         final boolean dispatcherEnable = Boolean.valueOf(env.getProperty("dispatcher.enable", "true"));
@@ -45,7 +44,9 @@ public class DynamicServiceRegister {
         return new BeanDefinitionRegistryPostProcessor() {
             @Override
             public void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) throws BeansException {
+                if (Constant.MODEL_LOCAL.equalsIgnoreCase(model)) {
 
+                }
             }
 
             @Override
@@ -61,8 +62,6 @@ public class DynamicServiceRegister {
                             BeanDefinitionBuilder.rootBeanDefinition(JCLocalLockTool.class).getBeanDefinition());
                 } else if (Constant.MODEL_CLUSTER.equalsIgnoreCase(model)){
                     LOGGER.info("current model is cluster ");
-                    registry.registerBeanDefinition("jcQueue",
-                            BeanDefinitionBuilder.rootBeanDefinition(RedisQueue.class).getBeanDefinition());
                     registry.registerBeanDefinition("jcRegistry",
                             BeanDefinitionBuilder.rootBeanDefinition(RedisRegistry.class).getBeanDefinition());
                     registry.registerBeanDefinition("jcLockTool",
@@ -77,11 +76,6 @@ public class DynamicServiceRegister {
                     }
                     List<String> exporterComponents = Arrays.asList(resultExporter.split(","));
                 }
-                if (dispatcherEnable) {
-                    LOGGER.info("start model:jcDispatcher");
-                    registry.registerBeanDefinition("jcDispatcher",
-                            BeanDefinitionBuilder.rootBeanDefinition(JCDispatcher.class).getBeanDefinition());
-                }
                 if (!dbExporterDisable) {
                     registry.registerBeanDefinition(Constant.DB_RESULT_EXPORTER,
                             BeanDefinitionBuilder.rootBeanDefinition(DbResultExporter.class).getBeanDefinition());
@@ -89,6 +83,7 @@ public class DynamicServiceRegister {
             }
         };
     }
+
 
 
 

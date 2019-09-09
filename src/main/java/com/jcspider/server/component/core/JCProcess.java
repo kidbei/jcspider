@@ -1,10 +1,16 @@
-package com.jcspider.server.component;
+package com.jcspider.server.component.core;
 
 import com.alibaba.fastjson.JSON;
+import com.jcspider.server.component.core.event.NewTask;
+import com.jcspider.server.component.ifc.JCComponent;
+import com.jcspider.server.component.ifc.JCQueue;
+import com.jcspider.server.component.ifc.JCRegistry;
+import com.jcspider.server.component.ifc.ResultExporter;
 import com.jcspider.server.dao.ProjectDao;
 import com.jcspider.server.dao.TaskDao;
 import com.jcspider.server.model.*;
 import com.jcspider.server.utils.*;
+import com.jcspider.server.web.api.service.SelfLogService;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.jboss.netty.util.internal.LinkedTransferQueue;
@@ -20,7 +26,6 @@ import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
 import java.io.IOException;
 import java.net.UnknownHostException;
-import java.sql.Timestamp;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -31,16 +36,15 @@ import java.util.stream.Collectors;
  * @author zhuang.hu
  * @since 24 June 2019
  */
-public abstract class JCProcess implements JCComponent{
+public abstract class JCProcess implements JCComponent {
     private static final Logger LOGGER = LoggerFactory.getLogger(JCProcess.class);
 
-
     @Value("${process.threads:10}")
-    private int processThreads;
+    private int                     processThreads;
     @Value("${process.result.exporter}")
-    private String exportComponents;
+    private String                  exportComponents;
 
-    protected List<ResultExporter> resultExporters = new ArrayList<>();
+    protected List<ResultExporter>  resultExporters = new ArrayList<>();
 
     @Autowired
     protected ProjectDao              projectDao;
@@ -49,7 +53,12 @@ public abstract class JCProcess implements JCComponent{
     @Autowired
     protected JCQueue                 jcQueue;
     @Autowired
-    protected JCRegistry              jcRegistry;
+    protected JCRegistry                jcRegistry;
+
+    @Autowired
+    protected ApplicationContext    applicationContext;
+    @Autowired
+    private SelfLogService          selfLogService;
 
     protected String                  localIp;
 
@@ -59,8 +68,7 @@ public abstract class JCProcess implements JCComponent{
 
     protected final Map<String, Fetcher> fetcherMap = new HashMap<>();
 
-    @Autowired
-    protected ApplicationContext    applicationContext;
+
 
     private final ConcurrentHashMap<Long, Project>  projectMap = new ConcurrentHashMap<>();
 
@@ -83,64 +91,11 @@ public abstract class JCProcess implements JCComponent{
         this.jcRegistry.registerProcess(this.localIp);
         this.threadPoolExecutor = new ThreadPoolExecutor(processThreads, processThreads, Long.MAX_VALUE, TimeUnit.HOURS, new LinkedTransferQueue<>());
 
-        this.threadPoolExecutor.execute(() -> {
-            final String topic = Constant.TOPIC_PROCESS_TASK + this.localIp;
-            LOGGER.info("subscript topic:{}", topic);
-            while (!Thread.interrupted() && !isStop) {
-                try {
-                    String taskId = this.jcQueue.blockingPopProcessTask(this.localIp);
-                    this.processTask(taskId);
-                } catch (Exception e) {
-                    LOGGER.error("process failed", e);
-                }
-            }
-        });
-
-        this.threadPoolExecutor.execute(() -> {
-            final String topic = Constant.TOPIC_PROCESS_PROJECT_START + this.localIp;
-            LOGGER.info("subscript topic:{}", topic);
-            while (!Thread.interrupted() && !isStop) {
-                try {
-                    Long projectId =  this.jcQueue.blockingPopProcessProjectStart(this.localIp);
-                    this.startProject(projectId);
-                } catch (Exception e) {
-                    LOGGER.error("start failed", e);
-                }
-            }
-        });
-
-        this.threadPoolExecutor.execute(() -> {
-            final String topic = Constant.TOPIC_PROCESS_DEBUG + this.localIp;
-            LOGGER.info("subscript topic:{}", topic);
-            while (!Thread.interrupted() && !isStop) {
-                DebugTask debugTask = this.jcQueue.blockingPopProcessDebugTask(this.localIp);
-                try {
-                    LOGGER.info("debug task:{}", debugTask);
-                    DebugResult debugResult = this.debug(debugTask.getRequestId(), debugTask.getScriptText(), debugTask.getSimpleTask());
-                    this.jcQueue.blockingPushProcessDebugTaskReturn(debugResult);
-                } catch (Exception e) {
-                    LOGGER.error("debug error", e);
-                }
-            }
-        });
-
-        this.jcQueue.subDispatcherStop((topic, message) -> {
-            try {
-                LOGGER.info("stop project:{}", message);
-                this.stopProject((Long) message);
-            } catch (Exception e) {
-                LOGGER.error("stop failed", e);
-            }
-        });
-
     }
 
 
-    abstract void stopProject(long projectId);
 
-
-
-    private void processTask(String taskId) {
+    public void processTask(String taskId) {
         LOGGER.info("start to process task:{}", taskId);
         Task task;
         try {
@@ -149,18 +104,9 @@ public abstract class JCProcess implements JCComponent{
                 LOGGER.warn("task not found:{}", taskId);
                 return;
             }
-           if (task.getScheduleType().equals(Constant.SCHEDULE_TYPE_LOOP)) {
-               if (task.getNextRunTime() <= System.currentTimeMillis()) {
-                   this.clearResult(task.getProjectId(), taskId);
-               }
-                this.runMethod(task.getProjectId(), task);
-                Task update = new Task(taskId, Constant.TASK_STATUS_DONE, System.currentTimeMillis() + task.getScheduleValue());
-                this.taskDao.upgrade(update);
-            } else {
-                this.runMethod(task.getProjectId(), task);
-                Task update = new Task(taskId, Constant.TASK_STATUS_DONE, 0L);
-                this.taskDao.upgrade(update);
-            }
+            this.runMethod(task.getProjectId(), task);
+            Task update = new Task(taskId, Constant.TASK_STATUS_DONE);
+            this.taskDao.upgrade(update);
         } catch (Exception e) {
             LOGGER.error("process task error:{}", taskId, e);
             this.taskDao.updateStatusAndStackById(taskId, e.getMessage(), Constant.TASK_STATUS_ERROR);
@@ -168,21 +114,72 @@ public abstract class JCProcess implements JCComponent{
     }
 
 
-    abstract void runMethod(long projectId, SimpleTask task) throws RunMethodException;
+    private void runMethod(long projectId, SimpleTask task) throws RunMethodException{
+        LOGGER.info("run method,projectId:{},method:{}", projectId, task.getMethod());
+        Fetcher fetcher = this.fetcherMap.get(task.getFetchType());
+        if (fetcher == null) {
+            throw new IllegalArgumentException("unknown fetch type:" + task.getFetchType());
+        }
+        Self self = new Self(projectId);
+        Object result;
 
-
-    private void clearResult(long projectId, String taskId) {
-        this.resultExporters.forEach(resultExporter -> {
+        if (Constant.METHOD_START.equals(task.getMethod())) {
             try {
-                resultExporter.delete(projectId, taskId);
+                result = this.runMethod(projectId, task.getMethod(), self, task.getSourceUrl());
             } catch (Exception e) {
-                LOGGER.error("delete result error, projectId:{}. taskId:{}", projectId, taskId);
+                throw new RunMethodException(e, task.getMethod());
             }
-        });
+        } else {
+            FetchResult fetchResult;
+            try {
+                fetchResult = fetcher.fetch(task);
+            } catch (IOException e) {
+                throw new RunMethodException("fetch failed, method:" + task.getMethod() + ".reason" + e.getMessage());
+            }
+            if (!fetchResult.isSuccess()) {
+                throw new RunMethodException("fetch failed,http status:" + fetchResult.getStatus(), task.getMethod());
+            }
+            Response response = new Response(fetchResult.getHeaders(), fetchResult.getContent(), task.getSourceUrl());
+            if (StringUtils.isNotBlank(task.getExtra())) {
+                response.setExtras(JSON.parseObject(task.getExtra()));
+            }
+            try {
+                result = this.runMethod(projectId, task.getMethod(), self, response);
+            } catch (Exception e) {
+                this.selfLogService.addLog(projectId, Constant.LEVEL_ERROR,
+                        "函数执行失败,project:" + projectId + ",url:" + task.getSourceUrl() + ",method:" + task.getMethod() + "error:" + e.getMessage());
+                throw new RunMethodException(e, task.getMethod());
+            }
+        }
+        if (self.hasNewTasks()) {
+            self.getNewTasks().forEach(newTask -> this.jcQueue.publish(Constant.TOPIC_NEW_TASK, new NewTask(newTask)));
+        } else {
+            LOGGER.info("task {} has no new url found", task.getId());
+            if (result == null) {
+                this.selfLogService.addLog(projectId, Constant.LEVEL_ERROR,
+                        "没有嗅探到新的URL,项目:" + projectId + ",url:" + task.getSourceUrl() + ",method:" + task.getMethod());
+            }
+        }
+        if (result != null) {
+            TaskResult taskResult = new TaskResult();
+            taskResult.setTaskId(task.getId());
+            taskResult.setProjectId(projectId);
+            taskResult.setCreatedAt(System.currentTimeMillis());
+            taskResult.setResultText(JSON.toJSONString(result));
+            this.resultExporters.forEach(resultExporter -> {
+                try {
+                    resultExporter.export(taskResult);
+                } catch (Exception e) {
+                    LOGGER.error("export result error, exporter:{}", resultExporter, e);
+                }
+            });
+        }
     }
 
 
-    private void startProject(Long projectId) {
+    abstract Object runMethod(long projectId, String method, Self self, Object params) throws RunMethodException;
+
+    public void startProject(Long projectId) {
         LOGGER.info("start project:{}", projectId);
         Project project = this.getProject(projectId);
         String taskId = IDUtils.genTaskId(projectId, project.getStartUrl(), "start");
@@ -211,7 +208,7 @@ public abstract class JCProcess implements JCComponent{
     }
 
 
-    private DebugResult debug(String requestId, String scriptText, SimpleTask simpleTask) {
+    public DebugResult debug(String requestId, String scriptText, SimpleTask simpleTask) {
         final DebugResult debugResult = new DebugResult();
         debugResult.setRequestId(requestId);
 
@@ -287,17 +284,6 @@ public abstract class JCProcess implements JCComponent{
     }
 
 
-    protected List<Task> removeRepeatTask(List<Task> newTasks) {
-        if (CollectionUtils.isEmpty(newTasks)) {
-            return newTasks;
-        }
-        List<Task> oldTask = this.taskDao.findByIds(newTasks.stream().map(t -> t.getId()).collect(Collectors.toList()));
-        if (CollectionUtils.isNotEmpty(oldTask)) {
-            newTasks.removeAll(oldTask);
-        }
-        return newTasks;
-    }
-
 
     protected Project getProject(long projectId) {
         Project project = this.projectMap.get(projectId);
@@ -318,5 +304,7 @@ public abstract class JCProcess implements JCComponent{
         this.threadPoolExecutor.shutdownNow();
         this.fetcherMap.values().forEach(fetcher -> fetcher.shutdown());
     }
+
+
 
 }

@@ -15,7 +15,6 @@ public class Task extends SimpleTask {
     private String  stack;
     private Long    projectId;
     private Long    scheduleValue;
-    private Long    nextRunTime;
     @JsonSerialize(using = LongTimeFormat.Serialize.class)
     private Long   createdAt;
     @JsonSerialize(using = LongTimeFormat.Serialize.class)
@@ -25,10 +24,9 @@ public class Task extends SimpleTask {
     public Task() {
     }
 
-    public Task(String id, String status, Long nextRunTime) {
+    public Task(String id, String status) {
         this.setId(id);
         this.status = status;
-        this.nextRunTime = nextRunTime;
     }
 
     public String getStatus() {
@@ -91,15 +89,6 @@ public class Task extends SimpleTask {
     @Override
     public boolean equals(Object obj) {
         return this.getId().equals(((Task)obj).getId());
-    }
-
-
-    public Long getNextRunTime() {
-        return nextRunTime;
-    }
-
-    public void setNextRunTime(Long nextRunTime) {
-        this.nextRunTime = nextRunTime;
     }
 
     public String getProcessNode() {

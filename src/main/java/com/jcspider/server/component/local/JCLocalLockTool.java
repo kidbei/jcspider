@@ -1,6 +1,6 @@
 package com.jcspider.server.component.local;
 
-import com.jcspider.server.component.JCLockTool;
+import com.jcspider.server.component.ifc.JCLockTool;
 
 import java.util.Collections;
 import java.util.HashSet;

@@ -1,6 +1,6 @@
 package com.jcspider.server.web.api.service;
 
-import com.jcspider.server.component.JCRegistry;
+import com.jcspider.server.component.ifc.JCRegistry;
 import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

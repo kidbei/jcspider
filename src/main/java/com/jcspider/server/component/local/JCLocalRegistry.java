@@ -1,6 +1,6 @@
 package com.jcspider.server.component.local;
 
-import com.jcspider.server.component.JCRegistry;
+import com.jcspider.server.component.ifc.JCRegistry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

@@ -1,6 +1,6 @@
 package com.jcspider.server.component.redis;
 
-import com.jcspider.server.component.JCLockTool;
+import com.jcspider.server.component.ifc.JCLockTool;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.connection.RedisConnection;
 import org.springframework.data.redis.core.RedisTemplate;

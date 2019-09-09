@@ -1,4 +1,4 @@
-package com.jcspider.server.component;
+package com.jcspider.server.component.core;
 
 import com.alibaba.fastjson.JSON;
 import com.jcspider.server.model.SelfLog;
@@ -10,7 +10,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.Serializable;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 
 /**
  * @author zhuang.hu
@@ -66,7 +69,6 @@ public class Self implements Serializable {
         } else {
             task.setScheduleValue(0L);
         }
-        task.setNextRunTime(0L);
         this.newTasks.putIfAbsent(task.getId(), task);
     }
 

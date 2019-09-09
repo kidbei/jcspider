@@ -1,5 +1,6 @@
-package com.jcspider.server.component;
+package com.jcspider.server.component.core;
 
+import com.jcspider.server.component.ifc.ResultExporter;
 import com.jcspider.server.dao.TaskResultDao;
 import com.jcspider.server.model.TaskResult;
 import com.jcspider.server.utils.Constant;

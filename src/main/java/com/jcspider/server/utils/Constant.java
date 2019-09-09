@@ -7,16 +7,14 @@ package com.jcspider.server.utils;
 public class Constant {
 
 
-    public static final String COMPONENT_NAME_DISPATCHER = "dispatcher";
-
-
-    public static final String  TOPIC_PROCESS_TASK = "process:task:consumer:";
-    public static final String  TOPIC_PROCESS_PROJECT_START = "process:project:start:";
     public static final String  TOPIC_DISPATCHER_PROJECT_START = "dispatcher:project:start";
-    public static final String  TOPIC_DISPATCHER_PROJECT_STOP = "dispatcher:project:stop";
-    public static final String  TOPIC_PROCESS_DEBUG = "process:task:debug:consumer:";
-    public static final String  TOPIC_PROCESS_DEBUG_TASK_RETURN = "process:task:debug:return:";
-    public static final String  TOPIC_DISPATCHER_LOOP_UPDATE = "dispatcher:loop:update";
+    public static final String  TOPIC_START_PROJECT = "start_project";
+    public static final String  TOPIC_NEW_TASK = "new_task";
+    public static final String  TOPIC_POP_TASK_REQ = "pop_task_req";
+    public static final String  TOPIC_POP_TASK_RESP = "pop_task_resp";
+    public static final String  TOPIC_STOP_PROJECT = "stop_project";
+    public static final String  TOPIC_DEBUG_PROJECT_REQ = "debug_project_req";
+    public static final String  TOPIC_DEBUG_PROJECT_RESP = "debug_project_resp";
 
     public static final String  TASK_STATUS_ERROR = "error";
     public static final String  TASK_STATUS_RUNNING = "running";

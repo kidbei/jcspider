@@ -1,6 +1,5 @@
 package com.jcspider.server.model;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
@@ -18,9 +17,6 @@ public class Project implements Serializable {
     private String      startUrl;
     private String      scriptText;
     private String      status;
-    private String      rateUnit;
-    private Integer     rateUnitMultiple;
-    private Integer     rateNumber;
     private String      dispatcher;
     @JsonSerialize(using = LongTimeFormat.Serialize.class)
     @JsonDeserialize(using = LongTimeFormat.Deserialize.class)
@@ -31,7 +27,7 @@ public class Project implements Serializable {
     private String      scheduleType;
     private Long        scheduleValue;
     private String      description;
-
+    private Double      qps;
 
 
     private Integer     resultCount;
@@ -81,30 +77,6 @@ public class Project implements Serializable {
 
     public void setStatus(String status) {
         this.status = status;
-    }
-
-    public String getRateUnit() {
-        return rateUnit;
-    }
-
-    public void setRateUnit(String rateUnit) {
-        this.rateUnit = rateUnit;
-    }
-
-    public Integer getRateUnitMultiple() {
-        return rateUnitMultiple;
-    }
-
-    public void setRateUnitMultiple(Integer rateUnitMultiple) {
-        this.rateUnitMultiple = rateUnitMultiple;
-    }
-
-    public Integer getRateNumber() {
-        return rateNumber;
-    }
-
-    public void setRateNumber(Integer rateNumber) {
-        this.rateNumber = rateNumber;
     }
 
     public String getDispatcher() {
@@ -163,6 +135,14 @@ public class Project implements Serializable {
         this.resultCount = resultCount;
     }
 
+    public Double getQps() {
+        return qps;
+    }
+
+    public void setQps(Double qps) {
+        this.qps = qps;
+    }
+
     @Override
     public String toString() {
         return "Project{" +
@@ -171,13 +151,11 @@ public class Project implements Serializable {
                 ", startUrl='" + startUrl + '\'' +
                 ", scriptText='" + scriptText + '\'' +
                 ", status='" + status + '\'' +
-                ", rateUnit='" + rateUnit + '\'' +
-                ", rateUnitMultiple=" + rateUnitMultiple +
-                ", rateNumber=" + rateNumber +
                 ", dispatcher='" + dispatcher + '\'' +
                 ", createdAt=" + createdAt +
                 ", updatedAt=" + updatedAt +
                 ", scheduleType='" + scheduleType + '\'' +
+                ", qps='" + qps + '\'' +
                 ", scheduleValue=" + scheduleValue +
                 ", description='" + description + '\'' +
                 '}';

@@ -1,6 +1,6 @@
 package com.jcspider.server.component.redis;
 
-import com.jcspider.server.component.JCRegistry;
+import com.jcspider.server.component.ifc.JCRegistry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;

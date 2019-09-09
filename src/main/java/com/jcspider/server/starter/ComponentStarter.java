@@ -1,12 +1,13 @@
 package com.jcspider.server.starter;
 
+import com.jcspider.server.component.ifc.JCComponent;
 import com.jcspider.server.model.ComponentInitException;
-import com.jcspider.server.component.JCComponent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
+import org.springframework.context.annotation.DependsOn;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PreDestroy;
@@ -17,6 +18,7 @@ import java.util.Map;
  * @since 31 May 2019
  */
 @Component
+@DependsOn("beanUtils")
 public class ComponentStarter implements ApplicationContextAware {
     private static final Logger LOGGER = LoggerFactory.getLogger(ComponentStarter.class);
 
@@ -47,4 +49,6 @@ public class ComponentStarter implements ApplicationContextAware {
             }
         });
     }
+
+
 }

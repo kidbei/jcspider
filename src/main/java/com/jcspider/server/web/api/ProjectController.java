@@ -146,8 +146,8 @@ public class ProjectController {
         if (StringUtils.isBlank(project.getStartUrl())) {
             return JSONResult.error("startUrl is empty");
         }
-        if (project.getRateNumber() == null || project.getRateNumber() <= 0) {
-            return JSONResult.error("频率值必须大于0");
+        if (project.getQps() == null) {
+            project.setQps(1.);
         }
         return JSONResult.success(null);
     }

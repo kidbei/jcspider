@@ -1,17 +1,20 @@
 package com.jcspider.server.web.api.service;
 
-import com.jcspider.server.component.JCQueue;
-import com.jcspider.server.component.JCRegistry;
+import com.jcspider.server.component.core.OnEvent;
+import com.jcspider.server.component.ifc.JCQueue;
 import com.jcspider.server.model.DebugResult;
 import com.jcspider.server.model.DebugTask;
+import com.jcspider.server.utils.Constant;
 import com.jcspider.server.utils.IDUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
-import java.util.Random;
+import javax.annotation.PostConstruct;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
@@ -22,36 +25,43 @@ public class DebugService {
 
     @Autowired
     private             JCQueue jcQueue;
-    @Autowired
-    private JCRegistry  jcRegistry;
 
+    private final Map<String, CompletableFuture<DebugResult>> pendingDebugMap = Collections.synchronizedMap(new HashMap<>());
 
-    private String selectRandom() {
-        List<String> nodes = this.jcRegistry.listProcesses();
-        if (nodes == null) {
-            throw new NullPointerException("no process node found");
-        }
-        if (nodes.size() == 1) {
-            return nodes.get(0);
-        }
-        int i = new Random().nextInt(nodes.size() - 1);
-        return nodes.get(i);
+    @PostConstruct
+    public void init() {
+        this.jcQueue.subscribe(Constant.TOPIC_DEBUG_PROJECT_RESP, new DebugTaskRespEvent());
     }
+
+
+    class DebugTaskRespEvent implements OnEvent {
+
+        @Override
+        public void event(String topic, Object value) {
+            DebugResult debugResult = (DebugResult) value;
+            LOGGER.info("debug task success", debugResult);
+            CompletableFuture<DebugResult> future = pendingDebugMap.remove(debugResult.getRequestId());
+            if (future == null) {
+                LOGGER.warn("future is already timeout ?, requestId:{}", debugResult.getRequestId());
+            } else {
+                future.complete(debugResult);
+            }
+        }
+    }
+
+
 
     public DebugResult debug(DebugTask debugTask) {
         LOGGER.info("debug task", debugTask);
         final String requestId = IDUtils.genUUID();
         debugTask.setRequestId(requestId);
-        debugTask.setProcessNode(this.selectRandom());
         CompletableFuture<DebugResult> future = new CompletableFuture<>();
-        new Thread(() -> {
-            DebugResult debugResult = this.jcQueue.blockingPopProcessDebugTaskReturn(requestId);
-            future.complete(debugResult);
-        }).start();
-        this.jcQueue.blockingPushProcessDebugTask(debugTask);
+        this.pendingDebugMap.put(requestId, future);
+        this.jcQueue.publish(Constant.TOPIC_DEBUG_PROJECT_REQ, debugTask);
         try {
             return future.get(1, TimeUnit.MINUTES);
         } catch (Exception e) {
+            this.pendingDebugMap.remove(requestId);
             LOGGER.error("debug error", e);
             DebugResult debugResult = new DebugResult();
             debugResult.setSuccess(false);
