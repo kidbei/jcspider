@@ -231,4 +231,14 @@ public class ProjectDao {
         return this.jdbcTemplate.query(sql, new Object[]{dispatcher}, new BeanPropertyRowMapper<>(Project.class));
     }
 
+    public List<Project> findByStatus(String status) {
+        final String sql = "select id," + COLUMNS + " from project where status = ?";
+        return this.jdbcTemplate.query(sql, new Object[]{status}, new BeanPropertyRowMapper<>(Project.class));
+    }
+
+    public List<Project> findAll() {
+        final String sql = "select id," + COLUMNS + " from project";
+        return this.jdbcTemplate.query(sql, new BeanPropertyRowMapper<>(Project.class));
+    }
+
 }

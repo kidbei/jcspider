@@ -36,6 +36,7 @@ public class EventBus {
     }
 
     public static void produce(String topic, Object value) {
+        LOGGER.info("produce to topic:{}, value:{}", topic, value);
         poolExecutor.execute(() -> {
             synchronized (eventMap) {
                 List<OnEvent> onEventList = eventMap.get(topic);

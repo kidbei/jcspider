@@ -43,7 +43,7 @@ public class TaskDao {
         if (task.getUpdatedAt() == null) {
             task.setUpdatedAt(System.currentTimeMillis());
         }
-        final String sql = "insert into task (" + COLUMNS + ") values (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
+        final String sql = "insert into task (" + COLUMNS + ") values (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?) on conflict(id) do nothing";
         this.jdbcTemplate.update(sql, task.getId(), task.getStatus(), task.getMethod(), task.getSourceUrl(), task.getScheduleType(),
                 task.getStack(), task.getProjectId(), task.getScheduleValue(), task.getHeaders(), task.getExtra(), task.getFetchType(),
                 task.getProxy(), task.getCreatedAt(), task.getUpdatedAt(), task.getCharset());
@@ -56,7 +56,7 @@ public class TaskDao {
                 t.setUpdatedAt(System.currentTimeMillis());
             }
         });
-        final String sql = "insert into task (" + COLUMNS + ") values (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
+        final String sql = "insert into task (" + COLUMNS + ") values (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?) on conflict(id) do nothing";
         this.jdbcTemplate.batchUpdate(sql, new BatchPreparedStatementSetter() {
             @Override
             public void setValues(PreparedStatement ps, int i) throws SQLException {
@@ -120,6 +120,7 @@ public class TaskDao {
         final String sql = "select " + COLUMNS + " from task where project_id = ? and status = ? limit ?";
         return this.jdbcTemplate.query(sql, new Object[]{projectId, status, limit}, new BeanPropertyRowMapper<>(Task.class));
     }
+
 
     public List<Task> findByOutOfNextRunTime(long projectId,long now, int limit) {
         final String sql = "select " + COLUMNS + " from task where project_id = ? and status not in(?,?) and next_run_time <= ? and next_run_time != 0 limit ?";

@@ -1,6 +1,7 @@
 package com.jcspider.server.component.core;
 
-import com.jcspider.server.dao.ProjectDao;
+import com.jcspider.server.component.ifc.JCQueue;
+import com.jcspider.server.utils.Constant;
 import org.quartz.Job;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
@@ -17,17 +18,18 @@ public class RepeatJob implements Job {
     private static final Logger LOGGER = LoggerFactory.getLogger(RepeatJob.class);
 
 
-    private static ProjectDao   projectDao;
+    private static JCQueue jcQueue;
 
     @Autowired
-    public void setProjectDao(ProjectDao projectDao) {
-        RepeatJob.projectDao = projectDao;
+    public void setJcQueue(JCQueue jcQueue) {
+        RepeatJob.jcQueue = jcQueue;
     }
 
     @Override
     public void execute(JobExecutionContext jobExecutionContext) throws JobExecutionException {
-        Long projectId = jobExecutionContext.getJobDetail().getJobDataMap().getLongFromString("projectId");
+        Long projectId = jobExecutionContext.getJobDetail().getJobDataMap().getLong("projectId");
         LOGGER.info("start to running project again, projectId:{}", projectId);
+        jcQueue.publish(Constant.TOPIC_START_PROJECT, projectId);
     }
 
 

@@ -15,6 +15,8 @@ public class Constant {
     public static final String  TOPIC_STOP_PROJECT = "stop_project";
     public static final String  TOPIC_DEBUG_PROJECT_REQ = "debug_project_req";
     public static final String  TOPIC_DEBUG_PROJECT_RESP = "debug_project_resp";
+    public static final String  TOPIC_NO_MORE_TASK = "no_more_task";
+    public static final String  TOPIC_RECOVERY_PROJECT = "recovery_project";
 
     public static final String  TASK_STATUS_ERROR = "error";
     public static final String  TASK_STATUS_RUNNING = "running";

@@ -8,6 +8,7 @@ import com.jcspider.server.model.DebugResult;
 import com.jcspider.server.model.DebugTask;
 import com.jcspider.server.model.Project;
 import com.jcspider.server.utils.Constant;
+import com.jcspider.server.web.api.service.SelfLogService;
 import org.quartz.SchedulerException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,10 +17,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 
 /**
  * @author zhuang.hu Date:2019-09-09 Time:17:17
@@ -29,41 +27,48 @@ public class ProcessDispatcher implements JCComponent {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ProcessDispatcher.class);
 
+    private static final int    MAX_NO_MORE_TIME = 5;
+
     @Autowired
     private JCQueue     jcQueue;
     @Autowired
     private ProjectDao  projectDao;
     @Autowired
     private JSR223EngineProcess process;
+    @Autowired
+    private SelfLogService  selfLogService;
 
     @Value("${process.threads:10}")
     private int processThreads;
 
-    private ThreadPoolExecutor  popThreadPool;
-    private ThreadPoolExecutor  processThreadPool;
+
+    private ExecutorService  popThreadPool;
+    private ProcessThreadPool  processThreadPool;
 
     private final ConcurrentHashMap<Long, TaskPopRunner>  projectTaskPopRunnerMap = new ConcurrentHashMap<>();
 
 
-    private final StartProjectEvent   startProjectEvent = new StartProjectEvent();
-    private final PopTaskRespEvent    popTaskRespEvent = new PopTaskRespEvent();
-    private final StopProjectEvent    stopProjectEvent = new StopProjectEvent();
-    private final DebugProjectReqEvent    debugProjectReqEvent = new DebugProjectReqEvent();
+    private final StartProjectEvent     startProjectEvent = new StartProjectEvent();
+    private final PopTaskRespEvent      popTaskRespEvent = new PopTaskRespEvent();
+    private final StopProjectEvent      stopProjectEvent = new StopProjectEvent();
+    private final DebugProjectReqEvent  debugProjectReqEvent = new DebugProjectReqEvent();
+    private final NoMoreTaskEvent       noMoreTaskEvent = new NoMoreTaskEvent();
+    private final RecoveryProjectEvent  recoveryProjectEvent = new RecoveryProjectEvent();
 
 
 
     @Override
     public void start(){
-        this.popThreadPool = new ThreadPoolExecutor(0, Integer.MAX_VALUE,
-                1L, TimeUnit.HOURS,
-                new LinkedBlockingQueue<>());
-        this.processThreadPool = new ThreadPoolExecutor(processThreads, processThreads,
+        this.popThreadPool = Executors.newCachedThreadPool();
+        this.processThreadPool = new ProcessThreadPool(processThreads, processThreads,
                 Integer.MAX_VALUE, TimeUnit.HOURS,
                 new LinkedBlockingQueue<>());
-        jcQueue.subscribe(Constant.TOPIC_START_PROJECT, startProjectEvent);
+                jcQueue.subscribe(Constant.TOPIC_START_PROJECT, startProjectEvent);
         jcQueue.subscribe(Constant.TOPIC_POP_TASK_RESP, popTaskRespEvent);
         jcQueue.subscribe(Constant.TOPIC_STOP_PROJECT, stopProjectEvent);
         jcQueue.subscribe(Constant.TOPIC_DEBUG_PROJECT_REQ, debugProjectReqEvent);
+        jcQueue.subscribe(Constant.TOPIC_NO_MORE_TASK, noMoreTaskEvent);
+        jcQueue.subscribe(Constant.TOPIC_RECOVERY_PROJECT, recoveryProjectEvent);
     }
 
 
@@ -81,8 +86,12 @@ public class ProcessDispatcher implements JCComponent {
     public void startProject(long projectId) {
         Project project = projectDao.getById(projectId);
         LOGGER.info("start process for project:{}", projectId);
+        if (project.getStatus().equals(Constant.PROJECT_STATUS_START) && projectTaskPopRunnerMap.contains(projectId)) {
+            LOGGER.info("project is already start, projectId:{}", projectId);
+            return;
+        }
         projectDao.updateStatusById(projectId, Constant.PROJECT_STATUS_START);
-        TaskPopRunner taskPopRunner = new TaskPopRunner(jcQueue, projectId, project.getQps());
+        TaskPopRunner taskPopRunner = new TaskPopRunner(this.jcQueue, this.processThreadPool, projectId, project.getQps());
         popThreadPool.execute(taskPopRunner);
         projectTaskPopRunnerMap.put(projectId, taskPopRunner);
         processThreadPool.execute(() -> process.startProject(projectId));
@@ -94,7 +103,7 @@ public class ProcessDispatcher implements JCComponent {
                 LOGGER.error("register repeat scheduler error", e);
             }
         }
-
+        selfLogService.addLog(projectId, Constant.LEVEL_INFO, "启动项目:" + project.getId());
     }
 
 
@@ -103,7 +112,7 @@ public class ProcessDispatcher implements JCComponent {
         @Override
         public void event(String topic, Object value) {
             final PopTaskResp popTaskResp = (PopTaskResp)value;
-            processThreadPool.execute(() -> popTaskResp.tasks.forEach(task -> process.processTask(task.getId())));
+            popTaskResp.tasks.forEach(task -> processThreadPool.execute(new ProcessRunner(process,task)));
         }
     }
 
@@ -118,14 +127,49 @@ public class ProcessDispatcher implements JCComponent {
             if (taskPopRunner != null) {
                 taskPopRunner.stop();
             }
+            processThreadPool.resetPending(projectId);
             projectDao.updateStatusById(projectId, Constant.PROJECT_STATUS_STOP);
             try {
                 RepeatJobFactory.stopRegisterProjectRepeatJob(projectId);
             } catch (SchedulerException e) {
                 LOGGER.error("unregister repeat scheduler error", e);
             }
+            selfLogService.addLog(projectId, Constant.LEVEL_INFO, "停止项目:" + projectId);
         }
 
+    }
+
+
+    class RecoveryProjectEvent implements OnEvent {
+
+        @Override
+        public void event(String topic, Object value) {
+            long projectId = (long) value;
+            LOGGER.info("recovery project:{}", projectId);
+            startProject(projectId);
+        }
+    }
+
+
+    class NoMoreTaskEvent implements OnEvent {
+
+        @Override
+        public void event(String topic, Object value) {
+            long projectId = (long) value;
+            if (processThreadPool.getPendingCount(projectId) <= 0) {
+                LOGGER.info("no more task and pending count is 0, stop project:{}", projectId);
+                TaskPopRunner taskPopRunner = projectTaskPopRunnerMap.get(projectId);
+                if (taskPopRunner == null) {
+                    jcQueue.publish(Constant.TOPIC_STOP_PROJECT, projectId);
+                    LOGGER.info("no task pop runner, stop project:{}", projectId);
+                } else {
+                    if (taskPopRunner.incrNoMoreTime() >= MAX_NO_MORE_TIME) {
+                        jcQueue.publish(Constant.TOPIC_STOP_PROJECT, projectId);
+                        LOGGER.info("max no more time is {}, stop project:{}", MAX_NO_MORE_TIME, projectId);
+                    }
+                }
+            }
+        }
     }
 
 

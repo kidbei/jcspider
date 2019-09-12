@@ -14,27 +14,48 @@ public class TaskPopRunner implements Runnable {
 
     private long            projectId;
     private double          qps;
-    private RateLimiter     rateLimiter;
+    private double          oldQps = 0.;
+    private RateLimiter     rateLimiter = RateLimiter.create(1);
     private int             batchSize;
-    private volatile    boolean stop;
+    private volatile        boolean stop = false;
 
     private JCQueue         jcQueue;
+    private ProcessThreadPool    processThreadPool;
 
-    public TaskPopRunner(JCQueue jcQueue, long projectId, double qps) {
+    private int             noMoreTime;
+
+
+    public TaskPopRunner(JCQueue jcQueue, ProcessThreadPool processThreadPool, long projectId, double qps) {
         this.jcQueue = jcQueue;
+        this.processThreadPool = processThreadPool;
         this.projectId = projectId;
+        this.initQpsRate(qps);
+    }
+
+
+    private void initQpsRate(double qps) {
         this.qps = qps;
         if (qps < 1) {
             this.batchSize = 1;
         } else {
             this.batchSize = (int) Math.ceil(this.qps);
         }
-        this.rateLimiter = RateLimiter.create(qps);
+        this.rateLimiter.setRate(this.qps);
     }
 
 
     public void stop() {
         this.stop = true;
+    }
+
+
+    public void setNoMoreTime(int noMoreTime) {
+        this.noMoreTime = noMoreTime;
+    }
+
+    public int incrNoMoreTime() {
+        this.noMoreTime += 1;
+        return this.noMoreTime;
     }
 
 
@@ -44,6 +65,19 @@ public class TaskPopRunner implements Runnable {
             this.rateLimiter.acquire(this.batchSize);
             LOGGER.info("pop {} task for project:{}", this.batchSize, this.projectId);
             jcQueue.publish("pop_task_req", new PopTaskReq(this.projectId, this.batchSize));
+            if (this.processThreadPool.getPendingCount(this.projectId) > (this.batchSize * 2)) {
+                if (this.qps > 1) {
+                    this.oldQps = this.qps;
+                    this.initQpsRate(this.qps - 1);
+                }
+                LOGGER.info("pending is overflow, projectId:{}, current qps:{}, current batch size:{}", this.projectId, this.qps, this.batchSize);
+            } else {
+                if (this.oldQps != 0.) {
+                    this.initQpsRate(this.oldQps);
+                    this.oldQps = 0.;
+                    LOGGER.info("recovery qps, projectId:{}, current qps:{}, current batch size:{}", this.projectId, this.qps, this.batchSize);
+                }
+            }
         }
         LOGGER.info("stop project pop task,projectId:{}", this.projectId);
     }

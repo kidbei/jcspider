@@ -7,6 +7,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
+import java.util.Date;
 
 /**
  * @author zhuang.hu Date:2019-09-06 Time:17:15
@@ -42,16 +43,19 @@ public class RepeatJobFactory {
                 .build();
 
         SimpleTrigger trigger = TriggerBuilder.newTrigger()
-                .withIdentity("repeat_project_trigger")
+                .withIdentity("repeat_project_trigger_" + projectId)
                 .withSchedule(
                         SimpleScheduleBuilder.simpleSchedule()
                         .repeatForever()
                         .withIntervalInMilliseconds(runAfter)
                 )
-                .startNow()
+                .startAt(new Date(System.currentTimeMillis() + runAfter))
                 .build();
 
         schedulerFactory.getScheduler().scheduleJob(repeatJob, trigger);
+        if (!schedulerFactory.getScheduler().isStarted()) {
+            schedulerFactory.getScheduler().start();
+        }
     }
 
 
@@ -59,5 +63,11 @@ public class RepeatJobFactory {
         LOGGER.info("stop project repeat job for project {}", projectId);
         schedulerFactory.getScheduler().deleteJob(JobKey.jobKey("repeat_project_" + projectId));
     }
+
+
+    public static void main(String[] args) throws SchedulerException {
+        registerProjectRepeatJob(1, 3600000);
+    }
+
 
 }
