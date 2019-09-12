@@ -54,6 +54,7 @@ public class ProcessDispatcher implements JCComponent {
     private final DebugProjectReqEvent  debugProjectReqEvent = new DebugProjectReqEvent();
     private final NoMoreTaskEvent       noMoreTaskEvent = new NoMoreTaskEvent();
     private final RecoveryProjectEvent  recoveryProjectEvent = new RecoveryProjectEvent();
+    private final RecoveryProjectLoopEvent  recoveryProjectLoopEvent = new RecoveryProjectLoopEvent();
 
 
 
@@ -69,6 +70,7 @@ public class ProcessDispatcher implements JCComponent {
         jcQueue.subscribe(Constant.TOPIC_DEBUG_PROJECT_REQ, debugProjectReqEvent);
         jcQueue.subscribe(Constant.TOPIC_NO_MORE_TASK, noMoreTaskEvent);
         jcQueue.subscribe(Constant.TOPIC_RECOVERY_PROJECT, recoveryProjectEvent);
+        jcQueue.subscribe(Constant.TOPIC_RECOVERY_LOOP, recoveryProjectLoopEvent);
     }
 
 
@@ -150,6 +152,22 @@ public class ProcessDispatcher implements JCComponent {
             long projectId = (long) value;
             LOGGER.info("recovery project:{}", projectId);
             startProject(projectId);
+        }
+    }
+
+
+    class RecoveryProjectLoopEvent implements OnEvent {
+
+        @Override
+        public void event(String topic, Object value) {
+            long projectId = (long) value;
+            Project project = projectDao.getById(projectId);
+            LOGGER.info("recovery project loop, projectId:{}", projectId);
+            try {
+                RepeatJobFactory.registerProjectRepeatJob(projectId, project.getScheduleValue());
+            } catch (SchedulerException e) {
+                LOGGER.error("recovery project loop error", e);
+            }
         }
     }
 

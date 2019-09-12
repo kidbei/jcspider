@@ -77,7 +77,9 @@ public class TaskDispatcher implements JCComponent {
                 if (project.getStatus().equals(Constant.PROJECT_STATUS_START)) {
                     jcQueue.publish(Constant.TOPIC_RECOVERY_PROJECT, project.getId());
                 } else {
-                    jcQueue.publish(Constant.TOPIC_STOP_PROJECT, project.getId());
+                    if (project.getScheduleType().equals(Constant.SCHEDULE_TYPE_LOOP)) {
+                        jcQueue.publish(Constant.TOPIC_RECOVERY_LOOP, project.getId());
+                    }
                 }
             });
         }
