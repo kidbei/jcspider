@@ -122,6 +122,7 @@ public class ProcessDispatcher implements JCComponent {
         @Override
         public void event(String topic, Object value) {
             long projectId = (long) value;
+            Project project = projectDao.getById(projectId);
             LOGGER.info("stop project process, projectId:{}", projectId);
             TaskPopRunner taskPopRunner = projectTaskPopRunnerMap.remove(projectId);
             if (taskPopRunner != null) {
@@ -129,10 +130,12 @@ public class ProcessDispatcher implements JCComponent {
             }
             processThreadPool.resetPending(projectId);
             projectDao.updateStatusById(projectId, Constant.PROJECT_STATUS_STOP);
-            try {
-                RepeatJobFactory.stopRegisterProjectRepeatJob(projectId);
-            } catch (SchedulerException e) {
-                LOGGER.error("unregister repeat scheduler error", e);
+            if (!project.getScheduleType().equals(Constant.SCHEDULE_TYPE_LOOP)) {
+                try {
+                    RepeatJobFactory.stopRegisterProjectRepeatJob(projectId);
+                } catch (SchedulerException e) {
+                    LOGGER.error("unregister repeat scheduler error", e);
+                }
             }
             selfLogService.addLog(projectId, Constant.LEVEL_INFO, "停止项目:" + projectId);
         }
