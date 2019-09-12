@@ -21,6 +21,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -75,7 +76,7 @@ public class DynamicServiceRegister {
                         registry.registerBeanDefinition("jSR223EngineProcess",
                                 BeanDefinitionBuilder.rootBeanDefinition(JSR223EngineProcess.class).getBeanDefinition());
                     }
-                    List<String> exporterComponents = Arrays.asList(resultExporter.split(","));
+                    List<String> exporterComponents = new ArrayList<>(Arrays.asList(resultExporter.split(",")));
                     exporterComponents.remove(Constant.DB_RESULT_EXPORTER);
                     if (exporterComponents.contains(Constant.REDIS_RESULT_EXPORTER)) {
                         registry.registerBeanDefinition(Constant.REDIS_RESULT_EXPORTER,
