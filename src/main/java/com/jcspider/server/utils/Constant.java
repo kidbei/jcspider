@@ -40,6 +40,7 @@ public class Constant {
 
 
     public static final String  DB_RESULT_EXPORTER = "dbResultExporter";
+    public static final String  REDIS_RESULT_EXPORTER = "redisResultExporter";
 
     public static final String  MODEL_LOCAL = "local";
     public static final String  MODEL_CLUSTER = "cluster";
@@ -67,5 +68,8 @@ public class Constant {
     public static final String  LEVEL_DEBUG = "debug";
     public static final String  LEVEL_INFO = "info";
     public static final String  LEVEL_ERROR = "error";
+
+
+    public static final String  TOPIC_RESULT_EXPORTER = "jcspider_result_exporter";
 
 }

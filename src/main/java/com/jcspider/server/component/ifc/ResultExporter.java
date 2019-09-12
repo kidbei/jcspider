@@ -8,7 +8,6 @@ import com.jcspider.server.model.TaskResult;
  */
 public interface ResultExporter extends JCComponent{
 
-
     void export(TaskResult result);
 
     void delete(long projectId, String taskId);

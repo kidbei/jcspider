@@ -2,6 +2,7 @@ package com.jcspider.server.starter;
 
 import com.jcspider.server.component.core.DbResultExporter;
 import com.jcspider.server.component.core.JSR223EngineProcess;
+import com.jcspider.server.component.core.RedisResultExporter;
 import com.jcspider.server.component.local.JCLocalLockTool;
 import com.jcspider.server.component.local.JCLocalQueue;
 import com.jcspider.server.component.local.JCLocalRegistry;
@@ -75,6 +76,11 @@ public class DynamicServiceRegister {
                                 BeanDefinitionBuilder.rootBeanDefinition(JSR223EngineProcess.class).getBeanDefinition());
                     }
                     List<String> exporterComponents = Arrays.asList(resultExporter.split(","));
+                    exporterComponents.remove(Constant.DB_RESULT_EXPORTER);
+                    if (exporterComponents.contains(Constant.REDIS_RESULT_EXPORTER)) {
+                        registry.registerBeanDefinition(Constant.REDIS_RESULT_EXPORTER,
+                                BeanDefinitionBuilder.rootBeanDefinition(RedisResultExporter.class).getBeanDefinition());
+                    }
                 }
                 if (!dbExporterDisable) {
                     registry.registerBeanDefinition(Constant.DB_RESULT_EXPORTER,
