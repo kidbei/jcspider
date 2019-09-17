@@ -1,6 +1,5 @@
 package com.jcspider.server.component.core;
 
-import com.google.common.collect.ArrayListMultimap;
 import com.jcspider.server.component.core.event.NewTask;
 import com.jcspider.server.component.core.event.PopTaskReq;
 import com.jcspider.server.component.core.event.PopTaskResp;
@@ -36,17 +35,16 @@ public class TaskDispatcher implements JCComponent {
     private static final int    FLUSH_DELAY = 1;
 
     private ThreadPoolExecutor          popTaskExecutor = new ThreadPoolExecutor(1, 2, Integer.MAX_VALUE, TimeUnit.HOURS, new LinkedBlockingQueue<>());
-    private ThreadPoolExecutor          persistenceExecutor = new ThreadPoolExecutor(1, 1, Integer.MAX_VALUE, TimeUnit.HOURS, new LinkedBlockingQueue<>());
+    private ThreadPoolExecutor          persistenceExecutor = new ThreadPoolExecutor(1, 2, Integer.MAX_VALUE, TimeUnit.HOURS, new LinkedBlockingQueue<>());
 
     @Autowired
     private TaskDao                 taskDao;
     @Autowired
     private ProjectDao              projectDao;
-
     @Autowired
     private JCQueue                 jcQueue;
 
-    private ArrayListMultimap<Long, Task>   taskBuffer = ArrayListMultimap.create();
+    private TaskBuffer              taskBuffer = new TaskBuffer();
 
     protected List<ResultExporter>  resultExporters = new ArrayList<>();
 
@@ -97,7 +95,7 @@ public class TaskDispatcher implements JCComponent {
             NewTask newTask = (NewTask)value;
             newTask.task.setStatus(Constant.TASK_STATUS_NONE);
             LOGGER.info("new task : {}", newTask.task.getSourceUrl());
-            taskBuffer.put(newTask.task.getProjectId(), newTask.task);
+            taskBuffer.add(newTask.task);
         }
     }
 
@@ -123,8 +121,10 @@ public class TaskDispatcher implements JCComponent {
                         taskDao.updateStatusByIds(tasks.stream().map(t -> t.getId()).collect(Collectors.toList()), Constant.TASK_STATUS_RUNNING);
                         jcQueue.publish(Constant.TOPIC_POP_TASK_RESP, new PopTaskResp(popTaskReq.projectId, tasks));
                     } else {
-                        LOGGER.info("no new task found for project:{}", popTaskReq.projectId);
-                        jcQueue.publish(Constant.TOPIC_NO_MORE_TASK, popTaskReq.projectId);
+                        if (!taskBuffer.containsProject(popTaskReq.projectId)) {
+                            LOGGER.info("no new task found for project:{}", popTaskReq.projectId);
+                            jcQueue.publish(Constant.TOPIC_NO_MORE_TASK, popTaskReq.projectId);
+                        }
                     }
                 } catch (Exception e) {
                     LOGGER.error("pop task error", e);
@@ -135,38 +135,19 @@ public class TaskDispatcher implements JCComponent {
     }
 
     class PersistenceRunner implements Runnable {
-
         @Override
         public void run() {
             while (!Thread.interrupted()) {
                 try {
                     if (!taskBuffer.isEmpty()) {
                         synchronized (taskBuffer) {
-                            for (Long projectId: taskBuffer.keySet()) {
-                                List<Task> taskList = taskBuffer.get(projectId);
-                                if (!taskList.isEmpty()) {
-                                    List<Task> existsTaskList = taskDao.findByIds(taskList.stream().map(t -> t.getId()).collect(Collectors.toList()));
-                                    if (!existsTaskList.isEmpty()) {
-                                        taskList.removeAll(existsTaskList);
-                                    }
-                                    if (!taskList.isEmpty()) {
-                                        taskDao.insertBatch(taskList);
-                                    } else {
-                                        LOGGER.info("no new task to persistence, projectId:{}", projectId);
-                                    }
-                                }
-                            }
+                            taskDao.insertBatch(taskBuffer);
                             taskBuffer.clear();
                         }
                     }
+                    Thread.sleep(FLUSH_DELAY * 1000);
                 } catch (Exception e) {
                     LOGGER.error("persistence task buffer error", e);
-                }
-
-                try {
-                    Thread.sleep(FLUSH_DELAY * 1000);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
                 }
             }
         }
