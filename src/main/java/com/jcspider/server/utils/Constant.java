@@ -7,7 +7,6 @@ package com.jcspider.server.utils;
 public class Constant {
 
 
-    public static final String  TOPIC_DISPATCHER_PROJECT_START = "dispatcher:project:start";
     public static final String  TOPIC_START_PROJECT = "start_project";
     public static final String  TOPIC_NEW_TASK = "new_task";
     public static final String  TOPIC_POP_TASK_REQ = "pop_task_req";
@@ -18,7 +17,7 @@ public class Constant {
     public static final String  TOPIC_NO_MORE_TASK = "no_more_task";
     public static final String  TOPIC_RECOVERY_PROJECT = "recovery_project";
     public static final String  TOPIC_RECOVERY_LOOP = "recovery_project_loop";
-    public static final String  TOPIC_RESULT_EXPORTER = "export_result";
+    public static final String  TOPC_EXPORT_RESULT = "export_result";
 
     public static final String  TASK_STATUS_ERROR = "error";
     public static final String  TASK_STATUS_RUNNING = "running";

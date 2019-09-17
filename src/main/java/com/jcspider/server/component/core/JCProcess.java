@@ -41,11 +41,6 @@ public abstract class JCProcess implements JCComponent {
 
     @Value("${process.threads:10}")
     private int                     processThreads;
-    @Value("${process.result.exporter}")
-    private String                  exportComponents;
-
-    protected List<ResultExporter>  resultExporters = new ArrayList<>();
-
     @Autowired
     protected ProjectDao              projectDao;
     @Autowired
@@ -82,12 +77,6 @@ public abstract class JCProcess implements JCComponent {
         } catch (UnknownHostException e) {
             throw new ComponentInitException(e, name());
         }
-
-        List<String> exportComponentList = Arrays.asList(this.exportComponents.split(","));
-        if (exportComponentList.contains(Constant.DB_RESULT_EXPORTER)) {
-            this.resultExporters.add(applicationContext.getBean(Constant.DB_RESULT_EXPORTER, DbResultExporter.class));
-        }
-
         this.jcRegistry.registerProcess(this.localIp);
         this.threadPoolExecutor = new ThreadPoolExecutor(processThreads, processThreads, Long.MAX_VALUE, TimeUnit.HOURS, new LinkedTransferQueue<>());
 
@@ -167,14 +156,8 @@ public abstract class JCProcess implements JCComponent {
             taskResult.setCreatedAt(System.currentTimeMillis());
             taskResult.setResultText(JSON.toJSONString(result));
 
-            jcQueue.publish(Constant.TOPIC_RESULT_EXPORTER, taskResult);
-            this.resultExporters.forEach(resultExporter -> {
-                try {
-                    resultExporter.export(taskResult);
-                } catch (Exception e) {
-                    LOGGER.error("export result error, exporter:{}", resultExporter, e);
-                }
-            });
+            jcQueue.publish(Constant.TOPC_EXPORT_RESULT, taskResult);
+
         }
     }
 

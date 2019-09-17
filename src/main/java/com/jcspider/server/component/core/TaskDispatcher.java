@@ -10,14 +10,18 @@ import com.jcspider.server.dao.ProjectDao;
 import com.jcspider.server.dao.TaskDao;
 import com.jcspider.server.model.Project;
 import com.jcspider.server.model.Task;
+import com.jcspider.server.model.TaskResult;
 import com.jcspider.server.utils.Constant;
 import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -44,6 +48,11 @@ public class TaskDispatcher implements JCComponent {
     @Autowired
     private JCQueue                 jcQueue;
 
+    @Value("${process.result.exporter}")
+    private String                  exportComponents;
+    @Autowired
+    private ApplicationContext      applicationContext;
+
     private TaskBuffer              taskBuffer = new TaskBuffer();
 
     protected List<ResultExporter>  resultExporters = new ArrayList<>();
@@ -51,12 +60,18 @@ public class TaskDispatcher implements JCComponent {
 
     private NewTaskEvent            newTaskEvent = new NewTaskEvent();
     private PopTaskEvent            popTaskEvent = new PopTaskEvent();
+    private ResultExportEvent       resultExportEvent = new ResultExportEvent();
 
 
     @Override
     public void start(){
         this.jcQueue.subscribe(Constant.TOPIC_NEW_TASK, this.newTaskEvent);
         this.jcQueue.subscribe(Constant.TOPIC_POP_TASK_REQ, this.popTaskEvent);
+        this.jcQueue.subscribe(Constant.TOPC_EXPORT_RESULT, this.resultExportEvent);
+        List<String> exportComponentList = Arrays.asList(this.exportComponents.split(","));
+        if (exportComponentList.contains(Constant.DB_RESULT_EXPORTER)) {
+            this.resultExporters.add(applicationContext.getBean(Constant.DB_RESULT_EXPORTER, DbResultExporter.class));
+        }
         this.persistenceExecutor.execute(new PersistenceRunner());
         recoveryProject();
     }
@@ -103,7 +118,15 @@ public class TaskDispatcher implements JCComponent {
 
         @Override
         public void event(String topic, Object value) {
-
+            TaskResult taskResult = (TaskResult) value;
+            LOGGER.info("save task result:{}", taskResult.getTaskId());
+            resultExporters.forEach(resultExporter -> {
+                try {
+                    resultExporter.export(taskResult);
+                } catch (Exception e) {
+                    LOGGER.error("export result error, exporter:{}", resultExporter, e);
+                }
+            });
         }
     }
 
