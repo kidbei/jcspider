@@ -6,6 +6,7 @@ import com.jcspider.server.component.core.event.PopTaskReq;
 import com.jcspider.server.component.core.event.PopTaskResp;
 import com.jcspider.server.component.ifc.JCComponent;
 import com.jcspider.server.component.ifc.JCQueue;
+import com.jcspider.server.component.ifc.ResultExporter;
 import com.jcspider.server.dao.ProjectDao;
 import com.jcspider.server.dao.TaskDao;
 import com.jcspider.server.model.Project;
@@ -17,6 +18,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -45,6 +47,9 @@ public class TaskDispatcher implements JCComponent {
     private JCQueue                 jcQueue;
 
     private ArrayListMultimap<Long, Task>   taskBuffer = ArrayListMultimap.create();
+
+    protected List<ResultExporter>  resultExporters = new ArrayList<>();
+
 
     private NewTaskEvent            newTaskEvent = new NewTaskEvent();
     private PopTaskEvent            popTaskEvent = new PopTaskEvent();
@@ -93,6 +98,14 @@ public class TaskDispatcher implements JCComponent {
             newTask.task.setStatus(Constant.TASK_STATUS_NONE);
             LOGGER.info("new task : {}", newTask.task.getSourceUrl());
             taskBuffer.put(newTask.task.getProjectId(), newTask.task);
+        }
+    }
+
+    class ResultExportEvent implements OnEvent {
+
+        @Override
+        public void event(String topic, Object value) {
+
         }
     }
 

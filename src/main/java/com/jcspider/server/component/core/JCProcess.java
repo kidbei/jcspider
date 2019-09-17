@@ -166,6 +166,8 @@ public abstract class JCProcess implements JCComponent {
             taskResult.setProjectId(projectId);
             taskResult.setCreatedAt(System.currentTimeMillis());
             taskResult.setResultText(JSON.toJSONString(result));
+
+            jcQueue.publish(Constant.TOPIC_RESULT_EXPORTER, taskResult);
             this.resultExporters.forEach(resultExporter -> {
                 try {
                     resultExporter.export(taskResult);

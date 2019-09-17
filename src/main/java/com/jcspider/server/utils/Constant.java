@@ -18,6 +18,7 @@ public class Constant {
     public static final String  TOPIC_NO_MORE_TASK = "no_more_task";
     public static final String  TOPIC_RECOVERY_PROJECT = "recovery_project";
     public static final String  TOPIC_RECOVERY_LOOP = "recovery_project_loop";
+    public static final String  TOPIC_RESULT_EXPORTER = "export_result";
 
     public static final String  TASK_STATUS_ERROR = "error";
     public static final String  TASK_STATUS_RUNNING = "running";
