@@ -74,7 +74,6 @@ public class ProjectService {
     public void update(Project project) {
         this.projectDao.updateByExp(project);
         this.jcQueue.publish(Constant.TOPIC_STOP_PROJECT, project.getId());
-        this.jcQueue.publish(Constant.TOPIC_START_PROJECT, project.getId());
     }
 
 
