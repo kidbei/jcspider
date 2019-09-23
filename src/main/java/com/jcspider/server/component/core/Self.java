@@ -69,6 +69,9 @@ public class Self implements Serializable {
         } else {
             task.setScheduleValue(0L);
         }
+        if (options.containsKey("expireValue")) {
+            task.setExpireValue(MapUtils.getLong(options, "expireValue"));
+        }
         this.newTasks.putIfAbsent(task.getId(), task);
     }
 

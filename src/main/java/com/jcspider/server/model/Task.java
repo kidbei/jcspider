@@ -20,6 +20,7 @@ public class Task extends SimpleTask {
     @JsonSerialize(using = LongTimeFormat.Serialize.class)
     private Long   updatedAt;
     private String  processNode;
+    private Long    expireValue;
 
     public Task() {
     }
@@ -97,5 +98,13 @@ public class Task extends SimpleTask {
 
     public void setProcessNode(String processNode) {
         this.processNode = processNode;
+    }
+
+    public Long getExpireValue() {
+        return expireValue;
+    }
+
+    public void setExpireValue(Long expireValue) {
+        this.expireValue = expireValue;
     }
 }
