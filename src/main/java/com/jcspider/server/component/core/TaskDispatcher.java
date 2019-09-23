@@ -164,8 +164,29 @@ public class TaskDispatcher implements JCComponent {
                 try {
                     if (!taskBuffer.isEmpty()) {
                         synchronized (taskBuffer) {
-                            taskDao.insertBatch(taskBuffer);
-                            taskBuffer.clear();
+                            long now = System.currentTimeMillis();
+                            List<Task> existsTaskList = taskDao.findByIds(taskBuffer.stream().map(t -> t.getId()).collect(Collectors.toList()));
+                            List<String>  toDeleteTaskList = new ArrayList<>();
+                            if (CollectionUtils.isNotEmpty(existsTaskList)) {
+                                for (Task task : existsTaskList) {
+                                    if (task.getExpireValue() != null && task.getExpireValue() > 0) {
+                                        if (now - task.getCreatedAt() >= task.getExpireValue()) {
+                                            LOGGER.info("task {} is expired", task.getId());
+                                            toDeleteTaskList.add(task.getId());
+                                        } else {
+                                            taskBuffer.remove(task);
+                                        }
+                                    }
+                                }
+                                if (CollectionUtils.isNotEmpty(toDeleteTaskList)) {
+                                    taskDao.deleteByIds(toDeleteTaskList);
+                                    taskDao.deleteByFromTaskIds(toDeleteTaskList);
+                                }
+                            }
+                            if (!taskBuffer.isEmpty()) {
+                                taskDao.insertBatch(taskBuffer);
+                                taskBuffer.clear();
+                            }
                         }
                     }
                     Thread.sleep(FLUSH_DELAY * 1000);

@@ -26,10 +26,12 @@ public class Self implements Serializable {
     private long projectId;
     private TreeMap<String, Task> newTasks = new TreeMap<>();
     private List<SelfLog>   logs;
+    private String  fromTaskId;
 
 
-    public Self(long projectId) {
+    public Self(long projectId, String fromTaskId) {
         this.projectId = projectId;
+        this.fromTaskId = fromTaskId;
     }
 
     public void crawl(String url, Map<String, Object> options) {
@@ -41,6 +43,7 @@ public class Self implements Serializable {
         task.setProjectId(projectId);
         task.setSourceUrl(url);
         task.setMethod(method);
+        task.setFromTaskId(this.fromTaskId);
         if (options.containsKey("headers")) {
             task.setHeaders(JSON.toJSONString(options.get("headers")));
         }

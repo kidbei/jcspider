@@ -36,17 +36,17 @@ public class TaskDao {
 
     private static final String COLUMNS = "id,status,method,source_url,schedule_type," +
             "stack,project_id,schedule_value,headers,extra,fetch_type," +
-            "proxy,created_at,updated_at, charset, expire_value";
+            "proxy,created_at,updated_at, charset, expire_value,from_task_id";
 
 
     public void insert(Task task) {
         if (task.getUpdatedAt() == null) {
             task.setUpdatedAt(System.currentTimeMillis());
         }
-        final String sql = "insert into task (" + COLUMNS + ") values (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?) on conflict(id) do nothing";
+        final String sql = "insert into task (" + COLUMNS + ") values (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?) on conflict(id) do nothing";
         this.jdbcTemplate.update(sql, task.getId(), task.getStatus(), task.getMethod(), task.getSourceUrl(), task.getScheduleType(),
                 task.getStack(), task.getProjectId(), task.getScheduleValue(), task.getHeaders(), task.getExtra(), task.getFetchType(),
-                task.getProxy(), task.getCreatedAt(), task.getUpdatedAt(), task.getCharset(), task.getExpireValue());
+                task.getProxy(), task.getCreatedAt(), task.getUpdatedAt(), task.getCharset(), task.getExpireValue(), task.getFromTaskId());
     }
 
 
@@ -56,7 +56,7 @@ public class TaskDao {
                 t.setUpdatedAt(System.currentTimeMillis());
             }
         });
-        final String sql = "insert into task (" + COLUMNS + ") values (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?) on conflict(id) do nothing";
+        final String sql = "insert into task (" + COLUMNS + ") values (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?) on conflict(id) do nothing";
         this.jdbcTemplate.batchUpdate(sql, new BatchPreparedStatementSetter() {
             @Override
             public void setValues(PreparedStatement ps, int i) throws SQLException {
@@ -77,6 +77,7 @@ public class TaskDao {
                 ps.setLong(14, task.getUpdatedAt());
                 ps.setString(15, task.getCharset());
                 ps.setLong(16, task.getExpireValue());
+                ps.setString(17, task.getFromTaskId());
             }
 
             @Override
@@ -186,6 +187,10 @@ public class TaskDao {
             sb.append("source_url = ?,");
             params.add(task.getSourceUrl());
         }
+        if (task.getFromTaskId() != null) {
+            sb.append("from_task_id = ?,");
+            params.add(task.getFromTaskId());
+        }
         params.add(task.getId());
         String sql = sb.substring(0, sb.length() - 1) + " where id = ?";
         this.jdbcTemplate.update(sql, params.toArray());
@@ -236,6 +241,13 @@ public class TaskDao {
 
     public void deleteByIds(Collection<String> taskIds) {
         final String sql = "delete from task where id in (:ids)";
+        MapSqlParameterSource parameters = new MapSqlParameterSource();
+        parameters.addValue("ids", taskIds);
+        this.namedParameterJdbcTemplate.update(sql, parameters);
+    }
+
+    public void deleteByFromTaskIds(Collection<String> taskIds) {
+        final String sql = "delete from task where from_task_id in (:ids)";
         MapSqlParameterSource parameters = new MapSqlParameterSource();
         parameters.addValue("ids", taskIds);
         this.namedParameterJdbcTemplate.update(sql, parameters);

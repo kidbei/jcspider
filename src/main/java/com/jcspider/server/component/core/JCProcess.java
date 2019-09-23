@@ -109,7 +109,7 @@ public abstract class JCProcess implements JCComponent {
         if (fetcher == null) {
             throw new IllegalArgumentException("unknown fetch type:" + task.getFetchType());
         }
-        Self self = new Self(projectId);
+        Self self = new Self(projectId, task.getId());
         Object result;
 
         if (Constant.METHOD_START.equals(task.getMethod())) {
@@ -208,7 +208,7 @@ public abstract class JCProcess implements JCComponent {
 
         debugResult.setCurrentMethod(simpleTask.getMethod());
 
-        Self self = new Self(0);
+        Self self = new Self(0, simpleTask.getId());
         Object result;
         if (Constant.METHOD_START.equals(simpleTask.getMethod())) {
             try {

@@ -21,6 +21,7 @@ public class Task extends SimpleTask {
     private Long   updatedAt;
     private String  processNode;
     private Long    expireValue;
+    private String  fromTaskId;
 
     public Task() {
     }
@@ -106,5 +107,13 @@ public class Task extends SimpleTask {
 
     public void setExpireValue(Long expireValue) {
         this.expireValue = expireValue;
+    }
+
+    public String getFromTaskId() {
+        return fromTaskId;
+    }
+
+    public void setFromTaskId(String fromTaskId) {
+        this.fromTaskId = fromTaskId;
     }
 }
