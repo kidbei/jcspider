@@ -173,6 +173,7 @@ public class TaskDispatcher implements JCComponent {
                                         if (now - task.getCreatedAt() >= task.getExpireValue()) {
                                             LOGGER.info("task {} is expired", task.getId());
                                             toDeleteTaskList.add(task.getId());
+                                            resultExporters.forEach(resultExporter -> resultExporter.delete(task.getProjectId(), task.getId()));
                                         } else {
                                             taskBuffer.remove(task);
                                         }
