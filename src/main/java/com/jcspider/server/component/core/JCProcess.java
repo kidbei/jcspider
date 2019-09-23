@@ -181,6 +181,7 @@ public abstract class JCProcess implements JCComponent {
             task.setProjectId(projectId);
             task.setFetchType(Constant.FETCH_TYPE_HTML);
             task.setExpireValue(0L);
+            task.setFromTaskId(taskId);
             this.taskDao.insert(task);
         }
         try {
