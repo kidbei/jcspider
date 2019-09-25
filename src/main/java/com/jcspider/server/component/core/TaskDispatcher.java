@@ -68,10 +68,7 @@ public class TaskDispatcher implements JCComponent {
         this.jcQueue.subscribe(Constant.TOPIC_NEW_TASK, this.newTaskEvent);
         this.jcQueue.subscribe(Constant.TOPIC_POP_TASK_REQ, this.popTaskEvent);
         this.jcQueue.subscribe(Constant.TOPIC_EXPORT_RESULT, this.resultExportEvent);
-        List<String> exportComponentList = Arrays.asList(this.exportComponents.split(","));
-        if (exportComponentList.contains(Constant.DB_RESULT_EXPORTER)) {
-            this.resultExporters.add(applicationContext.getBean(Constant.DB_RESULT_EXPORTER, DbResultExporter.class));
-        }
+        this.resultExporters.addAll(this.applicationContext.getBeansOfType(ResultExporter.class).values());
         this.persistenceExecutor.execute(new PersistenceRunner());
         recoveryProject();
     }
