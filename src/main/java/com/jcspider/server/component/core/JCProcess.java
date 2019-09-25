@@ -5,7 +5,6 @@ import com.jcspider.server.component.core.event.NewTask;
 import com.jcspider.server.component.ifc.JCComponent;
 import com.jcspider.server.component.ifc.JCQueue;
 import com.jcspider.server.component.ifc.JCRegistry;
-import com.jcspider.server.component.ifc.ResultExporter;
 import com.jcspider.server.dao.ProjectDao;
 import com.jcspider.server.dao.TaskDao;
 import com.jcspider.server.model.*;
@@ -156,7 +155,7 @@ public abstract class JCProcess implements JCComponent {
             taskResult.setCreatedAt(System.currentTimeMillis());
             taskResult.setResultText(JSON.toJSONString(result));
 
-            jcQueue.publish(Constant.TOPC_EXPORT_RESULT, taskResult);
+            jcQueue.publish(Constant.TOPIC_EXPORT_RESULT, taskResult);
 
         }
     }
