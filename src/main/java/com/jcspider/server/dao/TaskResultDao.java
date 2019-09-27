@@ -67,7 +67,6 @@ public class TaskResultDao {
         return this.namedParameterJdbcTemplate.query(sql, parameters, new BeanPropertyRowMapper<>(ProjectResultCount.class));
     }
 
-
     public int countByProjectId(long projectId) {
         final String sql = "select count(id) from result where project_id = ?";
         return this.jdbcTemplate.queryForObject(sql, new Object[]{projectId}, int.class);
