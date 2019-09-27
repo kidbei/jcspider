@@ -7,6 +7,7 @@ import com.jcspider.server.dao.TaskResultDao;
 import com.jcspider.server.dao.UserProjectDao;
 import com.jcspider.server.model.*;
 import com.jcspider.server.utils.Constant;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -121,6 +122,12 @@ public class ProjectService {
 
         LOGGER.info("start project {}", projectId);
         this.jcQueue.publish(Constant.TOPIC_START_PROJECT, project.getId());
+    }
+
+
+    public void startAllProject() {
+        List<Project> projectList = this.projectDao.findAll();
+        projectList.forEach(project -> startProject(project));
     }
 
 

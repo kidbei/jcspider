@@ -93,6 +93,14 @@ public class ProjectController {
     }
 
 
+
+    @RequestMapping(value = "/start/all", method = RequestMethod.GET)
+    public JSONResult<String> startAll() {
+        this.projectService.startAllProject();
+        return JSONResult.success("ok");
+    }
+
+
     private JSONResult<String> checkPermission(Project project) {
         if (project == null) {
             return JSONResult.error("project is not found:" + project.getId());

@@ -34,4 +34,11 @@ public class ResultController {
         return JSONResult.success("ok");
     }
 
+
+    @RequestMapping(value = "/results/export", method = RequestMethod.GET)
+    public JSONResult<String> syncToExporter() {
+        new Thread(() -> this.taskResultService.syncToExporter()).start();
+        return JSONResult.success("ok");
+    }
+
 }

@@ -64,7 +64,7 @@ public class TaskResult implements Serializable {
         sb.append("id=").append(id);
         sb.append(", projectId=").append(projectId);
         sb.append(", taskId='").append(taskId).append('\'');
-        sb.append(", resultText='").append(resultText).append('\'');
+        sb.append(", resultText='").append(resultText.length() > 1024 ? resultText.substring(0, 1023) : resultText).append('\'');
         sb.append(", createdAt=").append(createdAt);
         sb.append('}');
         return sb.toString();

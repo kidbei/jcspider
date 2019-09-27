@@ -84,4 +84,10 @@ public class TaskResultDao {
         return new PageImpl<>(taskResults, request, count);
     }
 
+
+    public List<TaskResult> findByGtId(long id, int limit) {
+        final String sql = "select id," + COLUMNS + " from result where id > ? order by id asc limit ?";
+        return this.jdbcTemplate.query(sql, new Object[]{id, limit}, new BeanPropertyRowMapper<>(TaskResult.class));
+    }
+
 }

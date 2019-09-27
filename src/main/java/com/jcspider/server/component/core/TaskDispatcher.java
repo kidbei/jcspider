@@ -16,12 +16,10 @@ import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -48,8 +46,6 @@ public class TaskDispatcher implements JCComponent {
     @Autowired
     private JCQueue                 jcQueue;
 
-    @Value("${process.result.exporter}")
-    private String                  exportComponents;
     @Autowired
     private ApplicationContext      applicationContext;
 
@@ -183,8 +179,8 @@ public class TaskDispatcher implements JCComponent {
                             }
                             if (!taskBuffer.isEmpty()) {
                                 taskDao.insertBatch(taskBuffer);
-                                taskBuffer.clear();
                             }
+                            taskBuffer.clear();
                         }
                     }
                     Thread.sleep(FLUSH_DELAY * 1000);
