@@ -39,6 +39,7 @@ public class LoginFilter implements Filter {
 
         {
             this.add("/api/login");
+            this.add("/api/projects/results/export");
         }
     };
 
