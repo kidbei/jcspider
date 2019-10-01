@@ -43,7 +43,7 @@ public class ProjectDao {
         if (project.getCreatedAt() == null) {
             project.setCreatedAt(project.getUpdatedAt());
         }
-        final String sql = "insert into project (" + COLUMNS + ") values (?,?,?,?,?,?,?,?,?,?,?,?,?,?) RETURNING id";
+        final String sql = "insert into project (" + COLUMNS + ") values (?,?,?,?,?,?,?,?,?,?,?) RETURNING id";
         return this.jdbcTemplate.queryForObject(sql, new Object[]{project.getName(), project.getStartUrl(),
                 project.getScriptText(), project.getStatus(), project.getDispatcher(), project.getCreatedAt(),
                 project.getUpdatedAt(), project.getScheduleType(), project.getScheduleValue(), project.getDescription(), project.getQps()}, Long.class);
