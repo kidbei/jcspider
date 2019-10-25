@@ -17,6 +17,7 @@ public class TaskResult implements Serializable {
     private String      resultText;
     @JsonSerialize(using = LongTimeFormat.Serialize.class)
     private Long        createdAt;
+    private String      url;
 
     public Long getId() {
         return id;
@@ -58,6 +59,14 @@ public class TaskResult implements Serializable {
         this.createdAt = createdAt;
     }
 
+    public String getUrl() {
+        return url;
+    }
+
+    public void setUrl(String url) {
+        this.url = url;
+    }
+
     @Override
     public String toString() {
         final StringBuilder sb = new StringBuilder("TaskResult{");
@@ -66,6 +75,7 @@ public class TaskResult implements Serializable {
         sb.append(", taskId='").append(taskId).append('\'');
         sb.append(", resultText='").append(resultText.length() > 1024 ? resultText.substring(0, 1023) : resultText).append('\'');
         sb.append(", createdAt=").append(createdAt);
+        sb.append(",url=").append(url);
         sb.append('}');
         return sb.toString();
     }

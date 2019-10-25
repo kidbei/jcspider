@@ -27,15 +27,16 @@ public class TaskResultDao {
     @Autowired
     private NamedParameterJdbcTemplate namedParameterJdbcTemplate;
 
-    private static final String COLUMNS = "project_id, task_id, result_text, created_at";
+    private static final String COLUMNS = "project_id, task_id, result_text, created_at,url";
 
     public void insert(TaskResult taskResult) {
         if (taskResult.getCreatedAt() == null) {
             taskResult.setCreatedAt(System.currentTimeMillis());
         }
-        final String sql = "insert into result(" + COLUMNS + ") values (?,?,?,?)";
+        final String sql = "insert into result(" + COLUMNS + ") values (?,?,?,?,?)";
         this.jdbcTemplate.update(sql, taskResult.getProjectId(),
-                taskResult.getTaskId(), taskResult.getResultText(), taskResult.getCreatedAt());
+                taskResult.getTaskId(), taskResult.getResultText(),
+                taskResult.getCreatedAt(),taskResult.getUrl());
     }
 
 
@@ -43,10 +44,11 @@ public class TaskResultDao {
         if (taskResult.getCreatedAt() == null) {
             taskResult.setCreatedAt(System.currentTimeMillis());
         }
-        final String sql = "insert into result(" + COLUMNS + ") values (?,?,?,?) on conflict (task_id) " +
+        final String sql = "insert into result(" + COLUMNS + ") values (?,?,?,?,?) on conflict (task_id) " +
                 "do update set result_text = excluded.result_text, created_at = excluded.created_at";
         this.jdbcTemplate.update(sql, taskResult.getProjectId(),
-                taskResult.getTaskId(), taskResult.getResultText(), taskResult.getCreatedAt());
+                taskResult.getTaskId(), taskResult.getResultText(),
+                taskResult.getCreatedAt(), taskResult.getUrl());
     }
 
 
